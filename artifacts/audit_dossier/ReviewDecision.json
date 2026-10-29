@@ -1,0 +1,76 @@
+{
+  "task_id": "TASK-001",
+  "review_decision": "REVISION_REQUESTED",
+  "reviewed_artifacts_count": 5,
+  "details": [
+    {
+      "artifact_name": "service.py",
+      "ast_syntax_pass": true,
+      "solid_compliance": {
+        "SingleResponsibility": "Compliant: Focused module scope",
+        "DependencyInversion": "Compliant: Relies on abstractions and schemas"
+      },
+      "issues": []
+    },
+    {
+      "artifact_name": "ResourceView.tsx",
+      "ast_syntax_pass": false,
+      "solid_compliance": {
+        "SingleResponsibility": "Compliant: Focused module scope",
+        "DependencyInversion": "Compliant: Relies on abstractions and schemas"
+      },
+      "issues": [
+        {
+          "file_path": "ResourceView.tsx",
+          "line_number": 3,
+          "severity": "ERROR",
+          "message": "leading zeros in decimal integer literals are not permitted; use an 0o prefix for octal integers (ResourceView.tsx, line 3)",
+          "rule_code": "SYNTAX_ERROR"
+        }
+      ]
+    },
+    {
+      "artifact_name": "main.tf",
+      "ast_syntax_pass": false,
+      "solid_compliance": {
+        "SingleResponsibility": "Compliant: Focused module scope",
+        "DependencyInversion": "Compliant: Relies on abstractions and schemas"
+      },
+      "issues": [
+        {
+          "file_path": "main.tf",
+          "line_number": 6,
+          "severity": "ERROR",
+          "message": "invalid syntax. Maybe you meant '==' or ':=' instead of '='? (main.tf, line 6)",
+          "rule_code": "SYNTAX_ERROR"
+        }
+      ]
+    },
+    {
+      "artifact_name": "Dockerfile",
+      "ast_syntax_pass": false,
+      "solid_compliance": {
+        "SingleResponsibility": "Compliant: Focused module scope",
+        "DependencyInversion": "Compliant: Relies on abstractions and schemas"
+      },
+      "issues": [
+        {
+          "file_path": "Dockerfile",
+          "line_number": 15,
+          "severity": "ERROR",
+          "message": "invalid decimal literal (Dockerfile, line 15)",
+          "rule_code": "SYNTAX_ERROR"
+        }
+      ]
+    },
+    {
+      "artifact_name": "test_integration.py",
+      "ast_syntax_pass": true,
+      "solid_compliance": {
+        "SingleResponsibility": "Compliant: Focused module scope",
+        "DependencyInversion": "Compliant: Relies on abstractions and schemas"
+      },
+      "issues": []
+    }
+  ]
+}
