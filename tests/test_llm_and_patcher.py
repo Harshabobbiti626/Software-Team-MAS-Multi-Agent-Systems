@@ -97,3 +97,4 @@ x = 999
 def test_sandbox_factory(tmp_path):
     runner = get_sandbox_runner(workspace_root=str(tmp_path), prefer_docker=False)
     assert isinstance(runner, SubprocessSandbox)
+

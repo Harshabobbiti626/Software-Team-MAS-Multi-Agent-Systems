@@ -123,3 +123,4 @@ class SurgicalPatcher:
                 file_path=file_path,
                 error_message=f"Failed to parse patch block: {str(e)}"
             )
+

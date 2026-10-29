@@ -159,6 +159,51 @@ class BaseAgent(ABC):
             verify_ast=True
         )
 
+    def execute_codeact_loop(
+        self,
+        test_command: List[str],
+        max_attempts: int = 3,
+        auto_repair_callback: Optional[Any] = None
+    ) -> Any:
+        """
+        Interactive CodeAct execution & self-debugging loop.
+        Executes a test/build in the sandbox; if failures occur, analyzes error tracebacks,
+        applies surgical patches, and re-runs until green or turn limits are hit.
+        """
+        from mas.tools.sandbox import get_sandbox_runner
+        sandbox = get_sandbox_runner(workspace_root=self.config.system.blackboard_repo_path)
+
+        for attempt in range(1, max_attempts + 1):
+            result = sandbox.execute(test_command, timeout=45)
+            if result.exit_code == 0:
+                self.working_memory.add_entry(role=self.role, content=f"CodeAct command passed on attempt {attempt}: {' '.join(test_command)}")
+                return result
+
+            # Failure encountered -> log and reflect
+            error_msg = result.stderr if result.stderr else result.stdout
+            self.working_memory.add_entry(
+                role=self.role,
+                content=f"CodeAct attempt {attempt} failed (exit {result.exit_code}). Error: {error_msg[:300]}"
+            )
+
+            if auto_repair_callback:
+                repair_patch = auto_repair_callback(result, attempt)
+                if repair_patch:
+                    file_p, s_block, r_block = repair_patch
+                    patch_res = self.apply_surgical_patch(file_p, s_block, r_block)
+                    if not patch_res.success:
+                        self.working_memory.add_entry(role=self.role, content=f"Patch failed: {patch_res.error_message}")
+            else:
+                # Default LLM-assisted reflection
+                reflection = self.cognition.reflect_on_outcome(
+                    step_goal=f"Execute {' '.join(test_command)}",
+                    expected="Process exit code 0",
+                    actual=error_msg[:200]
+                )
+                self.working_memory.add_entry(role=self.role, content=f"Cognitive Reflection: {reflection.discrepancy_explanation}")
+
+        return result
+
     def publish_artifact(
         self,
         artifact_id: str,

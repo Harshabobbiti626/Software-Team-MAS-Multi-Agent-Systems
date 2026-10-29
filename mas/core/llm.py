@@ -297,3 +297,4 @@ def get_llm_provider(config: Optional[MASConfiguration] = None) -> BaseLLMProvid
         return GeminiRESTProvider(api_key=api_key, default_model=cfg.models.default_model)
 
     return DeterministicMockLLMProvider(default_model=cfg.models.default_model)
+
