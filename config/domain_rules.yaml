@@ -1,0 +1,64 @@
+# Domain Axioms & Ubiquitous Language Rules for SME Verification
+
+domain_name: "enterprise_software_engineering"
+version: "1.0.0"
+
+ubiquitous_language:
+  Task:
+    definition: "An atomic, scoped work assignment with strict acceptance criteria and blast radius attribution."
+    prohibited_synonyms: ["ticket", "todo", "issue_item"]
+  PRD:
+    definition: "Product Requirements Document defining user stories with formal Given/When/Then acceptance criteria."
+    required_sections:
+      - "executive_summary"
+      - "user_stories"
+      - "acceptance_criteria"
+      - "non_functional_requirements"
+  ADR:
+    definition: "Architectural Decision Record capturing context, decision, consequences, and evaluated alternatives."
+    required_sections:
+      - "context"
+      - "decision"
+      - "consequences"
+      - "trade_offs"
+  CodePatch:
+    definition: "Versioned file diff with immutable provenance header linking commit to task and architectural decision."
+  TestReport:
+    definition: "Deterministic test run output containing assertions, pass/fail counts, execution time, and stdout/stderr."
+
+invariants:
+  - id: "INV_SEC_001"
+    name: "No Hardcoded Secrets"
+    severity: "CRITICAL"
+    description: "Code, configuration, and documentation must never contain plaintext API keys, tokens, or credentials."
+    rule_type: "regex_forbidden"
+    patterns:
+      - "ghp_[A-Za-z0-9_]{36}"
+      - "AIza[0-9A-Za-z\\-_]{35}"
+      - "AKIA[0-9A-Z]{16}"
+      - "password\\s*=\\s*['\"][^'\"]+['\"]"
+      - "secret\\s*=\\s*['\"][^'\"]+['\"]"
+
+  - id: "INV_ARCH_002"
+    name: "Contract-First Interface Adherence"
+    severity: "HIGH"
+    description: "Every service endpoint implementation must conform to an approved OpenAPI specification or protobuf schema."
+    rule_type: "contract_schema"
+
+  - id: "INV_DATA_003"
+    name: "Safe Database Migrations"
+    severity: "HIGH"
+    description: "DDL schema migrations must be backward-compatible and non-locking (e.g. concurrent indexes, nullable new columns)."
+    rule_type: "ddl_safety"
+
+  - id: "INV_CODE_004"
+    name: "Provenance Header Required"
+    severity: "MEDIUM"
+    description: "Generated code patches must include a traceability provenance header with Task ID and ADR reference."
+    rule_type: "provenance_header"
+
+  - id: "INV_QUAL_005"
+    name: "Deterministic Test Suite Pass"
+    severity: "CRITICAL"
+    description: "All integration and unit tests must report 100% pass before release gate progression."
+    rule_type: "test_pass"

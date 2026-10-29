@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+build/
+dist/
+*.egg-info/
+
+# Pytest / Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Local databases & artifacts
+*.db
+*.sqlite3
+.mas_episodic.db
+
+# IDE & OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
