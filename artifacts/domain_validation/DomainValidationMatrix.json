@@ -1,0 +1,20 @@
+{
+  "task_id": "TASK-001",
+  "domain_compliance": "FAILED",
+  "checked_rules_count": 4,
+  "violations": [
+    {
+      "invariant_id": "INV_PRD_SCHEMA",
+      "name": "Missing PRD Section",
+      "severity": "HIGH",
+      "description": "PRD is missing required section: 'non functional requirements'",
+      "violating_content": "Section 'non functional requirements' not found in document.",
+      "file_path": "artifacts/prd/PRD.md"
+    }
+  ],
+  "regulatory_frameworks_audited": [
+    "GDPR_DATA_MINIMIZATION",
+    "PCI_DSS_SECRETS_MASKING"
+  ],
+  "certified_by": "DomainSMEAgent"
+}
