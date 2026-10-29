@@ -7,6 +7,7 @@ from mas.tools.file_ops import SafeFileOps
 from mas.tools.sandbox import SubprocessSandbox, SandboxResult
 from mas.tools.linter import DeterministicLinter, LintResult
 from mas.tools.domain_verifier import DomainVerifier, RuleValidationResult
+from mas.tools.patcher import SurgicalPatcher, PatchResult
 
 __all__ = [
     "SafeFileOps",
@@ -15,5 +16,7 @@ __all__ = [
     "DeterministicLinter",
     "LintResult",
     "DomainVerifier",
-    "RuleValidationResult"
+    "RuleValidationResult",
+    "SurgicalPatcher",
+    "PatchResult"
 ]

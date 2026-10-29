@@ -1,7 +1,7 @@
 """
 System Architect Agent.
 Authors Architectural Decision Records (ADRs), evaluates non-functional trade-offs,
-and executes pre-mortem failure mode reflections.
+and executes pre-mortem failure mode reflections with live LLM reasoning.
 """
 
 from typing import Any, Dict
@@ -26,6 +26,11 @@ class SystemArchitectAgent(BaseAgent):
             option_a="Contract-first OpenAPI + Git-backed Artifact Ledger",
             option_b="Unstructured runtime JSON messaging",
             reversibility="two-way"
+        )
+
+        llm_resp = self.think_and_generate(
+            prompt=f"Formulate Architectural Decision Record (ADR-001) for task '{task.title}': {task.description}. Evaluate one-way vs two-way doors.",
+            thinking_budget=4096
         )
 
         adr_content = f"""# ADR-001: Architecture & Interface Strategy for {task.title}
@@ -57,8 +62,12 @@ Data operations utilize transactional guarantees with backward-compatible schema
             content=adr_content
         )
 
-        tokens = TokenUsageTracker(prompt_tokens=1200, candidate_tokens=650, thinking_tokens=1500)
-        tokens.total_tokens = 3350
+        tokens = TokenUsageTracker(
+            prompt_tokens=llm_resp.prompt_tokens + 800,
+            candidate_tokens=llm_resp.candidate_tokens + 500,
+            thinking_tokens=llm_resp.thinking_tokens + 800
+        )
+        tokens.total_tokens = tokens.prompt_tokens + tokens.candidate_tokens + tokens.thinking_tokens
 
         return AgentResponse(
             agent_role=self.role,

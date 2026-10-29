@@ -10,8 +10,8 @@ limits:
   max_turns_per_agent: 5
   max_total_turns_per_task: 30
   max_prompt_tokens: 128000
-  max_candidate_tokens: 8192
-  max_thinking_tokens: 16384
+  max_candidate_tokens: 16384
+  max_thinking_tokens: 65536
   max_consecutive_failures: 3
   circuit_breaker_enabled: true
   task_timeout_seconds: 300

@@ -20,8 +20,8 @@ class LimitSettings(BaseModel):
     max_turns_per_agent: int = 5
     max_total_turns_per_task: int = 30
     max_prompt_tokens: int = 128000
-    max_candidate_tokens: int = 8192
-    max_thinking_tokens: int = 16384
+    max_candidate_tokens: int = 16384
+    max_thinking_tokens: int = 65536
     max_consecutive_failures: int = 3
     circuit_breaker_enabled: bool = True
     task_timeout_seconds: int = 300
