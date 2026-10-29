@@ -1,0 +1,41 @@
+{
+  "task_id": "TASK-001",
+  "root_objective": "Integration Test Service",
+  "parallel_workstreams": [
+    {
+      "stream_id": "WS-DATA",
+      "role": "DatabaseArchitectAgent",
+      "deliverable": "schema.sql",
+      "dependencies": []
+    },
+    {
+      "stream_id": "WS-BACKEND",
+      "role": "BackendEngineerAgent",
+      "deliverable": "service.py",
+      "dependencies": [
+        "WS-DATA"
+      ]
+    },
+    {
+      "stream_id": "WS-FRONTEND",
+      "role": "FrontendEngineerAgent",
+      "deliverable": "component.tsx",
+      "dependencies": []
+    },
+    {
+      "stream_id": "WS-CLOUD",
+      "role": "CloudEngineerAgent",
+      "deliverable": "main.tf",
+      "dependencies": []
+    },
+    {
+      "stream_id": "WS-QA",
+      "role": "QASDETAgent",
+      "deliverable": "test_integration.py",
+      "dependencies": [
+        "WS-BACKEND",
+        "WS-FRONTEND"
+      ]
+    }
+  ]
+}
