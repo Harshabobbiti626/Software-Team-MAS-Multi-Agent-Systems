@@ -68,12 +68,12 @@ class BaseLLMProvider(ABC):
 
 
 MODEL_ALIASES = {
-    "gemini-2.5-pro": "gemini-3.1-pro-preview",
+    "gemini-2.5-pro": "gemini-3.8-flash",
     "gemini-2.5-flash": "gemini-3.8-flash",
-    "gemini-3.0-thinking": "gemini-3.1-pro-preview",
+    "gemini-3.0-thinking": "gemini-3.8-flash",
     "gemini-2.0-flash": "gemini-3.8-flash",
     "gemini-2.0-flash-exp": "gemini-3.8-flash",
-    "gemini-1.5-pro": "gemini-3.1-pro-preview",
+    "gemini-1.5-pro": "gemini-3.8-flash",
     "gemini-1.5-flash": "gemini-3.8-flash",
 }
 
@@ -85,16 +85,17 @@ class GeminiRESTProvider(BaseLLMProvider):
 
     BASE_URL = "https://generativelanguage.googleapis.com/v1beta/models"
 
-    def __init__(self, api_key: Optional[str] = None, default_model: str = "gemini-3.1-pro-preview"):
+    def __init__(self, api_key: Optional[str] = None, default_model: str = "gemini-3.8-flash"):
         self.api_key = api_key or os.environ.get("GEMINI_API_KEY", "")
         self.default_model = MODEL_ALIASES.get(default_model, default_model)
 
     def _execute_with_retry(
-        self, url: str, payload: Dict[str, Any], max_retries: int = 1, timeout: int = 8
+        self, url: str, payload: Dict[str, Any], max_retries: int = 2, timeout: int = 35
     ) -> Dict[str, Any]:
         params = {"key": self.api_key}
         headers = {"Content-Type": "application/json"}
 
+        last_error = ""
         for attempt in range(max_retries):
             try:
                 response = requests.post(
@@ -103,18 +104,20 @@ class GeminiRESTProvider(BaseLLMProvider):
                 if response.status_code == 200:
                     return response.json()
                 elif response.status_code in [429, 500, 503]:
-                    backoff = (2**attempt) + random.uniform(0.1, 0.5)
+                    last_error = f"HTTP {response.status_code}: {response.text[:200]}"
+                    backoff = (1.5**attempt) + random.uniform(0.1, 0.5)
                     time.sleep(backoff)
                 else:
                     raise RuntimeError(
                         f"Gemini API returned error {response.status_code}: {response.text}"
                     )
-            except requests.RequestException:
+            except requests.RequestException as req_err:
+                last_error = str(req_err)
                 if attempt == max_retries - 1:
                     raise
-                time.sleep((2**attempt) + random.uniform(0.1, 0.5))
+                time.sleep((1.5**attempt) + random.uniform(0.1, 0.5))
 
-        raise RuntimeError("Gemini API call failed after retries")
+        raise RuntimeError(f"Gemini API call failed after retries: {last_error}")
 
     def generate(
         self,
@@ -160,12 +163,28 @@ class GeminiRESTProvider(BaseLLMProvider):
         try:
             data = self._execute_with_retry(url, payload)
         except Exception as exc:
-            logger.warning(
-                f"Gemini API invocation encountered an issue ({exc}). Engaging resilient synthesis fallback."
-            )
-            return DeterministicMockLLMProvider(default_model=target_model).generate(
-                prompt=prompt, system_prompt=system_prompt, model=target_model, config=cfg
-            )
+            if target_model != "gemini-3.8-flash":
+                logger.info(
+                    f"Model '{target_model}' invocation failed ({exc}). Retrying with active model 'gemini-3.8-flash'..."
+                )
+                try:
+                    fallback_url = f"{self.BASE_URL}/gemini-3.8-flash:generateContent"
+                    data = self._execute_with_retry(fallback_url, payload)
+                    target_model = "gemini-3.8-flash"
+                except Exception as inner_exc:
+                    logger.warning(
+                        f"Gemini API fallback to 'gemini-3.8-flash' also failed ({inner_exc}). Engaging resilient synthesis fallback."
+                    )
+                    return DeterministicMockLLMProvider(default_model=target_model).generate(
+                        prompt=prompt, system_prompt=system_prompt, model=target_model, config=cfg
+                    )
+            else:
+                logger.warning(
+                    f"Gemini API invocation encountered an issue ({exc}). Engaging resilient synthesis fallback."
+                )
+                return DeterministicMockLLMProvider(default_model=target_model).generate(
+                    prompt=prompt, system_prompt=system_prompt, model=target_model, config=cfg
+                )
 
         candidates = data.get("candidates", [])
         if not candidates:

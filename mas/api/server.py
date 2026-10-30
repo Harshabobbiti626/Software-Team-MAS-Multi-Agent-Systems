@@ -157,7 +157,10 @@ class MASRequestHandler(SimpleHTTPRequestHandler):
         self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
         self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization")
         self.end_headers()
-        self.wfile.write(payload)
+        try:
+            self.wfile.write(payload)
+        except (BrokenPipeError, ConnectionResetError, ConnectionAbortedError, ConnectionError):
+            pass
 
     def do_OPTIONS(self) -> None:
         self.send_response(HTTPStatus.NO_CONTENT)
@@ -383,7 +386,7 @@ class MASRequestHandler(SimpleHTTPRequestHandler):
                     # Keep-alive heartbeat comment
                     self.wfile.write(b": heartbeat\n\n")
                     self.wfile.flush()
-        except (BrokenPipeError, ConnectionResetError):
+        except (BrokenPipeError, ConnectionResetError, ConnectionAbortedError, ConnectionError):
             pass
         finally:
             event_bus.unsubscribe(mission_id, subscriber_queue)
@@ -415,18 +418,35 @@ def execute_mission_pipeline(session: MissionSession) -> None:
             "artifact": artifact,
         })
 
+    def sync_tokens() -> None:
+        session.tokens_used = {
+            "prompt": circuit_breaker.prompt_tokens,
+            "candidate": circuit_breaker.candidate_tokens,
+            "thinking": circuit_breaker.thinking_tokens,
+            "total": (
+                circuit_breaker.prompt_tokens
+                + circuit_breaker.candidate_tokens
+                + circuit_breaker.thinking_tokens
+            ),
+        }
+        event_bus.publish(mission_id, "TOKEN_METRICS_UPDATED", {"tokens_used": session.tokens_used})
+
     def trigger_gate(gate_level: GateLevel, pre_mortem_summary: str) -> str:
         if not session.interactive:
             return "APPROVED"
 
         session.pending_gate = {
             "gate": gate_level.value,
+            "gate_level": gate_level.value,
+            "level": gate_level.value,
             "pre_mortem": pre_mortem_summary,
+            "premise": pre_mortem_summary,
             "token_projection": session.tokens_used["total"] + 1500,
         }
         session.gate_event.clear()
 
         event_bus.publish(mission_id, "GATE_PROMPTED", session.pending_gate)
+        event_bus.publish(mission_id, "GATE_TRIGGERED", session.pending_gate)
         # Wait until operator submits decision from the UI
         session.gate_event.wait(timeout=300)
         return session.gate_decision
@@ -456,18 +476,21 @@ def execute_mission_pipeline(session: MissionSession) -> None:
         sponsor = BusinessSponsorAgent(blackboard=blackboard)
         sponsor.run(task)
         circuit_breaker.record_turn(sponsor.role)
+        sync_tokens()
         emit_log("  + BusinessSponsor: Approved charter GOAL-001")
 
         # Product Manager
         pm = ProductManagerAgent(blackboard=blackboard)
         pm.run(task)
         circuit_breaker.record_turn(pm.role)
+        sync_tokens()
         emit_log("  + ProductManager: Authored PRD.md with INVEST acceptance criteria")
 
         # Domain SME
         sme = DomainSMEAgent(blackboard=blackboard)
         sme.run(task)
         circuit_breaker.record_turn(sme.role)
+        sync_tokens()
         emit_log("  + DomainSME: Invariant verification completed")
 
         # Gate 1: Scope & Budget
@@ -485,12 +508,14 @@ def execute_mission_pipeline(session: MissionSession) -> None:
         arch = SystemArchitectAgent(blackboard=blackboard)
         arch.run(task)
         circuit_breaker.record_turn(arch.role)
+        sync_tokens()
         emit_log("  + SystemArchitect: Authored ADR-001 with pre-mortem failure mode analysis")
 
         # Tech Lead
         tech_lead = TechLeadAgent(blackboard=blackboard)
         tech_lead.run(task)
         circuit_breaker.record_turn(tech_lead.role)
+        sync_tokens()
         emit_log("  + TechLead: Published api-spec.yaml and TaskDAG.json")
 
         update_pod("Leadership", "DONE", "Contracts Locked")
@@ -527,6 +552,7 @@ def execute_mission_pipeline(session: MissionSession) -> None:
 
         for ag in parallel_workers:
             circuit_breaker.record_turn(ag.role)
+        sync_tokens()
 
         update_pod("Data Pod", "DONE", "Generated schema.sql with non-locking indexes", "schema.sql")
         update_pod("Backend Pod", "DONE", "Synthesized service.py conforming to api-spec.yaml", "service.py")
@@ -542,16 +568,18 @@ def execute_mission_pipeline(session: MissionSession) -> None:
         qa = QASDETAgent(blackboard=blackboard)
         qa.run(task)
         circuit_breaker.record_turn(qa.role)
+        sync_tokens()
         emit_log("  + QASDETAgent: Sandboxed verification suite 100% pass (2/2)")
 
         code_rev = CodeReviewerAgent(blackboard=blackboard)
         code_rev.run(task)
         circuit_breaker.record_turn(code_rev.role)
+        sync_tokens()
 
         sec = AppSecAgent(blackboard=blackboard)
         sec.run(task)
         circuit_breaker.record_turn(sec.role)
-        circuit_breaker.record_turn(sec.role)
+        sync_tokens()
         emit_log("  + AppSecAgent: OWASP Top 10 security audit PASSED")
 
         update_pod("Governance & QA", "DONE", "QA 100% Passed | Security Clean")

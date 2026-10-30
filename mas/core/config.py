@@ -67,9 +67,9 @@ class MemorySettings(BaseModel):
 
 class ModelSettings(BaseModel):
     provider: str = "gemini"
-    default_model: str = "gemini-3.1-pro-preview"
+    default_model: str = "gemini-3.8-flash"
     fast_model: str = "gemini-3.8-flash"
-    reasoning_model: str = "gemini-3.1-pro-preview"
+    reasoning_model: str = "gemini-3.8-flash"
     api_key: Optional[str] = None
     base_url: Optional[str] = None
     roles: Dict[str, str] = Field(default_factory=dict)

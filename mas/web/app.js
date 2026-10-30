@@ -389,9 +389,10 @@ function App() {
         });
         addFeedLog("POD", `[${data.pod}] ${data.action} (${data.status})`);
         break;
+      case "GATE_PROMPTED":
       case "GATE_TRIGGERED":
-        setPendingGate(data.gate);
-        addFeedLog("GATE", `⚠️ HUMAN DECISION REQUIRED: ${data.gate.level || "Strategic Approval"}`);
+        setPendingGate(data.gate || data);
+        addFeedLog("GATE", `⚠️ HUMAN DECISION REQUIRED: ${data.gate && (data.gate.gate || data.gate.level) || data.gate || data.level || "Strategic Approval"}`);
         break;
       case "GATE_RESOLVED":
         setPendingGate(null);
@@ -407,6 +408,14 @@ function App() {
         openArtifactInEditor(data.artifact.id);
         break;
       case "TOKEN_BURN":
+      case "TOKEN_METRICS_UPDATED":
+        if (data.tokens_used) {
+          setMissionData(prev => ({
+            ...prev,
+            tokens_used: data.tokens_used
+          }));
+        }
+        break;
         setMissionData(prev => ({
           ...prev,
           tokens: data.tokens_used || prev.tokens
@@ -456,7 +465,7 @@ function App() {
   const handleGateDecision = useCallback(async decision => {
     if (!activeMissionId || !pendingGate || isResolvingGate) return;
     setIsResolvingGate(true);
-    const gateName = pendingGate.gate_level || pendingGate.level || "GATE_1_BUSINESS_INVARIANTS";
+    const gateName = pendingGate.gate || pendingGate.gate_level || pendingGate.level || "GATE_1_BUSINESS_INVARIANTS";
     try {
       const res = await fetch(`/api/v1/missions/${activeMissionId}/gates/${gateName}/decision`, {
         method: "POST",
@@ -1118,9 +1127,9 @@ function App() {
     className: "gate-card"
   }, /*#__PURE__*/React.createElement("div", {
     className: "gate-badge"
-  }, "⚠️ HUMAN DECISION REQUIRED"), /*#__PURE__*/React.createElement("h3", null, pendingGate.level || "Gate: Strategic Review"), /*#__PURE__*/React.createElement("p", {
+  }, "⚠️ HUMAN DECISION REQUIRED"), /*#__PURE__*/React.createElement("h3", null, pendingGate.gate || pendingGate.level || "Gate: Strategic Review"), /*#__PURE__*/React.createElement("p", {
     className: "gate-premise"
-  }, pendingGate.context?.blast_radius_summary || pendingGate.premise || "A strategic boundary gate has been reached. Inspect blast radius and approve next phase."), /*#__PURE__*/React.createElement("div", {
+  }, pendingGate.pre_mortem || pendingGate.premise || pendingGate.context?.blast_radius_summary || "A strategic boundary gate has been reached. Inspect blast radius and approve next phase."), /*#__PURE__*/React.createElement("div", {
     className: "gate-mitigation-box"
   }, /*#__PURE__*/React.createElement("strong", null, "Pre-Mortem Mitigation:"), " Non-locking index verification and contract compliance locked."), /*#__PURE__*/React.createElement("div", {
     style: {
