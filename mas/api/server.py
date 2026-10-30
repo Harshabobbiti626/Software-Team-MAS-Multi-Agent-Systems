@@ -5,6 +5,7 @@ interactive HITL gate resolution, and static UI assets without third-party pip d
 """
 
 import json
+import mimetypes
 import queue
 import threading
 import time
@@ -42,6 +43,11 @@ from mas.core.orchestrator import MASOrchestrator
 from mas.core.state import SubsystemClass, Task, TaskPriority
 from mas.core.vcs import PullRequestGenerator
 from mas.hitl.gates import GateLevel
+
+# Ensure modern JS and JSX MIME types are correctly served
+mimetypes.add_type("text/javascript", ".js")
+mimetypes.add_type("text/javascript", ".jsx")
+mimetypes.add_type("text/javascript", ".mjs")
 
 
 class MissionSession:

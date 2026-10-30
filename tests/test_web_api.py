@@ -68,12 +68,13 @@ def test_web_server_rest_endpoints(tmp_path):
             assert data["status"] == "ok"
             assert "version" in data
 
-        # 2. Test GET / (Serves index.html)
+        # 2. Test GET / (Serves index.html with React 18 mount point)
         with urllib.request.urlopen(f"{base_url}/") as resp:
             assert resp.status == 200
             html = resp.read().decode("utf-8")
             assert "MAS Mission Control" in html
-            assert "pipeline-progress" in html
+            assert 'id="root"' in html
+            assert "app.js" in html
 
         # 3. Test POST /api/v1/missions
         create_payload = json.dumps({
