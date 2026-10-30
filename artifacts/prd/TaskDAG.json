@@ -1,18 +1,18 @@
 {
   "task_id": "TASK-001",
-  "root_objective": "Integration Test Service",
-  "domain_entity": "Integration",
+  "root_objective": "Real-Time Payment Gateway",
+  "domain_entity": "Real",
   "parallel_workstreams": [
     {
       "stream_id": "WS-DATA",
       "role": "DatabaseArchitectAgent",
-      "deliverable": "schema_integration.sql",
+      "deliverable": "schema_real.sql",
       "dependencies": []
     },
     {
       "stream_id": "WS-BACKEND",
       "role": "BackendEngineerAgent",
-      "deliverable": "integration_service.py",
+      "deliverable": "real_service.py",
       "dependencies": [
         "WS-DATA"
       ]
@@ -20,7 +20,7 @@
     {
       "stream_id": "WS-FRONTEND",
       "role": "FrontendEngineerAgent",
-      "deliverable": "IntegrationView.tsx",
+      "deliverable": "RealView.tsx",
       "dependencies": []
     },
     {
@@ -32,7 +32,7 @@
     {
       "stream_id": "WS-QA",
       "role": "QASDETAgent",
-      "deliverable": "test_integration.py",
+      "deliverable": "test_real.py",
       "dependencies": [
         "WS-BACKEND",
         "WS-FRONTEND"
