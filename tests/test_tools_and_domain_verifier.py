@@ -1,7 +1,9 @@
-import pytest
 from pathlib import Path
-from mas.tools.file_ops import SafeFileOps
+
+import pytest
+
 from mas.tools.domain_verifier import DomainVerifier
+from mas.tools.file_ops import SafeFileOps
 from mas.tools.linter import DeterministicLinter
 
 

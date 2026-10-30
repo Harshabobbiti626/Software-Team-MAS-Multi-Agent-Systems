@@ -1,7 +1,8 @@
 import pytest
+
 from mas.core.circuit_breaker import CircuitBreaker, CircuitBreakerTrippedException
-from mas.core.config import LimitSettings
 from mas.core.cognition import CognitiveEngine
+from mas.core.config import LimitSettings
 
 
 def test_circuit_breaker_turns():
@@ -36,7 +37,7 @@ def test_cognitive_engine_pre_mortem():
     analysis = engine.perform_pre_mortem(
         decision_summary="Database schema update",
         subsystem="Database",
-        proposed_change="ALTER TABLE users ADD COLUMN phone VARCHAR(20);"
+        proposed_change="ALTER TABLE users ADD COLUMN phone VARCHAR(20);",
     )
     assert len(analysis.timeout_or_lock_risks) > 0
     assert analysis.pass_pre_mortem is True
@@ -48,7 +49,7 @@ def test_cognitive_engine_trade_off():
         topic="Caching Layer",
         option_a="Redis Distributed Cache",
         option_b="In-Memory Local Dict",
-        reversibility="two-way"
+        reversibility="two-way",
     )
     assert eval_result.recommended_option == "Redis Distributed Cache"
     assert eval_result.reversibility == "two-way"

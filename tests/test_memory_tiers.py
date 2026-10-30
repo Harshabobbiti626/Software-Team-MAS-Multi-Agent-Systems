@@ -1,8 +1,9 @@
 import pytest
-from mas.memory.working import WorkingMemory
+
 from mas.memory.episodic import EpisodicMemory
-from mas.memory.semantic import SemanticMemory
 from mas.memory.procedural import ProceduralMemory
+from mas.memory.semantic import SemanticMemory
+from mas.memory.working import WorkingMemory
 
 
 def test_working_memory_compaction():
@@ -24,7 +25,7 @@ def test_episodic_memory(tmp_path):
         task_id="task-1",
         agent_role="BackendAgent",
         event_type="TEST_RUN",
-        payload={"result": "PASS"}
+        payload={"result": "PASS"},
     )
     assert event_id > 0
 
@@ -40,7 +41,7 @@ def test_semantic_memory():
         category="coding_guidelines",
         title="REST API Guidelines",
         content="Always use standard HTTP verbs and return json responses.",
-        tags=["api", "rest"]
+        tags=["api", "rest"],
     )
     results = mem.query("HTTP verbs API", category="coding_guidelines")
     assert len(results) > 0
@@ -57,7 +58,7 @@ def test_procedural_memory():
         name="calculator_add",
         description="Adds two integers",
         handler=add,
-        roles_allowed=["BackendAgent"]
+        roles_allowed=["BackendAgent"],
     )
 
     result = mem.execute_tool("calculator_add", caller_role="BackendAgent", a=3, b=7)

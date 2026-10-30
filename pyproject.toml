@@ -27,6 +27,9 @@ dev = [
 [project.scripts]
 mas = "main:main"
 
+[tool.setuptools.packages.find]
+include = ["mas*"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["test_*.py"]

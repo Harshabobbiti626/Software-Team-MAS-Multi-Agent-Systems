@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+
 from mas.core.llm import (
     DeterministicMockLLMProvider,
     GeminiRESTProvider,
@@ -6,7 +7,7 @@ from mas.core.llm import (
     get_llm_provider,
 )
 from mas.tools.patcher import SurgicalPatcher
-from mas.tools.sandbox import get_sandbox_runner, SubprocessSandbox
+from mas.tools.sandbox import SubprocessSandbox, get_sandbox_runner
 
 
 class SampleValidationModel(BaseModel):
@@ -17,24 +18,29 @@ class SampleValidationModel(BaseModel):
 
 def test_mock_llm_provider_generation():
     provider = DeterministicMockLLMProvider()
-    resp = provider.generate(prompt="Analyze database schema lock risk", config=LLMGenerationConfig(thinking_budget=2000))
+    resp = provider.generate(
+        prompt="Analyze database schema lock risk",
+        config=LLMGenerationConfig(thinking_budget=2000),
+    )
     assert resp.finish_reason == "STOP"
     assert resp.prompt_tokens > 0
     assert resp.thinking_tokens == 2000
     assert resp.total_tokens > 0
+    assert resp.thoughts is not None
     assert "pre-mortem" in resp.thoughts.lower()
 
 
 def test_mock_llm_structured_output():
     provider = DeterministicMockLLMProvider()
     obj, resp = provider.generate_structured(
-        prompt="Review pull request #42",
-        schema=SampleValidationModel
+        prompt="Review pull request #42", schema=SampleValidationModel
     )
     assert isinstance(obj, SampleValidationModel)
     assert obj.id == "MOCK-001"
     assert obj.status == "SUCCESS"
     assert obj.decision == "APPROVED"
+    assert resp.finish_reason == "STOP"
+    assert resp.structured_data is not None
 
 
 def test_llm_provider_factory():
@@ -48,7 +54,7 @@ def test_surgical_patcher_success(tmp_path):
     test_file = tmp_path / "service.py"
     test_file.write_text(
         "def compute_total(a, b):\n    return a + b\n\ndef validate():\n    return True\n",
-        encoding="utf-8"
+        encoding="utf-8",
     )
 
     search = "def compute_total(a, b):\n    return a + b"
@@ -68,8 +74,11 @@ def test_surgical_patcher_syntax_error_rollback(tmp_path):
     search = "return 100"
     replace = "return (broken syntax without closing parenthesis"
 
-    res = patcher.apply_search_replace_block("broken.py", search, replace, verify_ast=True)
+    res = patcher.apply_search_replace_block(
+        "broken.py", search, replace, verify_ast=True
+    )
     assert res.success is False
+    assert res.error_message is not None
     assert "syntax error" in res.error_message.lower()
     # File content must remain unchanged (atomic rollback)
     assert test_file.read_text(encoding="utf-8") == original_code
@@ -94,4 +103,3 @@ x = 999
 def test_sandbox_factory(tmp_path):
     runner = get_sandbox_runner(workspace_root=str(tmp_path), prefer_docker=False)
     assert isinstance(runner, SubprocessSandbox)
-
