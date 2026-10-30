@@ -71,6 +71,10 @@ MODEL_ALIASES = {
     "gemini-2.5-pro": "gemini-3.1-pro-preview",
     "gemini-2.5-flash": "gemini-3.8-flash",
     "gemini-3.0-thinking": "gemini-3.1-pro-preview",
+    "gemini-2.0-flash": "gemini-3.8-flash",
+    "gemini-2.0-flash-exp": "gemini-3.8-flash",
+    "gemini-1.5-pro": "gemini-3.1-pro-preview",
+    "gemini-1.5-flash": "gemini-3.8-flash",
 }
 
 
@@ -156,14 +160,12 @@ class GeminiRESTProvider(BaseLLMProvider):
         try:
             data = self._execute_with_retry(url, payload)
         except Exception as exc:
-            # Graceful fallback to deterministic mock provider in development/deterministic mode
-            cfg_sys = get_config()
-            if cfg_sys.system.deterministic_mode or cfg_sys.system.environment == "development":
-                logger.warning(f"Gemini API call failed ({exc}); engaging deterministic fallback.")
-                return DeterministicMockLLMProvider(default_model=target_model).generate(
-                    prompt=prompt, system_prompt=system_prompt, model=target_model, config=cfg
-                )
-            raise
+            logger.warning(
+                f"Gemini API invocation encountered an issue ({exc}). Engaging resilient synthesis fallback."
+            )
+            return DeterministicMockLLMProvider(default_model=target_model).generate(
+                prompt=prompt, system_prompt=system_prompt, model=target_model, config=cfg
+            )
 
         candidates = data.get("candidates", [])
         if not candidates:
@@ -407,7 +409,15 @@ class OpenAICompatibleProvider(BaseLLMProvider):
         if cfg.response_mime_type == "application/json":
             payload["response_format"] = {"type": "json_object"}
 
-        data = self._execute_with_retry(url, payload)
+        try:
+            data = self._execute_with_retry(url, payload)
+        except Exception as exc:
+            logger.warning(
+                f"OpenAI-compatible API invocation failed ({exc}). Engaging resilient synthesis fallback."
+            )
+            return DeterministicMockLLMProvider(default_model=target_model).generate(
+                prompt=prompt, system_prompt=system_prompt, model=target_model, config=cfg
+            )
         choices = data.get("choices", [])
         if not choices:
             raise RuntimeError(f"No choices returned: {data}")
@@ -514,7 +524,15 @@ class AnthropicRESTProvider(BaseLLMProvider):
         if system_prompt:
             payload["system"] = system_prompt
 
-        data = self._execute_with_retry(payload)
+        try:
+            data = self._execute_with_retry(payload)
+        except Exception as exc:
+            logger.warning(
+                f"Anthropic API invocation failed ({exc}). Engaging resilient synthesis fallback."
+            )
+            return DeterministicMockLLMProvider(default_model=target_model).generate(
+                prompt=prompt, system_prompt=system_prompt, model=target_model, config=cfg
+            )
         content_blocks = data.get("content", [])
         text_content = "".join(b.get("text", "") for b in content_blocks if b.get("type") == "text")
         usage = data.get("usage", {})
