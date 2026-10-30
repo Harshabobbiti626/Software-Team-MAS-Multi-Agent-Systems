@@ -64,7 +64,7 @@
       ]
     },
     {
-      "artifact_name": "test_integration.py",
+      "artifact_name": "test_real.py",
       "ast_syntax_pass": true,
       "solid_compliance": {
         "SingleResponsibility": "Compliant: Focused module scope",
