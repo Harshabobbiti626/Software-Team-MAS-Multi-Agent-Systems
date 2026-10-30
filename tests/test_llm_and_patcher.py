@@ -1,9 +1,12 @@
 from pydantic import BaseModel
 
+from mas.core.config import load_dotenv_if_present
 from mas.core.llm import (
+    AnthropicRESTProvider,
     DeterministicMockLLMProvider,
     GeminiRESTProvider,
     LLMGenerationConfig,
+    OpenAICompatibleProvider,
     get_llm_provider,
 )
 from mas.tools.patcher import SurgicalPatcher
@@ -43,10 +46,48 @@ def test_mock_llm_structured_output():
     assert resp.structured_data is not None
 
 
-def test_llm_provider_factory():
-    # Should fallback to mock provider cleanly in offline / test environment
+def test_llm_provider_factory(monkeypatch):
+    # 1. Fallback to mock provider in clean offline environment
+    monkeypatch.delenv("GEMINI_API_KEY", raising=False)
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+    monkeypatch.delenv("MAS_LLM_PROVIDER", raising=False)
+
     provider = get_llm_provider()
-    assert isinstance(provider, (DeterministicMockLLMProvider, GeminiRESTProvider))
+    assert isinstance(provider, DeterministicMockLLMProvider)
+
+    # 2. OpenAI provider selection
+    monkeypatch.setenv("OPENAI_API_KEY", "sk-test-mock-key")
+    p_openai = get_llm_provider()
+    assert isinstance(p_openai, OpenAICompatibleProvider)
+    assert p_openai.api_key == "sk-test-mock-key"
+
+    # 3. Anthropic provider selection
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-ant-test-key")
+    p_anthropic = get_llm_provider()
+    assert isinstance(p_anthropic, AnthropicRESTProvider)
+    assert p_anthropic.api_key == "sk-ant-test-key"
+
+    # 4. Gemini provider selection
+    monkeypatch.setenv("GEMINI_API_KEY", "AIzaSy-real-key")
+    p_gemini = get_llm_provider()
+    assert isinstance(p_gemini, GeminiRESTProvider)
+    assert p_gemini.api_key == "AIzaSy-real-key"
+
+
+def test_native_dotenv_loader(tmp_path, monkeypatch):
+    test_env = tmp_path / ".env.test"
+    test_env.write_text("CUSTOM_TEST_VAR=mas_value_123\n# A comment\nANOTHER_KEY=\"quoted_value\"\n", encoding="utf-8")
+    monkeypatch.delenv("CUSTOM_TEST_VAR", raising=False)
+    monkeypatch.delenv("ANOTHER_KEY", raising=False)
+
+    load_dotenv_if_present(test_env)
+
+    import os
+    assert os.environ.get("CUSTOM_TEST_VAR") == "mas_value_123"
+    assert os.environ.get("ANOTHER_KEY") == "quoted_value"
+
 
 
 def test_surgical_patcher_success(tmp_path):

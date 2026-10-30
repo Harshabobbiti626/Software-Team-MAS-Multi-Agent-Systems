@@ -3,11 +3,33 @@ System Configuration Engine for MAS.
 Loads settings from YAML files or environment variables with strict Pydantic validation.
 """
 
+import os
 from pathlib import Path
 from typing import Dict, List, Optional
 
 import yaml
 from pydantic import BaseModel, Field
+
+
+def load_dotenv_if_present(env_path: Optional[str | Path] = ".env") -> None:
+    """Zero-dependency loader for .env environment variables."""
+    target_path = Path(env_path) if env_path else Path(".env")
+    if not target_path.exists():
+        return
+    try:
+        with open(target_path, "r", encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if not line or line.startswith("#") or "=" not in line:
+                    continue
+                k, v = line.split("=", 1)
+                k = k.strip()
+                v = v.strip().strip("\"'")
+                if k and k not in os.environ:
+                    os.environ[k] = v
+    except Exception:
+        pass
+
 
 
 class SystemSettings(BaseModel):
@@ -44,9 +66,12 @@ class MemorySettings(BaseModel):
 
 
 class ModelSettings(BaseModel):
+    provider: str = "gemini"
     default_model: str = "gemini-2.5-pro"
     fast_model: str = "gemini-2.5-flash"
     reasoning_model: str = "gemini-3.0-thinking"
+    api_key: Optional[str] = None
+    base_url: Optional[str] = None
     roles: Dict[str, str] = Field(default_factory=dict)
 
 
@@ -66,6 +91,7 @@ class MASConfiguration(BaseModel):
 
     @classmethod
     def load_from_yaml(cls, path: Optional[Path | str] = None) -> "MASConfiguration":
+        load_dotenv_if_present()
         if path is None:
             default_path = Path("config/system_settings.yaml")
             if default_path.exists():
@@ -86,5 +112,6 @@ _config_instance: Optional[MASConfiguration] = None
 def get_config(reload: bool = False, config_path: Optional[str] = None) -> MASConfiguration:
     global _config_instance
     if _config_instance is None or reload:
+        load_dotenv_if_present()
         _config_instance = MASConfiguration.load_from_yaml(config_path)
     return _config_instance

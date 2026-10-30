@@ -316,16 +316,282 @@ class DeterministicMockLLMProvider(BaseLLMProvider):
         return validated, resp
 
 
+class OpenAICompatibleProvider(BaseLLMProvider):
+    """
+    Universal REST client for OpenAI-compatible inference endpoints:
+    Supports OpenAI (gpt-4o, o3-mini), Groq, DeepSeek, Ollama, Together, vLLM, and LMStudio.
+    """
+
+    def __init__(
+        self,
+        api_key: Optional[str] = None,
+        base_url: Optional[str] = None,
+        default_model: str = "gpt-4o",
+    ):
+        self.api_key = api_key or os.environ.get("OPENAI_API_KEY", "")
+        raw_base = (
+            base_url
+            or os.environ.get("OPENAI_BASE_URL", "")
+            or "https://api.openai.com/v1"
+        )
+        self.base_url = raw_base.rstrip("/")
+        self.default_model = default_model
+
+    def _execute_with_retry(
+        self, url: str, payload: Dict[str, Any], max_retries: int = 3
+    ) -> Dict[str, Any]:
+        headers = {"Content-Type": "application/json"}
+        if self.api_key:
+            headers["Authorization"] = f"Bearer {self.api_key}"
+
+        for attempt in range(max_retries):
+            try:
+                response = requests.post(url, json=payload, headers=headers, timeout=60)
+                if response.status_code == 200:
+                    return response.json()
+                elif response.status_code in [429, 500, 502, 503]:
+                    backoff = (2**attempt) + random.uniform(0.1, 1.0)
+                    time.sleep(backoff)
+                else:
+                    raise RuntimeError(
+                        f"OpenAI-compatible API error {response.status_code}: {response.text}"
+                    )
+            except requests.RequestException:
+                if attempt == max_retries - 1:
+                    raise
+                time.sleep((2**attempt) + random.uniform(0.1, 0.5))
+        raise RuntimeError("OpenAI-compatible API call failed after max retries")
+
+    def generate(
+        self,
+        prompt: str,
+        system_prompt: Optional[str] = None,
+        model: Optional[str] = None,
+        config: Optional[LLMGenerationConfig] = None,
+    ) -> LLMResponse:
+        target_model = model or self.default_model
+        cfg = config or LLMGenerationConfig()
+        url = f"{self.base_url}/chat/completions"
+
+        messages = []
+        if system_prompt:
+            messages.append({"role": "system", "content": system_prompt})
+        messages.append({"role": "user", "content": prompt})
+
+        payload: Dict[str, Any] = {
+            "model": target_model,
+            "messages": messages,
+            "temperature": cfg.temperature,
+            "max_tokens": cfg.max_output_tokens,
+        }
+
+        if cfg.response_mime_type == "application/json":
+            payload["response_format"] = {"type": "json_object"}
+
+        data = self._execute_with_retry(url, payload)
+        choices = data.get("choices", [])
+        if not choices:
+            raise RuntimeError(f"No choices returned: {data}")
+
+        choice = choices[0]
+        text_content = choice.get("message", {}).get("content", "")
+        usage = data.get("usage", {})
+        prompt_tokens = usage.get("prompt_tokens", 0)
+        completion_tokens = usage.get("completion_tokens", 0)
+
+        return LLMResponse(
+            text=text_content.strip(),
+            prompt_tokens=prompt_tokens,
+            candidate_tokens=completion_tokens,
+            total_tokens=usage.get("total_tokens", prompt_tokens + completion_tokens),
+            finish_reason=choice.get("finish_reason", "STOP"),
+            model_name=target_model,
+        )
+
+    def generate_structured(
+        self,
+        prompt: str,
+        schema: Type[T],
+        system_prompt: Optional[str] = None,
+        model: Optional[str] = None,
+        config: Optional[LLMGenerationConfig] = None,
+    ) -> tuple[T, LLMResponse]:
+        cfg = config or LLMGenerationConfig()
+        cfg.response_mime_type = "application/json"
+        strict_prompt = (
+            f"{prompt}\n\n"
+            f"CRITICAL: Return ONLY valid JSON adhering to this schema:\n"
+            f"{json.dumps(schema.model_json_schema(), indent=2)}"
+        )
+        resp = self.generate(strict_prompt, system_prompt=system_prompt, model=model, config=cfg)
+        clean = resp.text.strip()
+        if clean.startswith("```json"):
+            clean = clean[7:]
+        if clean.startswith("```"):
+            clean = clean[3:]
+        if clean.endswith("```"):
+            clean = clean[:-3]
+
+        parsed = json.loads(clean.strip())
+        structured_obj = schema.model_validate(parsed)
+        resp.structured_data = parsed
+        return structured_obj, resp
+
+
+class AnthropicRESTProvider(BaseLLMProvider):
+    """
+    Direct REST client for Anthropic Claude API (claude-3-7-sonnet, claude-3-5-haiku).
+    """
+
+    BASE_URL = "https://api.anthropic.com/v1/messages"
+
+    def __init__(
+        self, api_key: Optional[str] = None, default_model: str = "claude-3-7-sonnet-20250219"
+    ):
+        self.api_key = api_key or os.environ.get("ANTHROPIC_API_KEY", "")
+        self.default_model = default_model
+
+    def _execute_with_retry(
+        self, payload: Dict[str, Any], max_retries: int = 3
+    ) -> Dict[str, Any]:
+        headers = {
+            "x-api-key": self.api_key,
+            "anthropic-version": "2023-06-01",
+            "Content-Type": "application/json",
+        }
+        for attempt in range(max_retries):
+            try:
+                response = requests.post(self.BASE_URL, json=payload, headers=headers, timeout=60)
+                if response.status_code == 200:
+                    return response.json()
+                elif response.status_code in [429, 500, 502, 503]:
+                    time.sleep((2**attempt) + random.uniform(0.1, 1.0))
+                else:
+                    raise RuntimeError(
+                        f"Anthropic API returned error {response.status_code}: {response.text}"
+                    )
+            except requests.RequestException:
+                if attempt == max_retries - 1:
+                    raise
+                time.sleep((2**attempt) + random.uniform(0.1, 0.5))
+        raise RuntimeError("Anthropic API call failed after max retries")
+
+    def generate(
+        self,
+        prompt: str,
+        system_prompt: Optional[str] = None,
+        model: Optional[str] = None,
+        config: Optional[LLMGenerationConfig] = None,
+    ) -> LLMResponse:
+        target_model = model or self.default_model
+        cfg = config or LLMGenerationConfig()
+
+        payload: Dict[str, Any] = {
+            "model": target_model,
+            "max_tokens": cfg.max_output_tokens,
+            "temperature": cfg.temperature,
+            "messages": [{"role": "user", "content": prompt}],
+        }
+        if system_prompt:
+            payload["system"] = system_prompt
+
+        data = self._execute_with_retry(payload)
+        content_blocks = data.get("content", [])
+        text_content = "".join(b.get("text", "") for b in content_blocks if b.get("type") == "text")
+        usage = data.get("usage", {})
+        prompt_tokens = usage.get("input_tokens", 0)
+        output_tokens = usage.get("output_tokens", 0)
+
+        return LLMResponse(
+            text=text_content.strip(),
+            prompt_tokens=prompt_tokens,
+            candidate_tokens=output_tokens,
+            total_tokens=prompt_tokens + output_tokens,
+            finish_reason=data.get("stop_reason", "STOP"),
+            model_name=target_model,
+        )
+
+    def generate_structured(
+        self,
+        prompt: str,
+        schema: Type[T],
+        system_prompt: Optional[str] = None,
+        model: Optional[str] = None,
+        config: Optional[LLMGenerationConfig] = None,
+    ) -> tuple[T, LLMResponse]:
+        strict_prompt = (
+            f"{prompt}\n\n"
+            f"CRITICAL: Return ONLY valid JSON adhering to this schema:\n"
+            f"{json.dumps(schema.model_json_schema(), indent=2)}"
+        )
+        resp = self.generate(strict_prompt, system_prompt=system_prompt, model=model, config=config)
+        clean = resp.text.strip()
+        if clean.startswith("```json"):
+            clean = clean[7:]
+        if clean.startswith("```"):
+            clean = clean[3:]
+        if clean.endswith("```"):
+            clean = clean[:-3]
+
+        parsed = json.loads(clean.strip())
+        structured_obj = schema.model_validate(parsed)
+        resp.structured_data = parsed
+        return structured_obj, resp
+
+
 def get_llm_provider(config: Optional[MASConfiguration] = None) -> BaseLLMProvider:
     """
     Factory creating the appropriate provider based on environment and credentials.
-    If GEMINI_API_KEY is present and not dummy, initializes GeminiRESTProvider;
-    otherwise gracefully falls back to DeterministicMockLLMProvider.
+    Priority:
+    1. Explicit provider setting in config.models.provider or MAS_LLM_PROVIDER
+    2. GEMINI_API_KEY -> GeminiRESTProvider
+    3. OPENAI_API_KEY or OPENAI_BASE_URL -> OpenAICompatibleProvider
+    4. ANTHROPIC_API_KEY -> AnthropicRESTProvider
+    5. Graceful fallback to DeterministicMockLLMProvider
     """
     cfg = config or get_config()
-    api_key = os.environ.get("GEMINI_API_KEY", "").strip()
+    provider_pref = (
+        os.environ.get("MAS_LLM_PROVIDER", "").strip().lower()
+        or getattr(cfg.models, "provider", "").strip().lower()
+    )
 
-    if api_key and not api_key.startswith("dummy") and not api_key.startswith("your_"):
-        return GeminiRESTProvider(api_key=api_key, default_model=cfg.models.default_model)
+    gemini_key = os.environ.get("GEMINI_API_KEY", "").strip() or (
+        cfg.models.api_key if provider_pref == "gemini" else ""
+    )
+    openai_key = os.environ.get("OPENAI_API_KEY", "").strip() or (
+        cfg.models.api_key if provider_pref in ["openai", "ollama", "groq", "deepseek"] else ""
+    )
+    openai_base = os.environ.get("OPENAI_BASE_URL", "").strip() or getattr(
+        cfg.models, "base_url", None
+    )
+    anthropic_key = os.environ.get("ANTHROPIC_API_KEY", "").strip() or (
+        cfg.models.api_key if provider_pref == "anthropic" else ""
+    )
+
+    # 1. Explicit preference or auto-detection
+    if (
+        provider_pref in ["openai", "ollama", "groq", "deepseek"]
+        or (openai_key and not gemini_key and not anthropic_key)
+        or openai_base
+    ):
+        model = (
+            cfg.models.default_model
+            if not cfg.models.default_model.startswith("gemini")
+            else "gpt-4o"
+        )
+        return OpenAICompatibleProvider(
+            api_key=openai_key, base_url=openai_base, default_model=model
+        )
+
+    if provider_pref == "anthropic" or (anthropic_key and not gemini_key):
+        model = (
+            cfg.models.default_model
+            if not cfg.models.default_model.startswith("gemini")
+            else "claude-3-7-sonnet-20250219"
+        )
+        return AnthropicRESTProvider(api_key=anthropic_key, default_model=model)
+
+    if gemini_key and not gemini_key.startswith("dummy") and not gemini_key.startswith("your_"):
+        return GeminiRESTProvider(api_key=gemini_key, default_model=cfg.models.default_model)
 
     return DeterministicMockLLMProvider(default_model=cfg.models.default_model)
