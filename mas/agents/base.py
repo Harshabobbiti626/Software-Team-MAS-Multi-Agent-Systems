@@ -28,6 +28,7 @@ from mas.memory.semantic import SemanticMemory
 from mas.memory.working import WorkingMemory
 from mas.tools.linter import DeterministicLinter
 from mas.tools.patcher import PatchResult, SurgicalPatcher
+from mas.tools.sandbox import SandboxResult, get_sandbox_runner
 
 T = TypeVar("T", bound=BaseModel)
 
@@ -137,6 +138,7 @@ class BaseAgent(ABC):
     ) -> LLMResponse:
         """
         Invokes the live LLM with extended reasoning token budget and role system prompt.
+        Automatically updates live token consumption.
         """
         model_name = self.config.models.roles.get(
             self.role.lower(), self.config.models.default_model
@@ -148,9 +150,15 @@ class BaseAgent(ABC):
             system_prompt
             or f"You are {self.role}, operating in the {self.pod.value} pod. Uphold strict SOLID and Clean Code standards."
         )
-        return self.llm.generate(
+        resp = self.llm.generate(
             prompt=prompt, system_prompt=sys_p, model=model_name, config=gen_config
         )
+        self.usage.add(
+            prompt=resp.prompt_tokens,
+            candidate=resp.candidate_tokens,
+            thinking=resp.thinking_tokens,
+        )
+        return resp
 
     def think_and_generate_structured(
         self,
@@ -161,6 +169,7 @@ class BaseAgent(ABC):
     ) -> tuple[T, LLMResponse]:
         """
         Invokes LLM with strict Pydantic structured output validation.
+        Automatically updates live token consumption.
         """
         model_name = self.config.models.roles.get(
             self.role.lower(), self.config.models.default_model
@@ -172,9 +181,15 @@ class BaseAgent(ABC):
             system_prompt
             or f"You are {self.role}, an elite software engineering agent in the {self.pod.value} pod."
         )
-        return self.llm.generate_structured(
+        obj, resp = self.llm.generate_structured(
             prompt=prompt, schema=schema, system_prompt=sys_p, model=model_name, config=gen_config
         )
+        self.usage.add(
+            prompt=resp.prompt_tokens,
+            candidate=resp.candidate_tokens,
+            thinking=resp.thinking_tokens,
+        )
+        return obj, resp
 
     def apply_surgical_patch(
         self, file_path: str, search_block: str, replace_block: str
@@ -194,15 +209,20 @@ class BaseAgent(ABC):
         test_command: List[str],
         max_attempts: int = 3,
         auto_repair_callback: Optional[Any] = None,
-    ) -> Any:
+    ) -> SandboxResult:
         """
         Interactive CodeAct execution & self-debugging loop.
         Executes a test/build in the sandbox; if failures occur, analyzes error tracebacks,
         applies surgical patches, and re-runs until green or turn limits are hit.
         """
-        from mas.tools.sandbox import get_sandbox_runner
-
         sandbox = get_sandbox_runner(workspace_root=self.config.system.blackboard_repo_path)
+        result = SandboxResult(
+            command=" ".join(test_command),
+            exit_code=-1,
+            stdout="",
+            stderr="No execution attempts made.",
+            duration_seconds=0.0,
+        )
 
         for attempt in range(1, max_attempts + 1):
             result = sandbox.execute(test_command, timeout=45)
@@ -263,10 +283,15 @@ class BaseAgent(ABC):
         context_slice = ""
         try:
             tokens = [w for w in task.title.split() if len(w) > 3]
-            for tok in tokens[:2]:
+            matched_symbols = []
+            for tok in tokens[:3]:
                 syms = self.code_graph.find_symbol(tok)
                 if syms:
-                    context_slice += f"\nExisting codebase symbol context: {syms[0].name} ({syms[0].kind.value})\n"
+                    matched_symbols.append(tok)
+            if matched_symbols:
+                slice_content = self.code_graph.get_context_slice(matched_symbols, max_lines=60)
+                if slice_content:
+                    context_slice = f"\n### Relevant Existing Codebase Context:\n{slice_content}\n"
         except Exception:
             pass
 
@@ -321,7 +346,13 @@ class BaseAgent(ABC):
         return last_code, False
 
     def publish_artifact(
-        self, artifact_id: str, artifact_type: ArtifactType, name: str, content: str
+        self,
+        artifact_id: str,
+        artifact_type: ArtifactType,
+        name: str,
+        content: str,
+        path: Optional[str] = None,
+        commit_to_git: bool = True,
     ) -> Artifact:
         """Convenience method to register a versioned artifact to the Blackboard."""
         return self.blackboard.register_artifact(
@@ -330,4 +361,6 @@ class BaseAgent(ABC):
             name=name,
             content=content,
             created_by=self.role,
+            path=path,
+            commit_to_git=commit_to_git,
         )

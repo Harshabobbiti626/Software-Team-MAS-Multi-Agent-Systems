@@ -38,6 +38,15 @@
       ]
     },
     {
+      "artifact_name": "service.py",
+      "ast_syntax_pass": true,
+      "solid_compliance": {
+        "SingleResponsibility": "Compliant: Focused module scope",
+        "DependencyInversion": "Compliant: Relies on abstractions and schemas"
+      },
+      "issues": []
+    },
+    {
       "artifact_name": "Dockerfile",
       "ast_syntax_pass": false,
       "solid_compliance": {
@@ -53,15 +62,6 @@
           "rule_code": "SYNTAX_ERROR"
         }
       ]
-    },
-    {
-      "artifact_name": "service.py",
-      "ast_syntax_pass": true,
-      "solid_compliance": {
-        "SingleResponsibility": "Compliant: Focused module scope",
-        "DependencyInversion": "Compliant: Relies on abstractions and schemas"
-      },
-      "issues": []
     },
     {
       "artifact_name": "test_integration.py",
