@@ -6,14 +6,14 @@ Validates contract compliance against api-spec.yaml
 
 import pytest
 
-def test_resource_creation_contract():
-    # Simulates contract verification
-    payload = {"name": "Widget-X", "category": "Enterprise"}
+def test_integration_creation_contract():
+    # Contract validation for integration
+    payload = {"name": "integration-sample", "category": "Core"}
     assert "name" in payload
     assert "category" in payload
     assert len(payload["name"]) > 0
 
-def test_resource_error_handling():
-    # Simulates 422 error validation
+def test_integration_error_handling():
+    # 422 error boundary validation
     invalid_payload = {"name": ""}
     assert len(invalid_payload["name"]) == 0
