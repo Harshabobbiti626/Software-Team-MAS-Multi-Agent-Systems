@@ -18,6 +18,22 @@
   <script src="/vendor/react.production.min.js"></script>
   <script src="/vendor/react-dom.production.min.js"></script>
   <script src="/vendor/prism.min.js"></script>
+
+  <!-- Client-side Error Guard -->
+  <script>
+    window.addEventListener('error', function(e) {
+      console.error('MAS Cockpit Runtime Error:', e);
+      var root = document.getElementById('root');
+      if (root && root.innerText.includes('Initializing React 18')) {
+        root.innerHTML = '<div style="padding: 2.5rem; color: #ef4444; font-family: -apple-system, sans-serif; background: #0b0f17; height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">' +
+          '<div style="font-size: 2.5rem; margin-bottom: 0.5rem;">⚠️</div>' +
+          '<h2 style="color: #f9fafb; margin-bottom: 0.5rem;">MAS Cockpit Startup Notice</h2>' +
+          '<p style="color: #9ca3af; max-width: 500px; font-size: 0.9rem; margin-bottom: 1.5rem;">' + (e.message || 'Script execution halted') + '</p>' +
+          '<button onclick="location.reload()" style="padding: 0.5rem 1.25rem; background: #38bdf8; color: #0b0f17; font-weight: 600; border: none; border-radius: 6px; cursor: pointer;">Reload Application</button>' +
+          '</div>';
+      }
+    });
+  </script>
 </head>
 <body class="dark-theme">
   <!-- React 18 Mount Point -->

@@ -1,4 +1,3 @@
-import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 /**
  * MAS Web Mission Control - Modern React 18 Application with IDE-Grade Workspace
  * Comprehensive multi-agent command cockpit with real-time SSE streaming,
@@ -704,864 +703,676 @@ function App() {
     if (!selectedArtifact?.path) return "No file selected";
     return `c:\\Users\\bobharsh\\MAS\\${selectedArtifact.path.replace(/\//g, '\\')}`;
   }, [selectedArtifact]);
-  return /*#__PURE__*/_jsxs("div", {
+  return /*#__PURE__*/React.createElement("div", {
     className: "cockpit-container",
     style: {
       display: "flex",
       flexDirection: "column",
       height: "100vh"
+    }
+  }, /*#__PURE__*/React.createElement("header", {
+    className: "top-bar",
+    role: "banner"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "brand-group"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "logo-badge",
+    title: "Multi-Agent Software Engineering System"
+  }, "MAS IDE"), /*#__PURE__*/React.createElement("div", {
+    className: "mission-meta"
+  }, /*#__PURE__*/React.createElement("h1", {
+    title: missionData.title
+  }, missionData.title), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: "0.5rem"
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    className: `live-indicator ${connectionStatus === "STREAMING" ? "" : connectionStatus === "IDLE" ? "idle" : "disconnected"}`
+  }), /*#__PURE__*/React.createElement("span", {
+    className: "mission-id-badge"
+  }, activeMissionId || "MISSION-IDLE")))), /*#__PURE__*/React.createElement("nav", {
+    className: "pipeline-progress",
+    "aria-label": "Pipeline Stages"
+  }, PIPELINE_STAGES.map(stg => {
+    const isCompleted = missionData.stageIndex > stg.index || missionData.status === "COMPLETED";
+    const isActive = missionData.stageIndex === stg.index && missionData.status !== "COMPLETED";
+    return /*#__PURE__*/React.createElement(React.Fragment, {
+      key: stg.id
+    }, /*#__PURE__*/React.createElement("div", {
+      className: `stage-node ${isActive ? "active" : ""} ${isCompleted ? "completed" : ""}`,
+      title: `${stg.label}: ${stg.desc}`
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "node-circle"
+    }, isCompleted ? "✓" : stg.index), /*#__PURE__*/React.createElement("span", {
+      className: "node-label"
+    }, stg.label)), stg.index < 5 && /*#__PURE__*/React.createElement("div", {
+      className: `stage-connector ${isCompleted ? "completed" : ""}`
+    }));
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "metrics-controls"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "metric-card",
+    title: "Prompt, candidate, and thinking tokens burned"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "metric-label"
+  }, "Tokens"), /*#__PURE__*/React.createElement("span", {
+    className: "metric-val"
+  }, Number(missionData.tokens.total || 0).toLocaleString())), /*#__PURE__*/React.createElement("div", {
+    className: "metric-card",
+    title: "Loop detection and recursion ceiling limiter"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "metric-label"
+  }, "Circuit Breaker"), /*#__PURE__*/React.createElement("span", {
+    className: `metric-val ${missionData.circuitBreaker.healthy ? "healthy" : "tripped"}`
+  }, missionData.circuitBreaker.healthy ? "HEALTHY" : "TRIPPED")), /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-primary",
+    onClick: () => setIsNewMissionOpen(true),
+    "aria-label": "Launch a new multi-agent mission"
+  }, "+ New Mission"), /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-outline",
+    onClick: toggleTheme,
+    "aria-label": "Toggle dark/light theme",
+    title: "Toggle theme"
+  }, theme === "dark" ? "☀️" : "🌙"))), /*#__PURE__*/React.createElement("main", {
+    className: "workspace-grid",
+    role: "main",
+    style: {
+      flex: 1,
+      minHeight: 0
+    }
+  }, /*#__PURE__*/React.createElement("aside", {
+    className: "panel left-panel",
+    "aria-label": "File Explorer and Pod Matrix"
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: "0.25rem",
+      marginBottom: "0.75rem",
+      borderBottom: "1px solid var(--border-color)",
+      paddingBottom: "0.4rem"
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    className: `btn btn-sm ${sidebarTab === "explorer" ? "btn-primary" : "btn-outline"}`,
+    style: {
+      flex: 1,
+      fontSize: "0.75rem"
     },
-    children: [/*#__PURE__*/_jsxs("header", {
-      className: "top-bar",
-      role: "banner",
-      children: [/*#__PURE__*/_jsxs("div", {
-        className: "brand-group",
-        children: [/*#__PURE__*/_jsx("div", {
-          className: "logo-badge",
-          title: "Multi-Agent Software Engineering System",
-          children: "MAS IDE"
-        }), /*#__PURE__*/_jsxs("div", {
-          className: "mission-meta",
-          children: [/*#__PURE__*/_jsx("h1", {
-            title: missionData.title,
-            children: missionData.title
-          }), /*#__PURE__*/_jsxs("div", {
-            style: {
-              display: "flex",
-              alignItems: "center",
-              gap: "0.5rem"
-            },
-            children: [/*#__PURE__*/_jsx("span", {
-              className: `live-indicator ${connectionStatus === "STREAMING" ? "" : connectionStatus === "IDLE" ? "idle" : "disconnected"}`
-            }), /*#__PURE__*/_jsx("span", {
-              className: "mission-id-badge",
-              children: activeMissionId || "MISSION-IDLE"
-            })]
-          })]
-        })]
-      }), /*#__PURE__*/_jsx("nav", {
-        className: "pipeline-progress",
-        "aria-label": "Pipeline Stages",
-        children: PIPELINE_STAGES.map(stg => {
-          const isCompleted = missionData.stageIndex > stg.index || missionData.status === "COMPLETED";
-          const isActive = missionData.stageIndex === stg.index && missionData.status !== "COMPLETED";
-          return /*#__PURE__*/_jsxs(React.Fragment, {
-            children: [/*#__PURE__*/_jsxs("div", {
-              className: `stage-node ${isActive ? "active" : ""} ${isCompleted ? "completed" : ""}`,
-              title: `${stg.label}: ${stg.desc}`,
-              children: [/*#__PURE__*/_jsx("span", {
-                className: "node-circle",
-                children: isCompleted ? "✓" : stg.index
-              }), /*#__PURE__*/_jsx("span", {
-                className: "node-label",
-                children: stg.label
-              })]
-            }), stg.index < 5 && /*#__PURE__*/_jsx("div", {
-              className: `stage-connector ${isCompleted ? "completed" : ""}`
-            })]
-          }, stg.id);
-        })
-      }), /*#__PURE__*/_jsxs("div", {
-        className: "metrics-controls",
-        children: [/*#__PURE__*/_jsxs("div", {
-          className: "metric-card",
-          title: "Prompt, candidate, and thinking tokens burned",
-          children: [/*#__PURE__*/_jsx("span", {
-            className: "metric-label",
-            children: "Tokens"
-          }), /*#__PURE__*/_jsx("span", {
-            className: "metric-val",
-            children: Number(missionData.tokens.total || 0).toLocaleString()
-          })]
-        }), /*#__PURE__*/_jsxs("div", {
-          className: "metric-card",
-          title: "Loop detection and recursion ceiling limiter",
-          children: [/*#__PURE__*/_jsx("span", {
-            className: "metric-label",
-            children: "Circuit Breaker"
-          }), /*#__PURE__*/_jsx("span", {
-            className: `metric-val ${missionData.circuitBreaker.healthy ? "healthy" : "tripped"}`,
-            children: missionData.circuitBreaker.healthy ? "HEALTHY" : "TRIPPED"
-          })]
-        }), /*#__PURE__*/_jsx("button", {
-          className: "btn btn-primary",
-          onClick: () => setIsNewMissionOpen(true),
-          "aria-label": "Launch a new multi-agent mission",
-          children: "+ New Mission"
-        }), /*#__PURE__*/_jsx("button", {
-          className: "btn btn-outline",
-          onClick: toggleTheme,
-          "aria-label": "Toggle dark/light theme",
-          title: "Toggle theme",
-          children: theme === "dark" ? "☀️" : "🌙"
-        })]
-      })]
-    }), /*#__PURE__*/_jsxs("main", {
-      className: "workspace-grid",
-      role: "main",
+    onClick: () => setSidebarTab("explorer")
+  }, "📁 Explorer (", missionData.artifacts.length, ")"), /*#__PURE__*/React.createElement("button", {
+    className: `btn btn-sm ${sidebarTab === "pods" ? "btn-primary" : "btn-outline"}`,
+    style: {
+      flex: 1,
+      fontSize: "0.75rem"
+    },
+    onClick: () => setSidebarTab("pods")
+  }, "⚡ Pods (5)")), sidebarTab === "explorer" && /*#__PURE__*/React.createElement("div", {
+    className: "ide-explorer-panel",
+    style: {
+      display: "flex",
+      flexDirection: "column",
+      height: "calc(100% - 45px)"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between",
+      marginBottom: "0.4rem"
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: "0.75rem",
+      fontWeight: 700,
+      textTransform: "uppercase",
+      letterSpacing: "0.05em",
+      color: "var(--text-secondary)"
+    }
+  }, "Workspace Files"), /*#__PURE__*/React.createElement("span", {
+    className: "badge",
+    title: "Total synthesized files on disk"
+  }, missionData.artifacts.length, " files")), /*#__PURE__*/React.createElement("input", {
+    type: "text",
+    className: "search-input",
+    placeholder: "Search files (e.g. service.py)...",
+    value: fileSearchQuery,
+    onChange: e => setFileSearchQuery(e.target.value)
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "ide-explorer",
+    style: {
+      flex: 1,
+      overflowY: "auto"
+    }
+  }, Object.entries(directoryTree).map(([fKey, folder]) => {
+    if (folder.items.length === 0) return null;
+    const isExpanded = expandedFolders[fKey] !== false;
+    return /*#__PURE__*/React.createElement("div", {
+      key: fKey,
+      className: "ide-tree-folder"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "ide-folder-header",
+      onClick: () => toggleFolder(fKey)
+    }, /*#__PURE__*/React.createElement("span", {
+      className: `ide-chevron ${isExpanded ? "expanded" : ""}`
+    }, "▶"), /*#__PURE__*/React.createElement("span", null, folder.icon), /*#__PURE__*/React.createElement("span", null, folder.name), /*#__PURE__*/React.createElement("span", {
       style: {
-        flex: 1,
-        minHeight: 0
+        marginLeft: "auto",
+        fontSize: "0.68rem",
+        color: "var(--text-muted)"
+      }
+    }, "(", folder.items.length, ")")), isExpanded && /*#__PURE__*/React.createElement("div", {
+      className: "ide-folder-children"
+    }, folder.items.map(file => {
+      const isActive = selectedArtifact?.id === file.id;
+      return /*#__PURE__*/React.createElement("div", {
+        key: file.id,
+        className: `ide-file-item ${isActive ? "active" : ""}`,
+        onClick: () => openArtifactInEditor(file.id),
+        title: `Path: ${file.path}\nAuthor: ${file.created_by}`
+      }, /*#__PURE__*/React.createElement("div", {
+        className: "ide-file-label"
+      }, /*#__PURE__*/React.createElement("span", {
+        className: "ide-file-icon"
+      }, getFileIcon(file.name)), /*#__PURE__*/React.createElement("span", null, file.name)), /*#__PURE__*/React.createElement("span", {
+        className: "ide-git-badge",
+        title: "Synthesized by MAS agent"
+      }, "+A"));
+    })));
+  }), missionData.artifacts.length === 0 && /*#__PURE__*/React.createElement("div", {
+    className: "empty-state",
+    style: {
+      padding: "1.5rem 0.5rem",
+      textAlign: "center"
+    }
+  }, "No files synthesized yet. Click ", /*#__PURE__*/React.createElement("strong", null, "+ New Mission"), " to generate code."))), sidebarTab === "pods" && /*#__PURE__*/React.createElement("div", {
+    className: "pod-matrix",
+    style: {
+      overflowY: "auto",
+      height: "calc(100% - 45px)"
+    }
+  }, POD_CONFIGS.map(podCfg => {
+    const livePod = missionData.pods[podCfg.key] || {
+      status: "IDLE",
+      action: "Standby",
+      artifact: podCfg.defaultArtifact
+    };
+    const status = livePod.status || "IDLE";
+    const isRunning = status === "RUNNING";
+    const isDone = status === "DONE";
+    let statusClass = "status-idle";
+    if (isRunning) statusClass = "status-running";else if (isDone) statusClass = "status-done";else if (status === "FAILED") statusClass = "status-tripped";
+    return /*#__PURE__*/React.createElement("div", {
+      key: podCfg.key,
+      className: `pod-card ${isRunning ? "running" : ""}`
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "pod-header"
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "pod-icon"
+    }, podCfg.icon), /*#__PURE__*/React.createElement("div", {
+      className: "pod-info"
+    }, /*#__PURE__*/React.createElement("h3", null, podCfg.name), /*#__PURE__*/React.createElement("p", {
+      className: "pod-sub"
+    }, podCfg.desc)), /*#__PURE__*/React.createElement("span", {
+      className: `status-pill ${statusClass}`
+    }, status)), /*#__PURE__*/React.createElement("div", {
+      className: "pod-action-text"
+    }, livePod.action), livePod.artifact && /*#__PURE__*/React.createElement("div", {
+      style: {
+        marginTop: "0.35rem",
+        display: "flex",
+        justifyContent: "flex-end"
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "preset-chip",
+      style: {
+        fontSize: "0.68rem"
       },
-      children: [/*#__PURE__*/_jsxs("aside", {
-        className: "panel left-panel",
-        "aria-label": "File Explorer and Pod Matrix",
-        children: [/*#__PURE__*/_jsxs("div", {
-          style: {
-            display: "flex",
-            gap: "0.25rem",
-            marginBottom: "0.75rem",
-            borderBottom: "1px solid var(--border-color)",
-            paddingBottom: "0.4rem"
-          },
-          children: [/*#__PURE__*/_jsxs("button", {
-            className: `btn btn-sm ${sidebarTab === "explorer" ? "btn-primary" : "btn-outline"}`,
-            style: {
-              flex: 1,
-              fontSize: "0.75rem"
-            },
-            onClick: () => setSidebarTab("explorer"),
-            children: ["📁 Explorer (", missionData.artifacts.length, ")"]
-          }), /*#__PURE__*/_jsx("button", {
-            className: `btn btn-sm ${sidebarTab === "pods" ? "btn-primary" : "btn-outline"}`,
-            style: {
-              flex: 1,
-              fontSize: "0.75rem"
-            },
-            onClick: () => setSidebarTab("pods"),
-            children: "⚡ Pods (5)"
-          })]
-        }), sidebarTab === "explorer" && /*#__PURE__*/_jsxs("div", {
-          className: "ide-explorer-panel",
-          style: {
-            display: "flex",
-            flexDirection: "column",
-            height: "calc(100% - 45px)"
-          },
-          children: [/*#__PURE__*/_jsxs("div", {
-            style: {
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              marginBottom: "0.4rem"
-            },
-            children: [/*#__PURE__*/_jsx("span", {
-              style: {
-                fontSize: "0.75rem",
-                fontWeight: 700,
-                textTransform: "uppercase",
-                letterSpacing: "0.05em",
-                color: "var(--text-secondary)"
-              },
-              children: "Workspace Files"
-            }), /*#__PURE__*/_jsxs("span", {
-              className: "badge",
-              title: "Total synthesized files on disk",
-              children: [missionData.artifacts.length, " files"]
-            })]
-          }), /*#__PURE__*/_jsx("input", {
-            type: "text",
-            className: "search-input",
-            placeholder: "Search files (e.g. service.py)...",
-            value: fileSearchQuery,
-            onChange: e => setFileSearchQuery(e.target.value)
-          }), /*#__PURE__*/_jsxs("div", {
-            className: "ide-explorer",
-            style: {
-              flex: 1,
-              overflowY: "auto"
-            },
-            children: [Object.entries(directoryTree).map(([fKey, folder]) => {
-              if (folder.items.length === 0) return null;
-              const isExpanded = expandedFolders[fKey] !== false;
-              return /*#__PURE__*/_jsxs("div", {
-                className: "ide-tree-folder",
-                children: [/*#__PURE__*/_jsxs("div", {
-                  className: "ide-folder-header",
-                  onClick: () => toggleFolder(fKey),
-                  children: [/*#__PURE__*/_jsx("span", {
-                    className: `ide-chevron ${isExpanded ? "expanded" : ""}`,
-                    children: "▶"
-                  }), /*#__PURE__*/_jsx("span", {
-                    children: folder.icon
-                  }), /*#__PURE__*/_jsx("span", {
-                    children: folder.name
-                  }), /*#__PURE__*/_jsxs("span", {
-                    style: {
-                      marginLeft: "auto",
-                      fontSize: "0.68rem",
-                      color: "var(--text-muted)"
-                    },
-                    children: ["(", folder.items.length, ")"]
-                  })]
-                }), isExpanded && /*#__PURE__*/_jsx("div", {
-                  className: "ide-folder-children",
-                  children: folder.items.map(file => {
-                    const isActive = selectedArtifact?.id === file.id;
-                    return /*#__PURE__*/_jsxs("div", {
-                      className: `ide-file-item ${isActive ? "active" : ""}`,
-                      onClick: () => openArtifactInEditor(file.id),
-                      title: `Path: ${file.path}\nAuthor: ${file.created_by}`,
-                      children: [/*#__PURE__*/_jsxs("div", {
-                        className: "ide-file-label",
-                        children: [/*#__PURE__*/_jsx("span", {
-                          className: "ide-file-icon",
-                          children: getFileIcon(file.name)
-                        }), /*#__PURE__*/_jsx("span", {
-                          children: file.name
-                        })]
-                      }), /*#__PURE__*/_jsx("span", {
-                        className: "ide-git-badge",
-                        title: "Synthesized by MAS agent",
-                        children: "+A"
-                      })]
-                    }, file.id);
-                  })
-                })]
-              }, fKey);
-            }), missionData.artifacts.length === 0 && /*#__PURE__*/_jsxs("div", {
-              className: "empty-state",
-              style: {
-                padding: "1.5rem 0.5rem",
-                textAlign: "center"
-              },
-              children: ["No files synthesized yet. Click ", /*#__PURE__*/_jsx("strong", {
-                children: "+ New Mission"
-              }), " to generate code."]
-            })]
-          })]
-        }), sidebarTab === "pods" && /*#__PURE__*/_jsx("div", {
-          className: "pod-matrix",
-          style: {
-            overflowY: "auto",
-            height: "calc(100% - 45px)"
-          },
-          children: POD_CONFIGS.map(podCfg => {
-            const livePod = missionData.pods[podCfg.key] || {
-              status: "IDLE",
-              action: "Standby",
-              artifact: podCfg.defaultArtifact
-            };
-            const status = livePod.status || "IDLE";
-            const isRunning = status === "RUNNING";
-            const isDone = status === "DONE";
-            let statusClass = "status-idle";
-            if (isRunning) statusClass = "status-running";else if (isDone) statusClass = "status-done";else if (status === "FAILED") statusClass = "status-tripped";
-            return /*#__PURE__*/_jsxs("div", {
-              className: `pod-card ${isRunning ? "running" : ""}`,
-              children: [/*#__PURE__*/_jsxs("div", {
-                className: "pod-header",
-                children: [/*#__PURE__*/_jsx("span", {
-                  className: "pod-icon",
-                  children: podCfg.icon
-                }), /*#__PURE__*/_jsxs("div", {
-                  className: "pod-info",
-                  children: [/*#__PURE__*/_jsx("h3", {
-                    children: podCfg.name
-                  }), /*#__PURE__*/_jsx("p", {
-                    className: "pod-sub",
-                    children: podCfg.desc
-                  })]
-                }), /*#__PURE__*/_jsx("span", {
-                  className: `status-pill ${statusClass}`,
-                  children: status
-                })]
-              }), /*#__PURE__*/_jsx("div", {
-                className: "pod-action-text",
-                children: livePod.action
-              }), livePod.artifact && /*#__PURE__*/_jsx("div", {
-                style: {
-                  marginTop: "0.35rem",
-                  display: "flex",
-                  justifyContent: "flex-end"
-                },
-                children: /*#__PURE__*/_jsxs("span", {
-                  className: "preset-chip",
-                  style: {
-                    fontSize: "0.68rem"
-                  },
-                  title: "Open artifact in editor",
-                  onClick: () => {
-                    const art = missionData.artifacts.find(a => a.name.includes(livePod.artifact));
-                    if (art) openArtifactInEditor(art.id);
-                  },
-                  children: ["📄 ", livePod.artifact]
-                })
-              })]
-            }, podCfg.key);
-          })
-        })]
-      }), /*#__PURE__*/_jsxs("section", {
-        className: "panel center-panel",
-        "aria-label": "IDE Code Editor Canvas",
-        style: {
-          display: "flex",
-          flexDirection: "column"
-        },
-        children: [/*#__PURE__*/_jsx("div", {
-          className: "ide-tabs-bar",
-          role: "tablist",
-          children: openTabs.length === 0 ? /*#__PURE__*/_jsx("div", {
-            style: {
-              padding: "0.4rem 0.85rem",
-              fontSize: "0.75rem",
-              color: "var(--text-muted)",
-              fontStyle: "italic"
-            },
-            children: "No open files. Select a file from the Explorer on the left."
-          }) : openTabs.map(tab => {
-            const isActive = activeTabId === tab.id;
-            return /*#__PURE__*/_jsxs("div", {
-              className: `ide-tab ${isActive ? "active" : ""}`,
-              onClick: () => {
-                setActiveTabId(tab.id);
-                setSelectedArtifact(tab);
-              },
-              children: [/*#__PURE__*/_jsx("span", {
-                children: getFileIcon(tab.name)
-              }), /*#__PURE__*/_jsx("span", {
-                children: tab.name
-              }), /*#__PURE__*/_jsx("span", {
-                className: "ide-tab-close",
-                title: "Close file tab",
-                onClick: e => handleCloseTab(e, tab.id),
-                children: "✕"
-              })]
-            }, tab.id);
-          })
-        }), selectedArtifact && /*#__PURE__*/_jsxs("div", {
-          className: "disk-location-banner",
-          children: [/*#__PURE__*/_jsxs("div", {
-            className: "disk-path-text",
-            title: localDiskPath,
-            children: ["📁 ", /*#__PURE__*/_jsx("strong", {
-              children: "Disk Location:"
-            }), " ", localDiskPath]
-          }), /*#__PURE__*/_jsxs("div", {
-            style: {
-              display: "flex",
-              gap: "0.4rem"
-            },
-            children: [/*#__PURE__*/_jsx("button", {
-              className: "btn btn-sm btn-outline",
-              style: {
-                fontSize: "0.65rem",
-                padding: "0.15rem 0.45rem"
-              },
-              onClick: handleCopyPath,
-              children: pathCopyFeedback ? "Path Copied! ✓" : "Copy Path"
-            }), /*#__PURE__*/_jsx("button", {
-              className: "btn btn-sm btn-outline",
-              style: {
-                fontSize: "0.65rem",
-                padding: "0.15rem 0.45rem"
-              },
-              onClick: handleCopyCode,
-              children: copyFeedback ? "Code Copied! ✓" : "Copy Code"
-            })]
-          })]
-        }), selectedArtifact && /*#__PURE__*/_jsxs("div", {
-          className: "ide-breadcrumbs",
-          children: [/*#__PURE__*/_jsx("span", {
-            children: "MAS Workspace"
-          }), /*#__PURE__*/_jsx("span", {
-            className: "ide-crumb-sep",
-            children: ">"
-          }), /*#__PURE__*/_jsx("span", {
-            children: selectedArtifact.path?.split("/")[0] || "artifacts"
-          }), /*#__PURE__*/_jsx("span", {
-            className: "ide-crumb-sep",
-            children: ">"
-          }), /*#__PURE__*/_jsx("span", {
-            className: "ide-crumb-active",
-            children: selectedArtifact.name
-          }), /*#__PURE__*/_jsxs("span", {
-            style: {
-              marginLeft: "auto",
-              fontSize: "0.68rem",
-              color: "var(--accent-green)"
-            },
-            children: ["Author: ", selectedArtifact.created_by || "Agent", " (v", selectedArtifact.version || 1, ")"]
-          })]
-        }), /*#__PURE__*/_jsx("div", {
-          className: "ide-editor-container",
-          style: {
-            flex: 1,
-            minHeight: 0
-          },
-          children: artifactLoading ?
-          /*#__PURE__*/
-          // Loading Skeleton State
-          _jsxs("div", {
-            className: "skeleton-container",
-            style: {
-              width: "100%"
-            },
-            "aria-busy": "true",
-            children: [/*#__PURE__*/_jsx("div", {
-              className: "skeleton-line short"
-            }), /*#__PURE__*/_jsx("div", {
-              className: "skeleton-line long"
-            }), /*#__PURE__*/_jsx("div", {
-              className: "skeleton-line medium"
-            }), /*#__PURE__*/_jsx("div", {
-              className: "skeleton-line long"
-            }), /*#__PURE__*/_jsx("div", {
-              className: "skeleton-line short"
-            }), /*#__PURE__*/_jsx("div", {
-              className: "skeleton-line medium"
-            }), /*#__PURE__*/_jsx("div", {
-              className: "skeleton-line long"
-            })]
-          }) : artifactError ?
-          /*#__PURE__*/
-          // Error State
-          _jsxs("div", {
-            className: "empty-canvas",
-            style: {
-              width: "100%"
-            },
-            children: [/*#__PURE__*/_jsx("div", {
-              className: "empty-canvas-icon",
-              children: "⚠️"
-            }), /*#__PURE__*/_jsx("h3", {
-              children: "Failed to load file"
-            }), /*#__PURE__*/_jsx("p", {
-              children: artifactError
-            }), /*#__PURE__*/_jsx("button", {
-              className: "btn btn-primary",
-              onClick: () => selectedArtifact && openArtifactInEditor(selectedArtifact.id),
-              children: "Retry Loading"
-            })]
-          }) : selectedArtifact ?
-          /*#__PURE__*/
-          // Populated IDE Code Editor with Gutter
-          _jsxs("div", {
-            style: {
-              display: "flex",
-              width: "100%",
-              height: "100%"
-            },
-            children: [/*#__PURE__*/_jsx("div", {
-              className: "ide-gutter",
-              children: lineNumbers.map(n => /*#__PURE__*/_jsx("div", {
-                children: n
-              }, n))
-            }), /*#__PURE__*/_jsx("div", {
-              className: "ide-code-pane",
-              children: /*#__PURE__*/_jsx("pre", {
-                children: /*#__PURE__*/_jsx("code", {
-                  ref: codeViewerRef,
-                  className: `language-${currentLanguage}`,
-                  children: selectedArtifact.content || "// File content is empty."
-                })
-              })
-            })]
-          }) :
-          /*#__PURE__*/
-          // Empty State with CTA
-          _jsxs("div", {
-            className: "empty-canvas",
-            style: {
-              width: "100%"
-            },
-            children: [/*#__PURE__*/_jsx("div", {
-              className: "empty-canvas-icon",
-              children: "💻"
-            }), /*#__PURE__*/_jsx("h3", {
-              children: "MAS IDE Workspace Ready"
-            }), /*#__PURE__*/_jsxs("p", {
-              children: ["Click any file in the ", /*#__PURE__*/_jsx("strong", {
-                children: "Explorer"
-              }), " on the left to inspect synthesized code, SQL migrations, API contracts, or documentation."]
-            }), /*#__PURE__*/_jsx("button", {
-              className: "btn btn-primary",
-              onClick: () => setIsNewMissionOpen(true),
-              children: "+ Launch New Mission"
-            })]
-          })
-        }), /*#__PURE__*/_jsxs("footer", {
-          className: "ide-status-bar dark-status",
-          children: [/*#__PURE__*/_jsxs("div", {
-            className: "ide-status-left",
-            children: [/*#__PURE__*/_jsx("span", {
-              className: "ide-status-item",
-              children: /*#__PURE__*/_jsxs("span", {
-                children: ["Ln ", lineCount, ", Col 1"]
-              })
-            }), /*#__PURE__*/_jsx("span", {
-              className: "ide-status-item",
-              children: "Spaces: 4"
-            }), /*#__PURE__*/_jsx("span", {
-              className: "ide-status-item",
-              children: "UTF-8"
-            }), /*#__PURE__*/_jsx("span", {
-              className: "ide-status-item",
-              children: "LF"
-            })]
-          }), /*#__PURE__*/_jsxs("div", {
-            className: "ide-status-right",
-            children: [/*#__PURE__*/_jsx("span", {
-              className: "ide-status-item",
-              style: {
-                color: "var(--accent-green)"
-              },
-              children: "AST Linter: Verified ✓"
-            }), /*#__PURE__*/_jsx("span", {
-              className: "ide-status-item",
-              style: {
-                textTransform: "capitalize"
-              },
-              children: currentLanguage
-            }), /*#__PURE__*/_jsx("button", {
-              className: "btn btn-sm btn-outline",
-              style: {
-                fontSize: "0.65rem",
-                padding: "0.1rem 0.4rem"
-              },
-              onClick: () => handleGeneratePR(false, false),
-              children: "🚀 GitHub PR"
-            })]
-          })]
-        })]
-      }), /*#__PURE__*/_jsxs("aside", {
-        className: "panel right-panel",
-        "aria-label": "HITL Strategic Decisions and Activity Feed",
-        children: [pendingGate && /*#__PURE__*/_jsx("div", {
-          className: "gate-card-wrapper",
-          role: "alert",
-          "aria-live": "assertive",
-          children: /*#__PURE__*/_jsxs("div", {
-            className: "gate-card",
-            children: [/*#__PURE__*/_jsx("div", {
-              className: "gate-badge",
-              children: "⚠️ HUMAN DECISION REQUIRED"
-            }), /*#__PURE__*/_jsx("h3", {
-              children: pendingGate.level || "Gate: Strategic Review"
-            }), /*#__PURE__*/_jsx("p", {
-              className: "gate-premise",
-              children: pendingGate.context?.blast_radius_summary || pendingGate.premise || "A strategic boundary gate has been reached. Inspect blast radius and approve next phase."
-            }), /*#__PURE__*/_jsxs("div", {
-              className: "gate-mitigation-box",
-              children: [/*#__PURE__*/_jsx("strong", {
-                children: "Pre-Mortem Mitigation:"
-              }), " Non-locking index verification and contract compliance locked."]
-            }), /*#__PURE__*/_jsx("div", {
-              style: {
-                marginTop: "0.5rem"
-              },
-              children: /*#__PURE__*/_jsx("input", {
-                type: "text",
-                className: "search-input",
-                placeholder: "Optional feedback or redirection note for agents...",
-                value: gateFeedback,
-                onChange: e => setGateFeedback(e.target.value)
-              })
-            }), /*#__PURE__*/_jsxs("div", {
-              className: "gate-actions",
-              children: [/*#__PURE__*/_jsxs("button", {
-                className: "btn btn-success",
-                onClick: () => handleGateDecision("APPROVED"),
-                disabled: isResolvingGate,
-                children: ["Approve ", /*#__PURE__*/_jsx("span", {
-                  className: "kbd-hint",
-                  children: "A"
-                })]
-              }), /*#__PURE__*/_jsxs("button", {
-                className: "btn btn-warning",
-                onClick: () => handleGateDecision("MODIFIED"),
-                disabled: isResolvingGate,
-                children: ["Modify ", /*#__PURE__*/_jsx("span", {
-                  className: "kbd-hint",
-                  children: "M"
-                })]
-              }), /*#__PURE__*/_jsxs("button", {
-                className: "btn btn-danger",
-                onClick: () => handleGateDecision("REJECTED"),
-                disabled: isResolvingGate,
-                children: ["Reject ", /*#__PURE__*/_jsx("span", {
-                  className: "kbd-hint",
-                  children: "R"
-                })]
-              })]
-            })]
-          })
-        }), /*#__PURE__*/_jsxs("div", {
-          className: "panel-header",
-          children: [/*#__PURE__*/_jsx("h2", {
-            children: "Live Event Stream"
-          }), /*#__PURE__*/_jsx("div", {
-            style: {
-              display: "flex",
-              gap: "0.25rem"
-            },
-            children: ["ALL", "POD", "GATE", "ARTIFACT"].map(f => /*#__PURE__*/_jsx("button", {
-              className: `btn btn-sm ${feedFilter === f ? "btn-primary" : "btn-outline"}`,
-              style: {
-                fontSize: "0.65rem",
-                padding: "0.15rem 0.4rem"
-              },
-              onClick: () => setFeedFilter(f),
-              children: f
-            }, f))
-          })]
-        }), /*#__PURE__*/_jsxs("div", {
-          className: "activity-feed",
-          role: "log",
-          "aria-live": "polite",
-          children: [feedLogs.filter(item => feedFilter === "ALL" || item.type === feedFilter).map((entry, idx) => {
-            let tagClass = "system-msg";
-            if (entry.type === "POD") tagClass = "pod-msg";else if (entry.type === "GATE") tagClass = "gate-msg";else if (entry.type === "SUCCESS") tagClass = "success-msg";else if (entry.type === "ERROR") tagClass = "error-msg";
-            return /*#__PURE__*/_jsxs("div", {
-              className: `feed-entry ${tagClass}`,
-              children: [/*#__PURE__*/_jsx("span", {
-                className: "feed-time",
-                children: entry.time
-              }), /*#__PURE__*/_jsx("span", {
-                className: "feed-text",
-                children: entry.text
-              })]
-            }, idx);
-          }), /*#__PURE__*/_jsx("div", {
-            ref: feedEndRef
-          })]
-        })]
-      })]
-    }), /*#__PURE__*/_jsxs("footer", {
-      className: `bottom-drawer ${isTerminalExpanded ? "expanded" : ""}`,
-      role: "contentinfo",
-      children: [/*#__PURE__*/_jsxs("div", {
-        className: "drawer-header",
-        onClick: () => setIsTerminalExpanded(prev => !prev),
-        tabIndex: 0,
-        onKeyDown: e => {
-          if (e.key === "Enter" || e.key === " ") setIsTerminalExpanded(prev => !prev);
-        },
-        role: "button",
-        "aria-expanded": isTerminalExpanded,
-        children: [/*#__PURE__*/_jsxs("div", {
-          className: "drawer-title",
-          children: [/*#__PURE__*/_jsx("span", {
-            children: "⚡ Subprocess Sandbox & Deterministic Linter Terminal"
-          }), /*#__PURE__*/_jsx("span", {
-            className: "drawer-tag",
-            children: "Exit Code: 0 (AST Verified)"
-          }), /*#__PURE__*/_jsx("span", {
-            className: "kbd-hint",
-            children: "T to toggle"
-          })]
-        }), /*#__PURE__*/_jsx("button", {
-          className: "drawer-btn",
-          children: isTerminalExpanded ? "▼ Collapse" : "▲ Expand"
-        })]
-      }), /*#__PURE__*/_jsx("div", {
-        className: "drawer-body",
-        children: /*#__PURE__*/_jsxs("div", {
-          className: "terminal-output",
-          children: [terminalLogs, /*#__PURE__*/_jsx("div", {
-            ref: terminalEndRef
-          })]
-        })
-      })]
-    }), isNewMissionOpen && /*#__PURE__*/_jsx("div", {
-      className: "modal-backdrop",
-      role: "dialog",
-      "aria-modal": "true",
-      "aria-labelledby": "modal-title",
-      children: /*#__PURE__*/_jsxs("div", {
-        className: "modal-card",
-        children: [/*#__PURE__*/_jsxs("div", {
-          className: "modal-header",
-          children: [/*#__PURE__*/_jsx("h2", {
-            id: "modal-title",
-            children: "Launch Multi-Agent Engineering Mission"
-          }), /*#__PURE__*/_jsx("button", {
-            className: "close-btn",
-            onClick: () => setIsNewMissionOpen(false),
-            "aria-label": "Close modal",
-            children: "×"
-          })]
-        }), /*#__PURE__*/_jsxs("div", {
-          style: {
-            marginBottom: "0.75rem"
-          },
-          children: [/*#__PURE__*/_jsx("label", {
-            style: {
-              fontSize: "0.75rem",
-              fontWeight: 600,
-              color: "var(--text-secondary)"
-            },
-            children: "Quick Presets:"
-          }), /*#__PURE__*/_jsx("div", {
-            className: "presets-container",
-            children: MISSION_PRESETS.map((p, i) => /*#__PURE__*/_jsxs("button", {
-              type: "button",
-              className: "preset-chip",
-              onClick: () => setNewMissionForm(prev => ({
-                ...prev,
-                title: p.title,
-                description: p.description
-              })),
-              children: ["⚡ ", p.label]
-            }, i))
-          })]
-        }), /*#__PURE__*/_jsxs("form", {
-          onSubmit: handleLaunchMission,
-          children: [/*#__PURE__*/_jsxs("div", {
-            className: "form-group",
-            children: [/*#__PURE__*/_jsx("label", {
-              htmlFor: "task-title",
-              children: "Task Title"
-            }), /*#__PURE__*/_jsx("input", {
-              id: "task-title",
-              type: "text",
-              required: true,
-              value: newMissionForm.title,
-              onChange: e => setNewMissionForm(prev => ({
-                ...prev,
-                title: e.target.value
-              })),
-              placeholder: "e.g. Stripe Webhook Verification Service"
-            })]
-          }), /*#__PURE__*/_jsxs("div", {
-            className: "form-group",
-            children: [/*#__PURE__*/_jsx("label", {
-              htmlFor: "task-desc",
-              children: "Task Requirements & Domain Specification"
-            }), /*#__PURE__*/_jsx("textarea", {
-              id: "task-desc",
-              rows: 4,
-              required: true,
-              value: newMissionForm.description,
-              onChange: e => setNewMissionForm(prev => ({
-                ...prev,
-                description: e.target.value
-              })),
-              placeholder: "Describe APIs, database tables, validation rules, and UI expectations..."
-            })]
-          }), /*#__PURE__*/_jsxs("div", {
-            className: "form-group",
-            children: [/*#__PURE__*/_jsx("label", {
-              htmlFor: "target-dir",
-              children: "Target Workspace Directory (In-Place Mapping)"
-            }), /*#__PURE__*/_jsx("input", {
-              id: "target-dir",
-              type: "text",
-              value: newMissionForm.targetDir,
-              onChange: e => setNewMissionForm(prev => ({
-                ...prev,
-                targetDir: e.target.value
-              })),
-              placeholder: "Optional: C:/projects/my-app (leave blank for default blackboard)"
-            })]
-          }), /*#__PURE__*/_jsxs("div", {
-            className: "form-group checkbox-group",
-            children: [/*#__PURE__*/_jsx("input", {
-              id: "chk-interactive",
-              type: "checkbox",
-              checked: newMissionForm.interactive,
-              onChange: e => setNewMissionForm(prev => ({
-                ...prev,
-                interactive: e.target.checked
-              }))
-            }), /*#__PURE__*/_jsx("label", {
-              htmlFor: "chk-interactive",
-              children: "Enable Interactive Human-in-the-Loop (HITL) Approval Gates"
-            })]
-          }), /*#__PURE__*/_jsxs("div", {
-            className: "form-group checkbox-group",
-            children: [/*#__PURE__*/_jsx("input", {
-              id: "chk-git-commit",
-              type: "checkbox",
-              checked: newMissionForm.gitCommit,
-              onChange: e => setNewMissionForm(prev => ({
-                ...prev,
-                gitCommit: e.target.checked
-              }))
-            }), /*#__PURE__*/_jsx("label", {
-              htmlFor: "chk-git-commit",
-              children: "Auto-commit synthesized code to git branch"
-            })]
-          }), /*#__PURE__*/_jsxs("div", {
-            className: "modal-actions",
-            children: [/*#__PURE__*/_jsx("button", {
-              type: "button",
-              className: "btn btn-outline",
-              onClick: () => setIsNewMissionOpen(false),
-              children: "Cancel"
-            }), /*#__PURE__*/_jsx("button", {
-              type: "submit",
-              className: "btn btn-primary",
-              disabled: isSubmittingMission,
-              children: isSubmittingMission ? "Initializing..." : "Start Autonomous Mission"
-            })]
-          })]
-        })]
-      })
-    }), isPROpen && prResult && /*#__PURE__*/_jsx("div", {
-      className: "modal-backdrop",
-      role: "dialog",
-      "aria-modal": "true",
-      children: /*#__PURE__*/_jsxs("div", {
-        className: "modal-card pr-modal-card",
-        children: [/*#__PURE__*/_jsxs("div", {
-          className: "modal-header",
-          children: [/*#__PURE__*/_jsx("h2", {
-            children: "GitHub Pull Request Dossier"
-          }), /*#__PURE__*/_jsx("button", {
-            className: "close-btn",
-            onClick: () => setIsPROpen(false),
-            children: "×"
-          })]
-        }), /*#__PURE__*/_jsxs("div", {
-          style: {
-            marginBottom: "0.75rem",
-            display: "flex",
-            gap: "0.5rem",
-            alignItems: "center"
-          },
-          children: [/*#__PURE__*/_jsx("span", {
-            className: "file-path-badge",
-            children: prResult.pr_id || "PR-001"
-          }), /*#__PURE__*/_jsx("span", {
-            style: {
-              fontSize: "0.85rem",
-              fontWeight: 600
-            },
-            children: prResult.title
-          })]
-        }), /*#__PURE__*/_jsx("div", {
-          className: "pr-content-view",
-          children: prResult.markdown
-        }), /*#__PURE__*/_jsxs("div", {
-          className: "modal-actions",
-          style: {
-            marginTop: "1rem"
-          },
-          children: [/*#__PURE__*/_jsx("button", {
-            type: "button",
-            className: "btn btn-outline",
-            onClick: () => {
-              navigator.clipboard.writeText(prResult.markdown);
-              alert("PR Markdown copied to clipboard!");
-            },
-            children: "📋 Copy Markdown"
-          }), /*#__PURE__*/_jsx("button", {
-            type: "button",
-            className: "btn btn-primary",
-            onClick: () => handleGeneratePR(true, true),
-            disabled: isGeneratingPR,
-            children: isGeneratingPR ? "Pushing & Submitting..." : "🚀 Push to Remote & Create PR"
-          })]
-        })]
-      })
-    })]
-  });
+      title: "Open artifact in editor",
+      onClick: () => {
+        const art = missionData.artifacts.find(a => a.name.includes(livePod.artifact));
+        if (art) openArtifactInEditor(art.id);
+      }
+    }, "📄 ", livePod.artifact)));
+  }))), /*#__PURE__*/React.createElement("section", {
+    className: "panel center-panel",
+    "aria-label": "IDE Code Editor Canvas",
+    style: {
+      display: "flex",
+      flexDirection: "column"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "ide-tabs-bar",
+    role: "tablist"
+  }, openTabs.length === 0 ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "0.4rem 0.85rem",
+      fontSize: "0.75rem",
+      color: "var(--text-muted)",
+      fontStyle: "italic"
+    }
+  }, "No open files. Select a file from the Explorer on the left.") : openTabs.map(tab => {
+    const isActive = activeTabId === tab.id;
+    return /*#__PURE__*/React.createElement("div", {
+      key: tab.id,
+      className: `ide-tab ${isActive ? "active" : ""}`,
+      onClick: () => {
+        setActiveTabId(tab.id);
+        setSelectedArtifact(tab);
+      }
+    }, /*#__PURE__*/React.createElement("span", null, getFileIcon(tab.name)), /*#__PURE__*/React.createElement("span", null, tab.name), /*#__PURE__*/React.createElement("span", {
+      className: "ide-tab-close",
+      title: "Close file tab",
+      onClick: e => handleCloseTab(e, tab.id)
+    }, "✕"));
+  })), selectedArtifact && /*#__PURE__*/React.createElement("div", {
+    className: "disk-location-banner"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "disk-path-text",
+    title: localDiskPath
+  }, "📁 ", /*#__PURE__*/React.createElement("strong", null, "Disk Location:"), " ", localDiskPath), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: "0.4rem"
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-sm btn-outline",
+    style: {
+      fontSize: "0.65rem",
+      padding: "0.15rem 0.45rem"
+    },
+    onClick: handleCopyPath
+  }, pathCopyFeedback ? "Path Copied! ✓" : "Copy Path"), /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-sm btn-outline",
+    style: {
+      fontSize: "0.65rem",
+      padding: "0.15rem 0.45rem"
+    },
+    onClick: handleCopyCode
+  }, copyFeedback ? "Code Copied! ✓" : "Copy Code"))), selectedArtifact && /*#__PURE__*/React.createElement("div", {
+    className: "ide-breadcrumbs"
+  }, /*#__PURE__*/React.createElement("span", null, "MAS Workspace"), /*#__PURE__*/React.createElement("span", {
+    className: "ide-crumb-sep"
+  }, ">"), /*#__PURE__*/React.createElement("span", null, selectedArtifact.path?.split("/")[0] || "artifacts"), /*#__PURE__*/React.createElement("span", {
+    className: "ide-crumb-sep"
+  }, ">"), /*#__PURE__*/React.createElement("span", {
+    className: "ide-crumb-active"
+  }, selectedArtifact.name), /*#__PURE__*/React.createElement("span", {
+    style: {
+      marginLeft: "auto",
+      fontSize: "0.68rem",
+      color: "var(--accent-green)"
+    }
+  }, "Author: ", selectedArtifact.created_by || "Agent", " (v", selectedArtifact.version || 1, ")")), /*#__PURE__*/React.createElement("div", {
+    className: "ide-editor-container",
+    style: {
+      flex: 1,
+      minHeight: 0
+    }
+  }, artifactLoading ?
+  /*#__PURE__*/
+  // Loading Skeleton State
+  React.createElement("div", {
+    className: "skeleton-container",
+    style: {
+      width: "100%"
+    },
+    "aria-busy": "true"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "skeleton-line short"
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "skeleton-line long"
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "skeleton-line medium"
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "skeleton-line long"
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "skeleton-line short"
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "skeleton-line medium"
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "skeleton-line long"
+  })) : artifactError ?
+  /*#__PURE__*/
+  // Error State
+  React.createElement("div", {
+    className: "empty-canvas",
+    style: {
+      width: "100%"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "empty-canvas-icon"
+  }, "⚠️"), /*#__PURE__*/React.createElement("h3", null, "Failed to load file"), /*#__PURE__*/React.createElement("p", null, artifactError), /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-primary",
+    onClick: () => selectedArtifact && openArtifactInEditor(selectedArtifact.id)
+  }, "Retry Loading")) : selectedArtifact ?
+  /*#__PURE__*/
+  // Populated IDE Code Editor with Gutter
+  React.createElement("div", {
+    style: {
+      display: "flex",
+      width: "100%",
+      height: "100%"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "ide-gutter"
+  }, lineNumbers.map(n => /*#__PURE__*/React.createElement("div", {
+    key: n
+  }, n))), /*#__PURE__*/React.createElement("div", {
+    className: "ide-code-pane"
+  }, /*#__PURE__*/React.createElement("pre", null, /*#__PURE__*/React.createElement("code", {
+    ref: codeViewerRef,
+    className: `language-${currentLanguage}`
+  }, selectedArtifact.content || "// File content is empty.")))) :
+  /*#__PURE__*/
+  // Empty State with CTA
+  React.createElement("div", {
+    className: "empty-canvas",
+    style: {
+      width: "100%"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "empty-canvas-icon"
+  }, "💻"), /*#__PURE__*/React.createElement("h3", null, "MAS IDE Workspace Ready"), /*#__PURE__*/React.createElement("p", null, "Click any file in the ", /*#__PURE__*/React.createElement("strong", null, "Explorer"), " on the left to inspect synthesized code, SQL migrations, API contracts, or documentation."), /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-primary",
+    onClick: () => setIsNewMissionOpen(true)
+  }, "+ Launch New Mission"))), /*#__PURE__*/React.createElement("footer", {
+    className: "ide-status-bar dark-status"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "ide-status-left"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "ide-status-item"
+  }, /*#__PURE__*/React.createElement("span", null, "Ln ", lineCount, ", Col 1")), /*#__PURE__*/React.createElement("span", {
+    className: "ide-status-item"
+  }, "Spaces: 4"), /*#__PURE__*/React.createElement("span", {
+    className: "ide-status-item"
+  }, "UTF-8"), /*#__PURE__*/React.createElement("span", {
+    className: "ide-status-item"
+  }, "LF")), /*#__PURE__*/React.createElement("div", {
+    className: "ide-status-right"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "ide-status-item",
+    style: {
+      color: "var(--accent-green)"
+    }
+  }, "AST Linter: Verified ✓"), /*#__PURE__*/React.createElement("span", {
+    className: "ide-status-item",
+    style: {
+      textTransform: "capitalize"
+    }
+  }, currentLanguage), /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-sm btn-outline",
+    style: {
+      fontSize: "0.65rem",
+      padding: "0.1rem 0.4rem"
+    },
+    onClick: () => handleGeneratePR(false, false)
+  }, "🚀 GitHub PR")))), /*#__PURE__*/React.createElement("aside", {
+    className: "panel right-panel",
+    "aria-label": "HITL Strategic Decisions and Activity Feed"
+  }, pendingGate && /*#__PURE__*/React.createElement("div", {
+    className: "gate-card-wrapper",
+    role: "alert",
+    "aria-live": "assertive"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "gate-card"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "gate-badge"
+  }, "⚠️ HUMAN DECISION REQUIRED"), /*#__PURE__*/React.createElement("h3", null, pendingGate.level || "Gate: Strategic Review"), /*#__PURE__*/React.createElement("p", {
+    className: "gate-premise"
+  }, pendingGate.context?.blast_radius_summary || pendingGate.premise || "A strategic boundary gate has been reached. Inspect blast radius and approve next phase."), /*#__PURE__*/React.createElement("div", {
+    className: "gate-mitigation-box"
+  }, /*#__PURE__*/React.createElement("strong", null, "Pre-Mortem Mitigation:"), " Non-locking index verification and contract compliance locked."), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: "0.5rem"
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "text",
+    className: "search-input",
+    placeholder: "Optional feedback or redirection note for agents...",
+    value: gateFeedback,
+    onChange: e => setGateFeedback(e.target.value)
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "gate-actions"
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-success",
+    onClick: () => handleGateDecision("APPROVED"),
+    disabled: isResolvingGate
+  }, "Approve ", /*#__PURE__*/React.createElement("span", {
+    className: "kbd-hint"
+  }, "A")), /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-warning",
+    onClick: () => handleGateDecision("MODIFIED"),
+    disabled: isResolvingGate
+  }, "Modify ", /*#__PURE__*/React.createElement("span", {
+    className: "kbd-hint"
+  }, "M")), /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-danger",
+    onClick: () => handleGateDecision("REJECTED"),
+    disabled: isResolvingGate
+  }, "Reject ", /*#__PURE__*/React.createElement("span", {
+    className: "kbd-hint"
+  }, "R"))))), /*#__PURE__*/React.createElement("div", {
+    className: "panel-header"
+  }, /*#__PURE__*/React.createElement("h2", null, "Live Event Stream"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: "0.25rem"
+    }
+  }, ["ALL", "POD", "GATE", "ARTIFACT"].map(f => /*#__PURE__*/React.createElement("button", {
+    key: f,
+    className: `btn btn-sm ${feedFilter === f ? "btn-primary" : "btn-outline"}`,
+    style: {
+      fontSize: "0.65rem",
+      padding: "0.15rem 0.4rem"
+    },
+    onClick: () => setFeedFilter(f)
+  }, f)))), /*#__PURE__*/React.createElement("div", {
+    className: "activity-feed",
+    role: "log",
+    "aria-live": "polite"
+  }, feedLogs.filter(item => feedFilter === "ALL" || item.type === feedFilter).map((entry, idx) => {
+    let tagClass = "system-msg";
+    if (entry.type === "POD") tagClass = "pod-msg";else if (entry.type === "GATE") tagClass = "gate-msg";else if (entry.type === "SUCCESS") tagClass = "success-msg";else if (entry.type === "ERROR") tagClass = "error-msg";
+    return /*#__PURE__*/React.createElement("div", {
+      key: idx,
+      className: `feed-entry ${tagClass}`
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "feed-time"
+    }, entry.time), /*#__PURE__*/React.createElement("span", {
+      className: "feed-text"
+    }, entry.text));
+  }), /*#__PURE__*/React.createElement("div", {
+    ref: feedEndRef
+  })))), /*#__PURE__*/React.createElement("footer", {
+    className: `bottom-drawer ${isTerminalExpanded ? "expanded" : ""}`,
+    role: "contentinfo"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "drawer-header",
+    onClick: () => setIsTerminalExpanded(prev => !prev),
+    tabIndex: 0,
+    onKeyDown: e => {
+      if (e.key === "Enter" || e.key === " ") setIsTerminalExpanded(prev => !prev);
+    },
+    role: "button",
+    "aria-expanded": isTerminalExpanded
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "drawer-title"
+  }, /*#__PURE__*/React.createElement("span", null, "⚡ Subprocess Sandbox & Deterministic Linter Terminal"), /*#__PURE__*/React.createElement("span", {
+    className: "drawer-tag"
+  }, "Exit Code: 0 (AST Verified)"), /*#__PURE__*/React.createElement("span", {
+    className: "kbd-hint"
+  }, "T to toggle")), /*#__PURE__*/React.createElement("button", {
+    className: "drawer-btn"
+  }, isTerminalExpanded ? "▼ Collapse" : "▲ Expand")), /*#__PURE__*/React.createElement("div", {
+    className: "drawer-body"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "terminal-output"
+  }, terminalLogs, /*#__PURE__*/React.createElement("div", {
+    ref: terminalEndRef
+  })))), isNewMissionOpen && /*#__PURE__*/React.createElement("div", {
+    className: "modal-backdrop",
+    role: "dialog",
+    "aria-modal": "true",
+    "aria-labelledby": "modal-title"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "modal-card"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "modal-header"
+  }, /*#__PURE__*/React.createElement("h2", {
+    id: "modal-title"
+  }, "Launch Multi-Agent Engineering Mission"), /*#__PURE__*/React.createElement("button", {
+    className: "close-btn",
+    onClick: () => setIsNewMissionOpen(false),
+    "aria-label": "Close modal"
+  }, "×")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginBottom: "0.75rem"
+    }
+  }, /*#__PURE__*/React.createElement("label", {
+    style: {
+      fontSize: "0.75rem",
+      fontWeight: 600,
+      color: "var(--text-secondary)"
+    }
+  }, "Quick Presets:"), /*#__PURE__*/React.createElement("div", {
+    className: "presets-container"
+  }, MISSION_PRESETS.map((p, i) => /*#__PURE__*/React.createElement("button", {
+    key: i,
+    type: "button",
+    className: "preset-chip",
+    onClick: () => setNewMissionForm(prev => ({
+      ...prev,
+      title: p.title,
+      description: p.description
+    }))
+  }, "⚡ ", p.label)))), /*#__PURE__*/React.createElement("form", {
+    onSubmit: handleLaunchMission
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "form-group"
+  }, /*#__PURE__*/React.createElement("label", {
+    htmlFor: "task-title"
+  }, "Task Title"), /*#__PURE__*/React.createElement("input", {
+    id: "task-title",
+    type: "text",
+    required: true,
+    value: newMissionForm.title,
+    onChange: e => setNewMissionForm(prev => ({
+      ...prev,
+      title: e.target.value
+    })),
+    placeholder: "e.g. Stripe Webhook Verification Service"
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "form-group"
+  }, /*#__PURE__*/React.createElement("label", {
+    htmlFor: "task-desc"
+  }, "Task Requirements & Domain Specification"), /*#__PURE__*/React.createElement("textarea", {
+    id: "task-desc",
+    rows: 4,
+    required: true,
+    value: newMissionForm.description,
+    onChange: e => setNewMissionForm(prev => ({
+      ...prev,
+      description: e.target.value
+    })),
+    placeholder: "Describe APIs, database tables, validation rules, and UI expectations..."
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "form-group"
+  }, /*#__PURE__*/React.createElement("label", {
+    htmlFor: "target-dir"
+  }, "Target Workspace Directory (In-Place Mapping)"), /*#__PURE__*/React.createElement("input", {
+    id: "target-dir",
+    type: "text",
+    value: newMissionForm.targetDir,
+    onChange: e => setNewMissionForm(prev => ({
+      ...prev,
+      targetDir: e.target.value
+    })),
+    placeholder: "Optional: C:/projects/my-app (leave blank for default blackboard)"
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "form-group checkbox-group"
+  }, /*#__PURE__*/React.createElement("input", {
+    id: "chk-interactive",
+    type: "checkbox",
+    checked: newMissionForm.interactive,
+    onChange: e => setNewMissionForm(prev => ({
+      ...prev,
+      interactive: e.target.checked
+    }))
+  }), /*#__PURE__*/React.createElement("label", {
+    htmlFor: "chk-interactive"
+  }, "Enable Interactive Human-in-the-Loop (HITL) Approval Gates")), /*#__PURE__*/React.createElement("div", {
+    className: "form-group checkbox-group"
+  }, /*#__PURE__*/React.createElement("input", {
+    id: "chk-git-commit",
+    type: "checkbox",
+    checked: newMissionForm.gitCommit,
+    onChange: e => setNewMissionForm(prev => ({
+      ...prev,
+      gitCommit: e.target.checked
+    }))
+  }), /*#__PURE__*/React.createElement("label", {
+    htmlFor: "chk-git-commit"
+  }, "Auto-commit synthesized code to git branch")), /*#__PURE__*/React.createElement("div", {
+    className: "modal-actions"
+  }, /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "btn btn-outline",
+    onClick: () => setIsNewMissionOpen(false)
+  }, "Cancel"), /*#__PURE__*/React.createElement("button", {
+    type: "submit",
+    className: "btn btn-primary",
+    disabled: isSubmittingMission
+  }, isSubmittingMission ? "Initializing..." : "Start Autonomous Mission"))))), isPROpen && prResult && /*#__PURE__*/React.createElement("div", {
+    className: "modal-backdrop",
+    role: "dialog",
+    "aria-modal": "true"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "modal-card pr-modal-card"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "modal-header"
+  }, /*#__PURE__*/React.createElement("h2", null, "GitHub Pull Request Dossier"), /*#__PURE__*/React.createElement("button", {
+    className: "close-btn",
+    onClick: () => setIsPROpen(false)
+  }, "×")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginBottom: "0.75rem",
+      display: "flex",
+      gap: "0.5rem",
+      alignItems: "center"
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "file-path-badge"
+  }, prResult.pr_id || "PR-001"), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: "0.85rem",
+      fontWeight: 600
+    }
+  }, prResult.title)), /*#__PURE__*/React.createElement("div", {
+    className: "pr-content-view"
+  }, prResult.markdown), /*#__PURE__*/React.createElement("div", {
+    className: "modal-actions",
+    style: {
+      marginTop: "1rem"
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "btn btn-outline",
+    onClick: () => {
+      navigator.clipboard.writeText(prResult.markdown);
+      alert("PR Markdown copied to clipboard!");
+    }
+  }, "📋 Copy Markdown"), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "btn btn-primary",
+    onClick: () => handleGeneratePR(true, true),
+    disabled: isGeneratingPR
+  }, isGeneratingPR ? "Pushing & Submitting..." : "🚀 Push to Remote & Create PR")))));
 }
 
 // Mount React Root
 const rootElement = document.getElementById("root");
 if (rootElement) {
   const root = ReactDOM.createRoot(rootElement);
-  root.render(/*#__PURE__*/_jsx(App, {}));
+  root.render(/*#__PURE__*/React.createElement(App, null));
 }
