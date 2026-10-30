@@ -16,10 +16,12 @@ dist/
 .coverage
 htmlcov/
 
-# Local databases & artifacts
+# Local databases, telemetry & ephemeral worktrees
 *.db
 *.sqlite3
 .mas_episodic.db
+.mas_traces.jsonl
+.worktrees/
 
 # IDE & OS
 .vscode/
@@ -27,3 +29,12 @@ htmlcov/
 .DS_Store
 Thumbs.db
 
+# IDE Config & Agent Assets (Local Only - Do Not Push to GitHub)
+.agents/
+prompts/
+templates/
+mcp/
+.cursorrules
+.windsurfrules
+AGENTS.md
+CLAUDE.md
