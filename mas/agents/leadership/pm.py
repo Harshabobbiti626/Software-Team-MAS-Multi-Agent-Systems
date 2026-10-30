@@ -55,20 +55,22 @@ This document specifies the business value, technical boundaries, and user accep
             artifact_id=f"prd-{task.id}",
             artifact_type=ArtifactType.PRD,
             name="PRD.md",
-            content=prd_markdown
+            content=prd_markdown,
         )
 
         tokens = TokenUsageTracker(
             prompt_tokens=llm_resp.prompt_tokens + 400,
             candidate_tokens=llm_resp.candidate_tokens + 350,
-            thinking_tokens=llm_resp.thinking_tokens + 400
+            thinking_tokens=llm_resp.thinking_tokens + 400,
         )
-        tokens.total_tokens = tokens.prompt_tokens + tokens.candidate_tokens + tokens.thinking_tokens
+        tokens.total_tokens = (
+            tokens.prompt_tokens + tokens.candidate_tokens + tokens.thinking_tokens
+        )
 
         return AgentResponse(
             agent_role=self.role,
             status="SUCCESS",
             summary=f"Authored canonical PRD.md with Given/When/Then acceptance criteria for task {task.id}.",
             artifacts_produced=[artifact.id],
-            tokens_used=tokens
+            tokens_used=tokens,
         )

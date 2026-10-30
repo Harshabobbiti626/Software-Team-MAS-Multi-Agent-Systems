@@ -28,14 +28,14 @@ class DomainSMEAgent(BaseAgent):
             "checked_rules_count": val_result.checked_invariants_count,
             "violations": [v.model_dump() for v in val_result.violations],
             "regulatory_frameworks_audited": ["GDPR_DATA_MINIMIZATION", "PCI_DSS_SECRETS_MASKING"],
-            "certified_by": self.role
+            "certified_by": self.role,
         }
 
         artifact = self.publish_artifact(
             artifact_id=f"domain-validation-{task.id}",
             artifact_type=ArtifactType.DOMAIN_VALIDATION,
             name="DomainValidationMatrix.json",
-            content=json.dumps(matrix, indent=2)
+            content=json.dumps(matrix, indent=2),
         )
 
         tokens = TokenUsageTracker(prompt_tokens=600, candidate_tokens=300, thinking_tokens=800)
@@ -47,5 +47,5 @@ class DomainSMEAgent(BaseAgent):
             status=status,
             summary=f"Domain verification complete: {len(val_result.violations)} violations detected.",
             artifacts_produced=[artifact.id],
-            tokens_used=tokens
+            tokens_used=tokens,
         )

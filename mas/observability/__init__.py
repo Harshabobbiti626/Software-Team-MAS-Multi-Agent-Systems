@@ -11,5 +11,5 @@ __all__ = [
     "TraceSpan",
     "DiagnosticAutopsyEngine",
     "AutopsyReport",
-    "OTLPTraceExporter"
+    "OTLPTraceExporter",
 ]

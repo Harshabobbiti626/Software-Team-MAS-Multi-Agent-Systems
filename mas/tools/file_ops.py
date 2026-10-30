@@ -18,7 +18,9 @@ class SafeFileOps:
         try:
             target.relative_to(self.workspace_root)
         except ValueError:
-            raise PermissionError(f"Access denied: path '{relative_or_abs_path}' traverses outside workspace root.")
+            raise PermissionError(
+                f"Access denied: path '{relative_or_abs_path}' traverses outside workspace root."
+            )
         return target
 
     def read_file(self, file_path: str) -> str:
@@ -42,13 +44,11 @@ class SafeFileOps:
             with open(safe_path, "r", encoding="utf-8") as f:
                 old_lines = f.readlines()
 
-        new_lines = [line + "\n" if not line.endswith("\n") else line for line in new_content.splitlines()]
+        new_lines = [
+            line + "\n" if not line.endswith("\n") else line for line in new_content.splitlines()
+        ]
         diff = difflib.unified_diff(
-            old_lines,
-            new_lines,
-            fromfile=f"a/{file_path}",
-            tofile=f"b/{file_path}",
-            lineterm=""
+            old_lines, new_lines, fromfile=f"a/{file_path}", tofile=f"b/{file_path}", lineterm=""
         )
         return "\n".join(diff)
 

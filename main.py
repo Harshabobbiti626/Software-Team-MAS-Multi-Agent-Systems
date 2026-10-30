@@ -8,8 +8,16 @@ Commands:
 """
 
 import argparse
+import io
 import sys
 from pathlib import Path
+
+# Configure UTF-8 encoding on Windows consoles
+if sys.platform == "win32":
+    if hasattr(sys.stdout, "buffer"):
+        sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
+    if hasattr(sys.stderr, "buffer"):
+        sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8", errors="replace")
 
 from mas.agents.engineering import (
     BackendEngineerAgent,
@@ -38,6 +46,7 @@ from mas.core.orchestrator import MASOrchestrator
 from mas.core.state import SubsystemClass, Task, TaskPriority, TestReport
 from mas.core.vcs import PullRequestGenerator
 from mas.hitl.gates import GateDecision, GateLevel, HITLGateManager
+from mas.hitl.mission_control import MissionControlConsole
 from mas.observability.otlp import OTLPTraceExporter
 from mas.observability.tracer import DistributedTracer
 from mas.tools.domain_verifier import DomainVerifier
@@ -45,12 +54,8 @@ from mas.tools.linter import DeterministicLinter
 
 
 def interactive_gate_handler(gate: GateLevel, task_id: str, context: dict) -> GateDecision:
-    print(f"\n[HITL Gate Intervention Required]: {gate.value}")
-    resp = input("Decision [A]pprove / [R]eject / [M]odify (default: Approve): ").strip().upper()
-    if resp == "R":
-        reason = input("Enter rejection reason: ").strip() or "Rejected by human reviewer"
-        return GateDecision(gate=gate, task_id=task_id, decision="REJECTED", reviewer="HumanArchitect", rationale=reason)
-    return GateDecision(gate=gate, task_id=task_id, decision="APPROVED", reviewer="HumanArchitect", rationale="Approved by human reviewer")
+    console = MissionControlConsole()
+    return console.prompt_gate_decision(gate=gate, task_id=task_id, context=context)
 
 
 def run_pipeline(task_title: str, task_desc: str, interactive: bool = False) -> int:
@@ -61,7 +66,9 @@ def run_pipeline(task_title: str, task_desc: str, interactive: bool = False) -> 
     config = get_config()
     blackboard = ArtifactBlackboard(repo_path=".")
     circuit_breaker = CircuitBreaker(config.limits)
-    orchestrator = MASOrchestrator(config=config, blackboard=blackboard, circuit_breaker=circuit_breaker)
+    orchestrator = MASOrchestrator(
+        config=config, blackboard=blackboard, circuit_breaker=circuit_breaker
+    )
     tracer = DistributedTracer()
     otlp_exporter = OTLPTraceExporter(output_file_path=".mas_traces.jsonl")
 
@@ -72,38 +79,47 @@ def run_pipeline(task_title: str, task_desc: str, interactive: bool = False) -> 
     # 1. Create Task & Blast Radius Triage
     task_id = "TASK-001"
     task = orchestrator.create_task(
-        task_id=task_id,
-        title=task_title,
-        description=task_desc,
-        priority=TaskPriority.HIGH
+        task_id=task_id, title=task_title, description=task_desc, priority=TaskPriority.HIGH
     )
     print(f"[*] Task Created: {task.id} | Assigned Pod: {task.assigned_pod.value}")
     print(f"[*] Active Agents (JIT Awakened): {', '.join(orchestrator.state.active_pods)}\n")
 
+    console = MissionControlConsole()
+    print(console.banner(task, circuit_breaker))
+
     # Shared Agent Dependency Dict
-    agent_kwargs = {
-        "config": config,
-        "blackboard": blackboard
-    }
+    agent_kwargs = {"config": config, "blackboard": blackboard}
 
     # 2. Business & Domain Tier
     print("[1/5] Executing Business & Domain Tier...")
     sponsor = BusinessSponsorAgent(**agent_kwargs)
     r_sponsor = sponsor.run(task)
     circuit_breaker.record_turn(sponsor.role)
-    circuit_breaker.record_tokens(r_sponsor.tokens_used.prompt_tokens, r_sponsor.tokens_used.candidate_tokens, r_sponsor.tokens_used.thinking_tokens)
+    circuit_breaker.record_tokens(
+        r_sponsor.tokens_used.prompt_tokens,
+        r_sponsor.tokens_used.candidate_tokens,
+        r_sponsor.tokens_used.thinking_tokens,
+    )
     print(f"  + {sponsor.role}: {r_sponsor.summary}")
 
     pm = ProductManagerAgent(**agent_kwargs)
     r_pm = pm.run(task)
     circuit_breaker.record_turn(pm.role)
-    circuit_breaker.record_tokens(r_pm.tokens_used.prompt_tokens, r_pm.tokens_used.candidate_tokens, r_pm.tokens_used.thinking_tokens)
+    circuit_breaker.record_tokens(
+        r_pm.tokens_used.prompt_tokens,
+        r_pm.tokens_used.candidate_tokens,
+        r_pm.tokens_used.thinking_tokens,
+    )
     print(f"  + {pm.role}: {r_pm.summary}")
 
     sme = DomainSMEAgent(**agent_kwargs)
     r_sme = sme.run(task)
     circuit_breaker.record_turn(sme.role)
-    circuit_breaker.record_tokens(r_sme.tokens_used.prompt_tokens, r_sme.tokens_used.candidate_tokens, r_sme.tokens_used.thinking_tokens)
+    circuit_breaker.record_tokens(
+        r_sme.tokens_used.prompt_tokens,
+        r_sme.tokens_used.candidate_tokens,
+        r_sme.tokens_used.thinking_tokens,
+    )
     print(f"  + {sme.role}: {r_sme.summary}")
 
     gate1 = hitl.evaluate_gate(GateLevel.GATE_1_SCOPE_BUDGET, task.id)
@@ -114,13 +130,21 @@ def run_pipeline(task_title: str, task_desc: str, interactive: bool = False) -> 
     architect = SystemArchitectAgent(**agent_kwargs)
     r_arch = architect.run(task)
     circuit_breaker.record_turn(architect.role)
-    circuit_breaker.record_tokens(r_arch.tokens_used.prompt_tokens, r_arch.tokens_used.candidate_tokens, r_arch.tokens_used.thinking_tokens)
+    circuit_breaker.record_tokens(
+        r_arch.tokens_used.prompt_tokens,
+        r_arch.tokens_used.candidate_tokens,
+        r_arch.tokens_used.thinking_tokens,
+    )
     print(f"  + {architect.role}: {r_arch.summary}")
 
     tech_lead = TechLeadAgent(**agent_kwargs)
     r_tl = tech_lead.run(task)
     circuit_breaker.record_turn(tech_lead.role)
-    circuit_breaker.record_tokens(r_tl.tokens_used.prompt_tokens, r_tl.tokens_used.candidate_tokens, r_tl.tokens_used.thinking_tokens)
+    circuit_breaker.record_tokens(
+        r_tl.tokens_used.prompt_tokens,
+        r_tl.tokens_used.candidate_tokens,
+        r_tl.tokens_used.thinking_tokens,
+    )
     print(f"  + {tech_lead.role}: {r_tl.summary}")
 
     gate2 = hitl.evaluate_gate(GateLevel.GATE_2_ARCHITECTURE_SECURITY, task.id)
@@ -133,12 +157,14 @@ def run_pipeline(task_title: str, task_desc: str, interactive: bool = False) -> 
         BackendEngineerAgent(**agent_kwargs),
         FrontendEngineerAgent(**agent_kwargs),
         CloudEngineerAgent(**agent_kwargs),
-        DevOpsSREAgent(**agent_kwargs)
+        DevOpsSREAgent(**agent_kwargs),
     ]
 
     parallel_results = orchestrator.execute_parallel_pods(task, engineering_pods, max_workers=5)
     for role, resp in parallel_results.items():
         print(f"  + [Concurrent Pod] {role}: {resp.summary}")
+    print(console.render_pod_matrix(orchestrator.state.active_pods, parallel_results))
+    print(console.render_artifact_ledger(blackboard))
     print()
 
     # 5. Verification, Security & Gatekeeping
@@ -159,7 +185,7 @@ def run_pipeline(task_title: str, task_desc: str, interactive: bool = False) -> 
                 task_id=task.id,
                 test_suite="integration",
                 passed_all=False,
-                stderr=r_qa.summary
+                stderr=r_qa.summary,
             )
         remediated = orchestrator.trigger_remediation_loop(task, test_report, agent_roster, qa)
         print(f"  [*] Remediation Loop Result: {'SUCCESS' if remediated else 'FAILED'}")
@@ -194,7 +220,7 @@ def run_pipeline(task_title: str, task_desc: str, interactive: bool = False) -> 
         agent_name="MASOrchestrator",
         agent_role="Orchestrator",
         operation="ExecutePipeline",
-        attributes={"task.title": task.title, "task.assigned_pod": task.assigned_pod.value}
+        attributes={"task.title": task.title, "task.assigned_pod": task.assigned_pod.value},
     )
     tracer.finish_span(
         span=task_span,
@@ -202,15 +228,19 @@ def run_pipeline(task_title: str, task_desc: str, interactive: bool = False) -> 
         candidate_tokens=circuit_breaker.candidate_tokens,
         thinking_tokens=circuit_breaker.thinking_tokens,
         duration_ms=2500.0,
-        status="OK"
+        status="OK",
     )
     otlp_exporter.export_spans([task_span])
 
     # Summary
     print("\n================================================================================")
     print(f"✅ MAS Task Complete: {task.title}")
-    print(f"   Total Turns: {circuit_breaker.total_turns} / {config.limits.max_total_turns_per_task}")
-    print(f"   Tokens Consumed: {circuit_breaker.prompt_tokens + circuit_breaker.candidate_tokens + circuit_breaker.thinking_tokens}")
+    print(
+        f"   Total Turns: {circuit_breaker.total_turns} / {config.limits.max_total_turns_per_task}"
+    )
+    print(
+        f"   Tokens Consumed: {circuit_breaker.prompt_tokens + circuit_breaker.candidate_tokens + circuit_breaker.thinking_tokens}"
+    )
     print(f"   Circuit Breaker: Healthy (Tripped: {circuit_breaker.is_tripped()})")
     print(f"   Artifacts Committed: {len(blackboard.list_artifacts())}")
     print("   Telemetry Trace: Exported to .mas_traces.jsonl")
@@ -219,10 +249,15 @@ def run_pipeline(task_title: str, task_desc: str, interactive: bool = False) -> 
 
 
 def generate_pr_command(task_id: str = "TASK-001") -> int:
-    task = Task(id=task_id, title="Core Service Implementation", description="End-to-end microservice", assigned_pod=SubsystemClass.FULL_SYSTEM)
+    task = Task(
+        id=task_id,
+        title="Core Service Implementation",
+        description="End-to-end microservice",
+        assigned_pod=SubsystemClass.FULL_SYSTEM,
+    )
     pr_gen = PullRequestGenerator()
     pr = pr_gen.generate_pr(task=task, source_branch="feat/task-001")
-    
+
     pr_file = Path("PULL_REQUEST.md")
     pr_file.write_text(pr.description_markdown, encoding="utf-8")
     print(f"\n✅ Synthesized GitHub Pull Request: {pr.title}")
@@ -232,14 +267,23 @@ def generate_pr_command(task_id: str = "TASK-001") -> int:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Multi-Agent Software Engineering System (MAS) CLI")
+    parser = argparse.ArgumentParser(
+        description="Multi-Agent Software Engineering System (MAS) CLI"
+    )
     subparsers = parser.add_subparsers(dest="command", help="MAS command to execute")
 
     # run command
     run_parser = subparsers.add_parser("run", help="Run multi-agent engineering workflow")
     run_parser.add_argument("--title", type=str, default="Core Resource Service", help="Task title")
-    run_parser.add_argument("--description", type=str, default="Implement secure REST API endpoints with PostgreSQL persistence, React UI, and Terraform IaC.", help="Task description")
-    run_parser.add_argument("--interactive", action="store_true", help="Enable interactive human approval gates")
+    run_parser.add_argument(
+        "--description",
+        type=str,
+        default="Implement secure REST API endpoints with PostgreSQL persistence, React UI, and Terraform IaC.",
+        help="Task description",
+    )
+    run_parser.add_argument(
+        "--interactive", action="store_true", help="Enable interactive human approval gates"
+    )
 
     # status command
     subparsers.add_parser("status", help="Show system status and blackboard artifacts")
@@ -249,13 +293,19 @@ def main() -> int:
 
     # pr command
     pr_parser = subparsers.add_parser("pr", help="Generate GitHub Pull Request markdown")
-    pr_parser.add_argument("--task-id", type=str, default="TASK-001", help="Task ID to generate PR for")
+    pr_parser.add_argument(
+        "--task-id", type=str, default="TASK-001", help="Task ID to generate PR for"
+    )
 
     args = parser.parse_args()
 
     if args.command == "run" or args.command is None:
         title = getattr(args, "title", "Core Resource Service")
-        desc = getattr(args, "description", "Implement secure REST API endpoints with PostgreSQL persistence, React UI, and Terraform IaC.")
+        desc = getattr(
+            args,
+            "description",
+            "Implement secure REST API endpoints with PostgreSQL persistence, React UI, and Terraform IaC.",
+        )
         interactive = getattr(args, "interactive", False)
         return run_pipeline(title, desc, interactive=interactive)
 
@@ -278,7 +328,9 @@ def main() -> int:
         ast_res = linter.check_python_syntax_ast("main.py")
         print(f"[*] Python AST Parser: {'PASSED' if ast_res.passed else 'FAILED'}")
         rule_res = verifier.verify_content("sample check content")
-        print(f"[*] Domain Invariant Rules Checked: {rule_res.checked_invariants_count} (Pass: {rule_res.is_valid})")
+        print(
+            f"[*] Domain Invariant Rules Checked: {rule_res.checked_invariants_count} (Pass: {rule_res.is_valid})"
+        )
         return 0
 
     return 0

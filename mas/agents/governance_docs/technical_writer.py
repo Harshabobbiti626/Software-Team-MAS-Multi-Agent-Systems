@@ -43,7 +43,7 @@ class TechnicalWriterAgent(BaseAgent):
             artifact_id=f"doc-exec-{task.id}",
             artifact_type=ArtifactType.DOCUMENTATION,
             name="EXECUTIVE_SUMMARY.md",
-            content=exec_summary
+            content=exec_summary,
         )
         produced_artifacts.append(a1.id)
 
@@ -66,7 +66,7 @@ flowchart LR
             artifact_id=f"doc-arch-{task.id}",
             artifact_type=ArtifactType.DOCUMENTATION,
             name="ARCHITECTURE.md",
-            content=arch_doc
+            content=arch_doc,
         )
         produced_artifacts.append(a2.id)
 
@@ -96,7 +96,7 @@ curl -X POST http://localhost:8080/api/v1/resource \\
             artifact_id=f"doc-api-{task.id}",
             artifact_type=ArtifactType.DOCUMENTATION,
             name="API_REFERENCE.md",
-            content=api_ref
+            content=api_ref,
         )
         produced_artifacts.append(a3.id)
 
@@ -121,7 +121,7 @@ curl -X POST http://localhost:8080/api/v1/resource \\
             artifact_id=f"doc-runbook-{task.id}",
             artifact_type=ArtifactType.DOCUMENTATION,
             name="RUNBOOK.md",
-            content=runbook
+            content=runbook,
         )
         produced_artifacts.append(a4.id)
 
@@ -141,7 +141,7 @@ py -m pytest tests/ -v
             artifact_id=f"doc-setup-{task.id}",
             artifact_type=ArtifactType.DOCUMENTATION,
             name="DEVELOPER_SETUP.md",
-            content=setup_doc
+            content=setup_doc,
         )
         produced_artifacts.append(a5.id)
 
@@ -161,7 +161,7 @@ py -m pytest tests/ -v
             artifact_id=f"doc-audit-{task.id}",
             artifact_type=ArtifactType.AUDIT_DOSSIER,
             name="AUDIT_REPORT.md",
-            content=audit_doc
+            content=audit_doc,
         )
         produced_artifacts.append(a6.id)
 
@@ -173,5 +173,5 @@ py -m pytest tests/ -v
             status="SUCCESS",
             summary="Synthesized the complete 6-document human reference suite.",
             artifacts_produced=produced_artifacts,
-            tokens_used=tokens
+            tokens_used=tokens,
         )

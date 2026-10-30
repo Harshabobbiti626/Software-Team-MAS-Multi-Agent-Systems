@@ -18,7 +18,17 @@ class TechLeadAgent(BaseAgent):
 
     def _extract_domain_noun(self, title: str) -> str:
         words = re.findall(r"[A-Za-z]+", title.lower())
-        stopwords = {"service", "api", "microservice", "system", "feature", "build", "implement", "create", "test"}
+        stopwords = {
+            "service",
+            "api",
+            "microservice",
+            "system",
+            "feature",
+            "build",
+            "implement",
+            "create",
+            "test",
+        }
         filtered = [w for w in words if w not in stopwords]
         return filtered[0] if filtered else "resource"
 
@@ -104,60 +114,62 @@ components:
                     "stream_id": "WS-DATA",
                     "role": "DatabaseArchitectAgent",
                     "deliverable": f"schema_{domain_noun}.sql",
-                    "dependencies": []
+                    "dependencies": [],
                 },
                 {
                     "stream_id": "WS-BACKEND",
                     "role": "BackendEngineerAgent",
                     "deliverable": f"{domain_noun}_service.py",
-                    "dependencies": ["WS-DATA"]
+                    "dependencies": ["WS-DATA"],
                 },
                 {
                     "stream_id": "WS-FRONTEND",
                     "role": "FrontendEngineerAgent",
                     "deliverable": f"{noun_capital}View.tsx",
-                    "dependencies": []
+                    "dependencies": [],
                 },
                 {
                     "stream_id": "WS-CLOUD",
                     "role": "CloudEngineerAgent",
                     "deliverable": "main.tf",
-                    "dependencies": []
+                    "dependencies": [],
                 },
                 {
                     "stream_id": "WS-QA",
                     "role": "QASDETAgent",
                     "deliverable": f"test_{domain_noun}.py",
-                    "dependencies": ["WS-BACKEND", "WS-FRONTEND"]
-                }
-            ]
+                    "dependencies": ["WS-BACKEND", "WS-FRONTEND"],
+                },
+            ],
         }
 
         art_api = self.publish_artifact(
             artifact_id=f"api-spec-{task.id}",
             artifact_type=ArtifactType.API_SPEC,
             name="api-spec.yaml",
-            content=api_spec_yaml
+            content=api_spec_yaml,
         )
 
         art_dag = self.publish_artifact(
             artifact_id=f"dag-{task.id}",
             artifact_type=ArtifactType.PRD,
             name="TaskDAG.json",
-            content=json.dumps(task_dag, indent=2)
+            content=json.dumps(task_dag, indent=2),
         )
 
         tokens = TokenUsageTracker(
             prompt_tokens=llm_resp.prompt_tokens + 500,
             candidate_tokens=llm_resp.candidate_tokens + 450,
-            thinking_tokens=llm_resp.thinking_tokens + 500
+            thinking_tokens=llm_resp.thinking_tokens + 500,
         )
-        tokens.total_tokens = tokens.prompt_tokens + tokens.candidate_tokens + tokens.thinking_tokens
+        tokens.total_tokens = (
+            tokens.prompt_tokens + tokens.candidate_tokens + tokens.thinking_tokens
+        )
 
         return AgentResponse(
             agent_role=self.role,
             status="SUCCESS",
             summary=f"Published api-spec.yaml (/api/v1/{domain_noun}) and TaskDAG.json for parallel execution.",
             artifacts_produced=[art_api.id, art_dag.id],
-            tokens_used=tokens
+            tokens_used=tokens,
         )

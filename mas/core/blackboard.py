@@ -26,7 +26,7 @@ class ArtifactBlackboard:
         content: str,
         created_by: str,
         path: Optional[str] = None,
-        commit_to_git: bool = True
+        commit_to_git: bool = True,
     ) -> Artifact:
         """
         Stores an artifact in the blackboard, increments its version if existing,
@@ -44,7 +44,7 @@ class ArtifactBlackboard:
             path=rel_path,
             content=content,
             version=version,
-            created_by=created_by
+            created_by=created_by,
         )
         self._artifacts[artifact_id] = artifact
 
@@ -57,18 +57,19 @@ class ArtifactBlackboard:
         commit_hash = None
         if self.git_enabled and commit_to_git:
             commit_hash = self._git_commit(
-                str(rel_path),
-                f"[{artifact_type.value}] {name} (v{version}) by {created_by}"
+                str(rel_path), f"[{artifact_type.value}] {name} (v{version}) by {created_by}"
             )
             artifact.metadata["commit_hash"] = commit_hash
 
-        self._history.append({
-            "artifact_id": artifact_id,
-            "version": str(version),
-            "created_by": created_by,
-            "commit_hash": commit_hash or "uncommitted",
-            "type": artifact_type.value
-        })
+        self._history.append(
+            {
+                "artifact_id": artifact_id,
+                "version": str(version),
+                "created_by": created_by,
+                "commit_hash": commit_hash or "uncommitted",
+                "type": artifact_type.value,
+            }
+        )
 
         return artifact
 
@@ -95,7 +96,7 @@ class ArtifactBlackboard:
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 text=True,
-                timeout=10
+                timeout=10,
             )
             # Commit file
             subprocess.run(
@@ -105,7 +106,7 @@ class ArtifactBlackboard:
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 text=True,
-                timeout=10
+                timeout=10,
             )
             # Get latest hash
             rev_res = subprocess.run(
@@ -115,7 +116,7 @@ class ArtifactBlackboard:
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 text=True,
-                timeout=5
+                timeout=5,
             )
             return rev_res.stdout.strip()
         except Exception:

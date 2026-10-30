@@ -67,13 +67,9 @@ def test_git_worktree_and_pull_request(tmp_path):
         description="Checkout flow",
         assigned_pod=SubsystemClass.BACKEND,
     )
-    test_report = TestReport(
-        id="TR-1", task_id="TASK-99", test_suite="unit", passed_all=True
-    )
+    test_report = TestReport(id="TR-1", task_id="TASK-99", test_suite="unit", passed_all=True)
 
-    pr = pr_gen.generate_pr(
-        task=task, source_branch="feat/backend-test", test_report=test_report
-    )
+    pr = pr_gen.generate_pr(task=task, source_branch="feat/backend-test", test_report=test_report)
     assert pr.pr_id == "PR-TASK-99"
     assert "100% Passed" in pr.description_markdown
     assert "ADR-001" in pr.description_markdown

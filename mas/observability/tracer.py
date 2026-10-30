@@ -44,7 +44,7 @@ class DistributedTracer:
         agent_role: str,
         operation: str,
         parent_span_id: Optional[str] = None,
-        attributes: Optional[Dict[str, Any]] = None
+        attributes: Optional[Dict[str, Any]] = None,
     ) -> TraceSpan:
         span = TraceSpan(
             task_id=task_id,
@@ -52,7 +52,7 @@ class DistributedTracer:
             agent_role=agent_role,
             operation=operation,
             parent_span_id=parent_span_id,
-            attributes=attributes or {}
+            attributes=attributes or {},
         )
         self._spans.append(span)
         return span
@@ -64,7 +64,7 @@ class DistributedTracer:
         candidate_tokens: int = 0,
         thinking_tokens: int = 0,
         duration_ms: float = 0.0,
-        status: str = "OK"
+        status: str = "OK",
     ) -> None:
         span.prompt_tokens = prompt_tokens
         span.candidate_tokens = candidate_tokens
@@ -91,7 +91,7 @@ class DistributedTracer:
             "candidate_tokens": total_candidate,
             "thinking_tokens": total_thinking,
             "total_tokens": total_prompt + total_candidate + total_thinking,
-            "estimated_cost_usd": round(prompt_cost + candidate_cost + thinking_cost, 4)
+            "estimated_cost_usd": round(prompt_cost + candidate_cost + thinking_cost, 4),
         }
 
     def generate_provenance_header(
@@ -101,7 +101,7 @@ class DistributedTracer:
         api_endpoint: str,
         adr_id: str,
         story_id: str,
-        business_goal_id: str
+        business_goal_id: str,
     ) -> Dict[str, str]:
         """
         Creates an immutable provenance chain:
@@ -113,5 +113,5 @@ class DistributedTracer:
             "API-Endpoint": api_endpoint,
             "ADR-Ref": adr_id,
             "PRD-Story": story_id,
-            "Business-Objective": business_goal_id
+            "Business-Objective": business_goal_id,
         }

@@ -48,7 +48,7 @@ class RFCManager:
         topic: str,
         problem_statement: str,
         proposed_alternatives: List[str],
-        trade_offs: Dict[str, str]
+        trade_offs: Dict[str, str],
     ) -> RFCRequest:
         request = RFCRequest(
             rfc_id=rfc_id,
@@ -57,7 +57,7 @@ class RFCManager:
             topic=topic,
             problem_statement=problem_statement,
             proposed_alternatives=proposed_alternatives,
-            trade_offs=trade_offs
+            trade_offs=trade_offs,
         )
         self._rfcs[rfc_id] = request
         self._responses[rfc_id] = []
@@ -69,7 +69,7 @@ class RFCManager:
         responder_role: str,
         analysis: str,
         recommendation: str,
-        counter_proposal: Optional[str] = None
+        counter_proposal: Optional[str] = None,
     ) -> RFCResponse:
         if rfc_id not in self._rfcs:
             raise KeyError(f"RFC {rfc_id} not found")
@@ -79,7 +79,7 @@ class RFCManager:
             responder_role=responder_role,
             analysis=analysis,
             recommendation=recommendation,
-            counter_proposal=counter_proposal
+            counter_proposal=counter_proposal,
         )
         self._responses[rfc_id].append(resp)
         return resp
@@ -89,7 +89,7 @@ class RFCManager:
         cdr_id: str,
         rfc_id: str,
         agreed_resolution: str,
-        contract_updates: Optional[Dict[str, str]] = None
+        contract_updates: Optional[Dict[str, str]] = None,
     ) -> ConsensusDecisionRecord:
         if rfc_id not in self._rfcs:
             raise KeyError(f"RFC {rfc_id} not found")
@@ -106,7 +106,7 @@ class RFCManager:
             topic=rfc.topic,
             participants=participants,
             agreed_resolution=agreed_resolution,
-            contract_updates=contract_updates or {}
+            contract_updates=contract_updates or {},
         )
         self._cdrs[cdr_id] = cdr
 
@@ -127,7 +127,7 @@ class RFCManager:
                 artifact_type=ArtifactType.CDR,
                 name=f"{cdr.id}.md",
                 content=cdr_markdown,
-                created_by="RFCManager"
+                created_by="RFCManager",
             )
 
         return cdr

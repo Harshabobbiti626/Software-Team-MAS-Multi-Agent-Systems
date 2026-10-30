@@ -37,16 +37,19 @@ class EpisodicMemory:
         task_id: str,
         agent_role: str,
         event_type: str,
-        payload: Dict[str, Any]
+        payload: Dict[str, Any],
     ) -> int:
         now = datetime.now(timezone.utc).isoformat()
         payload_str = json.dumps(payload, default=str)
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
-            cursor.execute("""
+            cursor.execute(
+                """
                 INSERT INTO episodic_events (session_id, task_id, agent_role, event_type, payload_json, created_at)
                 VALUES (?, ?, ?, ?, ?, ?)
-            """, (session_id, task_id, agent_role, event_type, payload_str, now))
+            """,
+                (session_id, task_id, agent_role, event_type, payload_str, now),
+            )
             conn.commit()
             return cursor.lastrowid or 0
 
@@ -54,48 +57,58 @@ class EpisodicMemory:
         with sqlite3.connect(self.db_path) as conn:
             conn.row_factory = sqlite3.Row
             cursor = conn.cursor()
-            cursor.execute("""
+            cursor.execute(
+                """
                 SELECT id, session_id, task_id, agent_role, event_type, payload_json, created_at
                 FROM episodic_events
                 WHERE task_id = ?
                 ORDER BY id ASC
-            """, (task_id,))
+            """,
+                (task_id,),
+            )
             rows = cursor.fetchall()
 
         events = []
         for r in rows:
-            events.append({
-                "id": r["id"],
-                "session_id": r["session_id"],
-                "task_id": r["task_id"],
-                "agent_role": r["agent_role"],
-                "event_type": r["event_type"],
-                "payload": json.loads(r["payload_json"]),
-                "created_at": r["created_at"]
-            })
+            events.append(
+                {
+                    "id": r["id"],
+                    "session_id": r["session_id"],
+                    "task_id": r["task_id"],
+                    "agent_role": r["agent_role"],
+                    "event_type": r["event_type"],
+                    "payload": json.loads(r["payload_json"]),
+                    "created_at": r["created_at"],
+                }
+            )
         return events
 
     def get_all_events(self, limit: int = 100) -> List[Dict[str, Any]]:
         with sqlite3.connect(self.db_path) as conn:
             conn.row_factory = sqlite3.Row
             cursor = conn.cursor()
-            cursor.execute("""
+            cursor.execute(
+                """
                 SELECT id, session_id, task_id, agent_role, event_type, payload_json, created_at
                 FROM episodic_events
                 ORDER BY id DESC
                 LIMIT ?
-            """, (limit,))
+            """,
+                (limit,),
+            )
             rows = cursor.fetchall()
 
         events = []
         for r in rows:
-            events.append({
-                "id": r["id"],
-                "session_id": r["session_id"],
-                "task_id": r["task_id"],
-                "agent_role": r["agent_role"],
-                "event_type": r["event_type"],
-                "payload": json.loads(r["payload_json"]),
-                "created_at": r["created_at"]
-            })
+            events.append(
+                {
+                    "id": r["id"],
+                    "session_id": r["session_id"],
+                    "task_id": r["task_id"],
+                    "agent_role": r["agent_role"],
+                    "event_type": r["event_type"],
+                    "payload": json.loads(r["payload_json"]),
+                    "created_at": r["created_at"],
+                }
+            )
         return events

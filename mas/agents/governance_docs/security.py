@@ -24,12 +24,14 @@ class AppSecAgent(BaseAgent):
         for art in artifacts:
             res = self.verifier.verify_content(art.content, file_path=art.path)
             for v in res.violations:
-                findings.append({
-                    "file": art.path,
-                    "severity": v.severity,
-                    "rule": v.name,
-                    "detail": v.violating_content
-                })
+                findings.append(
+                    {
+                        "file": art.path,
+                        "severity": v.severity,
+                        "rule": v.name,
+                        "detail": v.violating_content,
+                    }
+                )
 
         report = {
             "task_id": task.id,
@@ -40,16 +42,16 @@ class AppSecAgent(BaseAgent):
                 "Repudiation": "Mitigated: SQLite/Postgres episodic audit trail",
                 "Information_Disclosure": "Mitigated: Zero secrets in repository",
                 "Denial_of_Service": "Mitigated: Ingress rate-limits and timeouts",
-                "Elevation_of_Privilege": "Mitigated: Least-privilege IAM policies"
+                "Elevation_of_Privilege": "Mitigated: Least-privilege IAM policies",
             },
-            "findings": findings
+            "findings": findings,
         }
 
         artifact = self.publish_artifact(
             artifact_id=f"security-audit-{task.id}",
             artifact_type=ArtifactType.SECURITY_AUDIT,
             name="SecurityAuditReport.json",
-            content=json.dumps(report, indent=2)
+            content=json.dumps(report, indent=2),
         )
 
         tokens = TokenUsageTracker(prompt_tokens=900, candidate_tokens=400, thinking_tokens=900)
@@ -61,5 +63,5 @@ class AppSecAgent(BaseAgent):
             status=status,
             summary=f"Security audit completed with status: {report['security_status']}",
             artifacts_produced=[artifact.id],
-            tokens_used=tokens
+            tokens_used=tokens,
         )

@@ -34,7 +34,7 @@ class SemanticMemory:
 4. Interface Segregation: Clients should not be forced to depend on interfaces they do not use.
 5. Dependency Inversion: Depend upon abstractions, not concretions.
             """,
-            tags=["clean_code", "solid", "standards"]
+            tags=["clean_code", "solid", "standards"],
         )
         self.add_document(
             doc_id="UBIQUITOUS_LANGUAGE",
@@ -46,19 +46,19 @@ class SemanticMemory:
 - ADR: Architectural decision record evaluating trade-offs.
 - Blackboard: Versioned git-backed artifact repository.
             """,
-            tags=["domain", "ddd", "language"]
+            tags=["domain", "ddd", "language"],
         )
 
-    def add_document(self, doc_id: str, category: str, title: str, content: str, tags: Optional[List[str]] = None) -> None:
+    def add_document(
+        self, doc_id: str, category: str, title: str, content: str, tags: Optional[List[str]] = None
+    ) -> None:
         self._documents[doc_id] = SemanticDocument(
-            doc_id=doc_id,
-            category=category,
-            title=title,
-            content=content,
-            tags=tags or []
+            doc_id=doc_id, category=category, title=title, content=content, tags=tags or []
         )
 
-    def query(self, query_text: str, category: Optional[str] = None, limit: int = 5) -> List[SemanticDocument]:
+    def query(
+        self, query_text: str, category: Optional[str] = None, limit: int = 5
+    ) -> List[SemanticDocument]:
         """
         Token-matching and tag-scoring semantic search.
         """

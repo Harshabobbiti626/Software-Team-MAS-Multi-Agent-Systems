@@ -30,7 +30,7 @@ class ProceduralMemory:
         parameters_schema: Optional[Dict[str, Any]] = None,
         roles_allowed: Optional[List[str]] = None,
         is_sandboxed: bool = True,
-        timeout_seconds: int = 30
+        timeout_seconds: int = 30,
     ) -> None:
         self._tools[name] = ToolDefinition(
             name=name,
@@ -38,7 +38,7 @@ class ProceduralMemory:
             parameters_schema=parameters_schema or {},
             roles_allowed=roles_allowed or ["*"],
             is_sandboxed=is_sandboxed,
-            timeout_seconds=timeout_seconds
+            timeout_seconds=timeout_seconds,
         )
         self._handlers[name] = handler
 
@@ -47,8 +47,7 @@ class ProceduralMemory:
 
     def list_tools_for_role(self, role: str) -> List[ToolDefinition]:
         return [
-            t for t in self._tools.values()
-            if "*" in t.roles_allowed or role in t.roles_allowed
+            t for t in self._tools.values() if "*" in t.roles_allowed or role in t.roles_allowed
         ]
 
     def execute_tool(self, name: str, caller_role: str, **kwargs: Any) -> Any:
@@ -57,7 +56,9 @@ class ProceduralMemory:
 
         tool = self._tools[name]
         if "*" not in tool.roles_allowed and caller_role not in tool.roles_allowed:
-            raise PermissionError(f"Role '{caller_role}' is not authorized to invoke tool '{name}'.")
+            raise PermissionError(
+                f"Role '{caller_role}' is not authorized to invoke tool '{name}'."
+            )
 
         handler = self._handlers[name]
         return handler(**kwargs)

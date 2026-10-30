@@ -86,7 +86,7 @@ export const ResourceView: React.FC = () => {{
             artifact_id=f"frontend-code-{task.id}",
             artifact_type=ArtifactType.CODE_PATCH,
             name="ResourceView.tsx",
-            content=component_code
+            content=component_code,
         )
 
         tokens = TokenUsageTracker(prompt_tokens=950, candidate_tokens=550, thinking_tokens=700)
@@ -97,5 +97,5 @@ export const ResourceView: React.FC = () => {{
             status="SUCCESS",
             summary="Created React component ResourceView.tsx wired to api-spec.yaml endpoints.",
             artifacts_produced=[artifact.id],
-            tokens_used=tokens
+            tokens_used=tokens,
         )

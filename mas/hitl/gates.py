@@ -34,16 +34,17 @@ class HITLGateManager:
     def __init__(self, auto_approve_in_dev: bool = False):
         self.auto_approve_in_dev = auto_approve_in_dev
         self.decision_history: List[GateDecision] = []
-        self._interactive_handler: Optional[Callable[[GateLevel, str, Dict[str, str]], GateDecision]] = None
+        self._interactive_handler: Optional[
+            Callable[[GateLevel, str, Dict[str, str]], GateDecision]
+        ] = None
 
-    def set_interactive_handler(self, handler: Callable[[GateLevel, str, Dict[str, str]], GateDecision]) -> None:
+    def set_interactive_handler(
+        self, handler: Callable[[GateLevel, str, Dict[str, str]], GateDecision]
+    ) -> None:
         self._interactive_handler = handler
 
     def evaluate_gate(
-        self,
-        gate: GateLevel,
-        task_id: str,
-        context: Optional[Dict[str, str]] = None
+        self, gate: GateLevel, task_id: str, context: Optional[Dict[str, str]] = None
     ) -> GateDecision:
         ctx = context or {}
 
@@ -58,7 +59,7 @@ class HITLGateManager:
                 task_id=task_id,
                 decision="APPROVED",
                 reviewer="SystemAutopilot_DevMode",
-                rationale="Auto-approved in development mode based on passing automated gates."
+                rationale="Auto-approved in development mode based on passing automated gates.",
             )
             self.decision_history.append(decision)
             return decision
@@ -69,7 +70,7 @@ class HITLGateManager:
             task_id=task_id,
             decision="APPROVED",
             reviewer="PrincipalEngineer_HITL",
-            rationale=f"Gate criteria satisfied for {gate.value}."
+            rationale=f"Gate criteria satisfied for {gate.value}.",
         )
         self.decision_history.append(decision)
         return decision

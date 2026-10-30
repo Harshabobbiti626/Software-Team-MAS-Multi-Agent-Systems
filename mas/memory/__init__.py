@@ -16,5 +16,5 @@ __all__ = [
     "ProceduralMemory",
     "CodeKnowledgeGraph",
     "CodeSymbol",
-    "SymbolKind"
+    "SymbolKind",
 ]

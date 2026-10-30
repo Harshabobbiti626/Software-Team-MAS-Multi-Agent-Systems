@@ -19,6 +19,7 @@ from mas.core.state import (
     TaskStatus,
     TestReport,
 )
+from mas.core.vcs import GitWorktreeManager
 
 
 class MASOrchestrator:
@@ -26,10 +27,12 @@ class MASOrchestrator:
         self,
         config: Optional[MASConfiguration] = None,
         blackboard: Optional[ArtifactBlackboard] = None,
-        circuit_breaker: Optional[CircuitBreaker] = None
+        circuit_breaker: Optional[CircuitBreaker] = None,
     ):
         self.config = config or get_config()
-        self.blackboard = blackboard or ArtifactBlackboard(repo_path=self.config.system.blackboard_repo_path)
+        self.blackboard = blackboard or ArtifactBlackboard(
+            repo_path=self.config.system.blackboard_repo_path
+        )
         self.circuit_breaker = circuit_breaker or CircuitBreaker(self.config.limits)
         self.router = IntelligentRouter()
         self.state = SystemState(session_id="mas-session-001")
@@ -40,10 +43,16 @@ class MASOrchestrator:
         Dormant pods are never awakened.
         """
         desc = task_description.lower()
-        has_fe = any(k in desc for k in ["ui", "frontend", "css", "react", "view", "page", "button"])
+        has_fe = any(
+            k in desc for k in ["ui", "frontend", "css", "react", "view", "page", "button"]
+        )
         has_be = any(k in desc for k in ["api", "backend", "service", "microservice", "endpoint"])
-        has_data = any(k in desc for k in ["sql", "database", "migration", "schema", "postgres", "table"])
-        has_cloud = any(k in desc for k in ["terraform", "docker", "k8s", "kubernetes", "helm", "aws", "gcp"])
+        has_data = any(
+            k in desc for k in ["sql", "database", "migration", "schema", "postgres", "table"]
+        )
+        has_cloud = any(
+            k in desc for k in ["terraform", "docker", "k8s", "kubernetes", "helm", "aws", "gcp"]
+        )
 
         # Check multi-subsystem / full-system indicators first
         subsystem_count = sum([has_fe, has_be, has_data, has_cloud])
@@ -74,12 +83,21 @@ class MASOrchestrator:
             SubsystemClass.QUALITY: ["QASDETAgent", "CodeReviewerAgent"],
             SubsystemClass.DOCUMENTATION: ["TechnicalWriterAgent"],
             SubsystemClass.FULL_SYSTEM: [
-                "BusinessSponsorAgent", "ProductManagerAgent", "DomainSMEAgent",
-                "SystemArchitectAgent", "TechLeadAgent",
-                "DatabaseArchitectAgent", "BackendEngineerAgent", "FrontendEngineerAgent",
-                "CloudEngineerAgent", "DevOpsSREAgent", "QASDETAgent",
-                "CodeReviewerAgent", "AppSecAgent", "TechnicalWriterAgent"
-            ]
+                "BusinessSponsorAgent",
+                "ProductManagerAgent",
+                "DomainSMEAgent",
+                "SystemArchitectAgent",
+                "TechLeadAgent",
+                "DatabaseArchitectAgent",
+                "BackendEngineerAgent",
+                "FrontendEngineerAgent",
+                "CloudEngineerAgent",
+                "DevOpsSREAgent",
+                "QASDETAgent",
+                "CodeReviewerAgent",
+                "AppSecAgent",
+                "TechnicalWriterAgent",
+            ],
         }
         return mapping.get(target_pod, mapping[SubsystemClass.FULL_SYSTEM])
 
@@ -89,7 +107,7 @@ class MASOrchestrator:
         title: str,
         description: str,
         priority: TaskPriority = TaskPriority.HIGH,
-        business_goal_id: str = "GOAL-001"
+        business_goal_id: str = "GOAL-001",
     ) -> Task:
         subsystem = self.analyze_blast_radius(description)
         task = Task(
@@ -99,7 +117,7 @@ class MASOrchestrator:
             business_goal_id=business_goal_id,
             assigned_pod=subsystem,
             priority=priority,
-            status=TaskStatus.PENDING
+            status=TaskStatus.PENDING,
         )
         self.state.current_task = task
         self.state.active_pods = self.determine_active_pods(subsystem)
@@ -115,16 +133,35 @@ class MASOrchestrator:
         self,
         task: Task,
         pod_agents: List[Any],
-        max_workers: int = 5
+        max_workers: int = 5,
+        isolate_worktrees: bool = False,
     ) -> Dict[str, Any]:
         """
         Executes engineering pods concurrently against compiled contracts (api-spec.yaml / schema.sql).
-        Cuts execution time significantly by building backend, frontend, cloud, and DBA in parallel.
+        Supports physical Git Worktree isolation per pod to guarantee zero file collisions during parallel runs.
         """
         results: Dict[str, Any] = {}
+        vcs_mgr = GitWorktreeManager(repo_path=str(self.blackboard.repo_path))
+        worktree_paths: List[Any] = []
 
         def _run_agent(agent: Any):
-            return agent.role, agent.run(task)
+            original_bb = getattr(agent, "blackboard", None)
+            pod_worktree = None
+            if isolate_worktrees:
+                pod_worktree = vcs_mgr.create_pod_worktree(
+                    agent.pod, f"feat/pod-{agent.pod.value.lower()}-{task.id.lower()}"
+                )
+                worktree_paths.append(pod_worktree)
+                agent.blackboard = ArtifactBlackboard(
+                    repo_path=str(pod_worktree), git_enabled=False
+                )
+
+            try:
+                role, response = agent.role, agent.run(task)
+                return role, response
+            finally:
+                if isolate_worktrees and original_bb is not None:
+                    agent.blackboard = original_bb
 
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
             future_to_agent = {executor.submit(_run_agent, agent): agent for agent in pod_agents}
@@ -135,8 +172,13 @@ class MASOrchestrator:
                 self.circuit_breaker.record_tokens(
                     response.tokens_used.prompt_tokens,
                     response.tokens_used.candidate_tokens,
-                    response.tokens_used.thinking_tokens
+                    response.tokens_used.thinking_tokens,
                 )
+
+        if isolate_worktrees and worktree_paths:
+            vcs_mgr.merge_pod_worktrees(worktree_paths)
+            for wp in worktree_paths:
+                vcs_mgr.remove_worktree(wp)
 
         return results
 
@@ -146,7 +188,7 @@ class MASOrchestrator:
         test_report: TestReport,
         agent_roster: Dict[str, Any],
         qa_agent: Any,
-        max_remediation_attempts: int = 2
+        max_remediation_attempts: int = 2,
     ) -> bool:
         """
         Closed-loop self-healing mechanism:
@@ -159,9 +201,7 @@ class MASOrchestrator:
                 return True
 
             ticket = self.router.triage_failure(
-                task_id=task.id,
-                test_report=test_report,
-                error_output=test_report.stderr
+                task_id=task.id, test_report=test_report, error_output=test_report.stderr
             )
 
             self.circuit_breaker.record_failure(ticket.root_cause_summary)

@@ -32,7 +32,7 @@ WHERE updated_at > (SELECT coalesce(max(updated_at), '1970-01-01') FROM {{{{ thi
             artifact_id=f"dbt-model-{task.id}",
             artifact_type=ArtifactType.CODE_PATCH,
             name="resources_incremental.sql",
-            content=dbt_model_sql
+            content=dbt_model_sql,
         )
 
         tokens = TokenUsageTracker(prompt_tokens=650, candidate_tokens=300, thinking_tokens=400)
@@ -43,5 +43,5 @@ WHERE updated_at > (SELECT coalesce(max(updated_at), '1970-01-01') FROM {{{{ thi
             status="SUCCESS",
             summary="Authored incremental dbt model resources_incremental.sql.",
             artifacts_produced=[artifact.id],
-            tokens_used=tokens
+            tokens_used=tokens,
         )

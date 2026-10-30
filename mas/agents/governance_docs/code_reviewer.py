@@ -28,28 +28,30 @@ class CodeReviewerAgent(BaseAgent):
             if not passed:
                 all_passed = False
 
-            review_items.append({
-                "artifact_name": p.name,
-                "ast_syntax_pass": passed,
-                "solid_compliance": {
-                    "SingleResponsibility": "Compliant: Focused module scope",
-                    "DependencyInversion": "Compliant: Relies on abstractions and schemas"
-                },
-                "issues": [i.model_dump() for i in ast_res.issues]
-            })
+            review_items.append(
+                {
+                    "artifact_name": p.name,
+                    "ast_syntax_pass": passed,
+                    "solid_compliance": {
+                        "SingleResponsibility": "Compliant: Focused module scope",
+                        "DependencyInversion": "Compliant: Relies on abstractions and schemas",
+                    },
+                    "issues": [i.model_dump() for i in ast_res.issues],
+                }
+            )
 
         decision_report = {
             "task_id": task.id,
             "review_decision": "APPROVED" if all_passed else "REVISION_REQUESTED",
             "reviewed_artifacts_count": len(patches),
-            "details": review_items
+            "details": review_items,
         }
 
         artifact = self.publish_artifact(
             artifact_id=f"code-review-{task.id}",
             artifact_type=ArtifactType.AUDIT_DOSSIER,
             name="ReviewDecision.json",
-            content=json.dumps(decision_report, indent=2)
+            content=json.dumps(decision_report, indent=2),
         )
 
         tokens = TokenUsageTracker(prompt_tokens=850, candidate_tokens=400, thinking_tokens=600)
@@ -61,5 +63,5 @@ class CodeReviewerAgent(BaseAgent):
             status=status,
             summary=f"Code review finished: {decision_report['review_decision']}",
             artifacts_produced=[artifact.id],
-            tokens_used=tokens
+            tokens_used=tokens,
         )

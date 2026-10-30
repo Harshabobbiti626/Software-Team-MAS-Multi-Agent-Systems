@@ -17,7 +17,17 @@ class DatabaseArchitectAgent(BaseAgent):
 
     def _extract_domain_table(self, title: str) -> str:
         words = re.findall(r"[A-Za-z]+", title.lower())
-        stopwords = {"service", "api", "microservice", "system", "feature", "build", "implement", "create", "test"}
+        stopwords = {
+            "service",
+            "api",
+            "microservice",
+            "system",
+            "feature",
+            "build",
+            "implement",
+            "create",
+            "test",
+        }
         filtered = [w for w in words if w not in stopwords]
         base = filtered[0] if filtered else "resource"
         return f"{base}s" if not base.endswith("s") else base
@@ -28,7 +38,7 @@ class DatabaseArchitectAgent(BaseAgent):
         pre_mortem = self.cognition.perform_pre_mortem(
             decision_summary=f"Database schema design for {task.title}",
             subsystem="DatabaseStorage",
-            proposed_change=f"CREATE TABLE {table_name} with transactional safety and CONCURRENTLY index"
+            proposed_change=f"CREATE TABLE {table_name} with transactional safety and CONCURRENTLY index",
         )
 
         llm_resp = self.think_and_generate(
@@ -58,15 +68,17 @@ ON {table_name} (category, status);
             artifact_id=f"schema-{task.id}",
             artifact_type=ArtifactType.SCHEMA_SQL,
             name="schema.sql",
-            content=schema_sql
+            content=schema_sql,
         )
 
         tokens = TokenUsageTracker(
             prompt_tokens=llm_resp.prompt_tokens + 400,
             candidate_tokens=llm_resp.candidate_tokens + 300,
-            thinking_tokens=llm_resp.thinking_tokens + 400
+            thinking_tokens=llm_resp.thinking_tokens + 400,
         )
-        tokens.total_tokens = tokens.prompt_tokens + tokens.candidate_tokens + tokens.thinking_tokens
+        tokens.total_tokens = (
+            tokens.prompt_tokens + tokens.candidate_tokens + tokens.thinking_tokens
+        )
 
         return AgentResponse(
             agent_role=self.role,
@@ -74,5 +86,5 @@ ON {table_name} (category, status);
             summary=f"Generated production-grade schema.sql for table '{table_name}' with non-locking indexing.",
             artifacts_produced=[artifact.id],
             pre_mortem=pre_mortem,
-            tokens_used=tokens
+            tokens_used=tokens,
         )

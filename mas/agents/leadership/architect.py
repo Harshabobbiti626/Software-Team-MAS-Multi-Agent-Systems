@@ -19,19 +19,19 @@ class SystemArchitectAgent(BaseAgent):
         pre_mortem = self.cognition.perform_pre_mortem(
             decision_summary=f"Architecture design for {task.title}",
             subsystem="SystemArchitecture",
-            proposed_change=task.description
+            proposed_change=task.description,
         )
 
         trade_off = self.cognition.evaluate_trade_off(
             topic="Inter-Service Communication & Data Flow",
             option_a="Contract-first OpenAPI + Git-backed Artifact Ledger",
             option_b="Unstructured runtime JSON messaging",
-            reversibility="two-way"
+            reversibility="two-way",
         )
 
         llm_resp = self.think_and_generate(
             prompt=f"Formulate Architectural Decision Record (ADR-001) for task '{task.title}': {task.description}. Evaluate one-way vs two-way doors.",
-            thinking_budget=4096
+            thinking_budget=4096,
         )
 
         adr_content = f"""# ADR-001: Architecture & Interface Strategy for {task.title}
@@ -60,15 +60,17 @@ Data operations utilize transactional guarantees with backward-compatible schema
             artifact_id=f"adr-001-{task.id}",
             artifact_type=ArtifactType.ADR,
             name="ADR-001.md",
-            content=adr_content
+            content=adr_content,
         )
 
         tokens = TokenUsageTracker(
             prompt_tokens=llm_resp.prompt_tokens + 800,
             candidate_tokens=llm_resp.candidate_tokens + 500,
-            thinking_tokens=llm_resp.thinking_tokens + 800
+            thinking_tokens=llm_resp.thinking_tokens + 800,
         )
-        tokens.total_tokens = tokens.prompt_tokens + tokens.candidate_tokens + tokens.thinking_tokens
+        tokens.total_tokens = (
+            tokens.prompt_tokens + tokens.candidate_tokens + tokens.thinking_tokens
+        )
 
         return AgentResponse(
             agent_role=self.role,
@@ -76,5 +78,5 @@ Data operations utilize transactional guarantees with backward-compatible schema
             summary=f"Authored ADR-001 for {task.title} with formal pre-mortem analysis.",
             artifacts_produced=[artifact.id],
             pre_mortem=pre_mortem,
-            tokens_used=tokens
+            tokens_used=tokens,
         )

@@ -49,7 +49,7 @@ class BaseLLMProvider(ABC):
         prompt: str,
         system_prompt: Optional[str] = None,
         model: Optional[str] = None,
-        config: Optional[LLMGenerationConfig] = None
+        config: Optional[LLMGenerationConfig] = None,
     ) -> LLMResponse:
         """Executes a single reasoning/generation turn."""
         pass
@@ -61,7 +61,7 @@ class BaseLLMProvider(ABC):
         schema: Type[T],
         system_prompt: Optional[str] = None,
         model: Optional[str] = None,
-        config: Optional[LLMGenerationConfig] = None
+        config: Optional[LLMGenerationConfig] = None,
     ) -> tuple[T, LLMResponse]:
         """Enforces schema-validated structured output with retry/self-healing."""
         pass
@@ -71,32 +71,41 @@ class GeminiRESTProvider(BaseLLMProvider):
     """
     Direct HTTPS REST client for Google Gemini API with exponential backoff and thinking support.
     """
+
     BASE_URL = "https://generativelanguage.googleapis.com/v1beta/models"
 
     def __init__(self, api_key: Optional[str] = None, default_model: str = "gemini-2.5-pro"):
         self.api_key = api_key or os.environ.get("GEMINI_API_KEY", "")
         self.default_model = default_model
 
-    def _execute_with_retry(self, url: str, payload: Dict[str, Any], max_retries: int = 3) -> Dict[str, Any]:
+    def _execute_with_retry(
+        self, url: str, payload: Dict[str, Any], max_retries: int = 3
+    ) -> Dict[str, Any]:
         params = {"key": self.api_key}
         headers = {"Content-Type": "application/json"}
 
         for attempt in range(max_retries):
             try:
-                response = requests.post(url, params=params, json=payload, headers=headers, timeout=60)
+                response = requests.post(
+                    url, params=params, json=payload, headers=headers, timeout=60
+                )
                 if response.status_code == 200:
                     return response.json()
                 elif response.status_code in [429, 500, 503]:
                     # Rate limit or transient error -> exponential backoff with jitter
-                    backoff = (2 ** attempt) + random.uniform(0.1, 1.0)
-                    logger.warning(f"Gemini API HTTP {response.status_code}. Retrying in {backoff:.2f}s...")
+                    backoff = (2**attempt) + random.uniform(0.1, 1.0)
+                    logger.warning(
+                        f"Gemini API HTTP {response.status_code}. Retrying in {backoff:.2f}s..."
+                    )
                     time.sleep(backoff)
                 else:
-                    raise RuntimeError(f"Gemini API returned error {response.status_code}: {response.text}")
+                    raise RuntimeError(
+                        f"Gemini API returned error {response.status_code}: {response.text}"
+                    )
             except requests.RequestException:
                 if attempt == max_retries - 1:
                     raise
-                backoff = (2 ** attempt) + random.uniform(0.1, 0.5)
+                backoff = (2**attempt) + random.uniform(0.1, 0.5)
                 time.sleep(backoff)
 
         raise RuntimeError("Gemini API call failed after max retries")
@@ -106,7 +115,7 @@ class GeminiRESTProvider(BaseLLMProvider):
         prompt: str,
         system_prompt: Optional[str] = None,
         model: Optional[str] = None,
-        config: Optional[LLMGenerationConfig] = None
+        config: Optional[LLMGenerationConfig] = None,
     ) -> LLMResponse:
         target_model = model or self.default_model
         cfg = config or LLMGenerationConfig()
@@ -114,8 +123,15 @@ class GeminiRESTProvider(BaseLLMProvider):
 
         contents = []
         if system_prompt:
-            contents.append({"role": "user", "parts": [{"text": f"System Directive:\n{system_prompt}"}]})
-            contents.append({"role": "model", "parts": [{"text": "Understood. I will abide by all system directives."}]})
+            contents.append(
+                {"role": "user", "parts": [{"text": f"System Directive:\n{system_prompt}"}]}
+            )
+            contents.append(
+                {
+                    "role": "model",
+                    "parts": [{"text": "Understood. I will abide by all system directives."}],
+                }
+            )
 
         contents.append({"role": "user", "parts": [{"text": prompt}]})
 
@@ -129,25 +145,20 @@ class GeminiRESTProvider(BaseLLMProvider):
         if cfg.response_schema:
             gen_config["responseSchema"] = cfg.response_schema
 
-        payload = {
-            "contents": contents,
-            "generationConfig": gen_config
-        }
+        payload = {"contents": contents, "generationConfig": gen_config}
 
         if cfg.thinking_budget:
-            payload["generationConfig"]["thinkingConfig"] = {
-                "thinkingBudget": cfg.thinking_budget
-            }
+            payload["generationConfig"]["thinkingConfig"] = {"thinkingBudget": cfg.thinking_budget}
 
         data = self._execute_with_retry(url, payload)
-        
+
         candidates = data.get("candidates", [])
         if not candidates:
             raise RuntimeError(f"No candidates returned: {data}")
 
         first_cand = candidates[0]
         parts = first_cand.get("content", {}).get("parts", [])
-        
+
         text_content = ""
         thoughts = ""
         for p in parts:
@@ -160,7 +171,9 @@ class GeminiRESTProvider(BaseLLMProvider):
         prompt_tokens = usage.get("promptTokenCount", 0)
         candidate_tokens = usage.get("candidatesTokenCount", 0)
         thinking_tokens = usage.get("thoughtsTokenCount", 0)
-        total_tokens = usage.get("totalTokenCount", prompt_tokens + candidate_tokens + thinking_tokens)
+        total_tokens = usage.get(
+            "totalTokenCount", prompt_tokens + candidate_tokens + thinking_tokens
+        )
 
         return LLMResponse(
             text=text_content.strip(),
@@ -170,7 +183,7 @@ class GeminiRESTProvider(BaseLLMProvider):
             thinking_tokens=thinking_tokens,
             total_tokens=total_tokens,
             finish_reason=first_cand.get("finishReason", "STOP"),
-            model_name=target_model
+            model_name=target_model,
         )
 
     def generate_structured(
@@ -179,11 +192,11 @@ class GeminiRESTProvider(BaseLLMProvider):
         schema: Type[T],
         system_prompt: Optional[str] = None,
         model: Optional[str] = None,
-        config: Optional[LLMGenerationConfig] = None
+        config: Optional[LLMGenerationConfig] = None,
     ) -> tuple[T, LLMResponse]:
         cfg = config or LLMGenerationConfig()
         cfg.response_mime_type = "application/json"
-        
+
         # Enhanced prompt with schema enforcement
         strict_prompt = (
             f"{prompt}\n\n"
@@ -211,6 +224,7 @@ class DeterministicMockLLMProvider(BaseLLMProvider):
     Offline deterministic provider for CI/CD, local testing, and zero-token test runs.
     Synthesizes valid contextual payloads adhering to Pydantic schemas.
     """
+
     def __init__(self, default_model: str = "mock-reasoner"):
         self.default_model = default_model
 
@@ -219,21 +233,38 @@ class DeterministicMockLLMProvider(BaseLLMProvider):
         prompt: str,
         system_prompt: Optional[str] = None,
         model: Optional[str] = None,
-        config: Optional[LLMGenerationConfig] = None
+        config: Optional[LLMGenerationConfig] = None,
     ) -> LLMResponse:
         est_prompt = max(10, len(prompt) // 4)
         est_cand = 50
         est_thinking = config.thinking_budget if (config and config.thinking_budget) else 100
 
+        p_lower = prompt.lower()
+        if "python" in p_lower or ("code" in p_lower and "generate" in p_lower):
+            text = (
+                "\"\"\"Mock Generated Service\"\"\"\n\n"
+                "import uuid\n"
+                "from pydantic import BaseModel, Field\n\n\n"
+                "class MockPayload(BaseModel):\n"
+                "    name: str = Field(..., min_length=1)\n\n\n"
+                "class MockService:\n"
+                "    def __init__(self):\n"
+                "        self.id = str(uuid.uuid4())\n\n"
+                "    def process(self, payload: MockPayload) -> bool:\n"
+                "        return len(payload.name) > 0\n"
+            )
+        else:
+            text = f"Deterministic response analyzing: {prompt[:80]}..."
+
         return LLMResponse(
-            text=f"Deterministic response analyzing: {prompt[:80]}...",
+            text=text,
             thoughts=f"Evaluated pre-mortem risks and contract constraints for {prompt[:60]}",
             prompt_tokens=est_prompt,
             candidate_tokens=est_cand,
             thinking_tokens=est_thinking,
             total_tokens=est_prompt + est_cand + est_thinking,
             finish_reason="STOP",
-            model_name=model or self.default_model
+            model_name=model or self.default_model,
         )
 
     def generate_structured(
@@ -242,7 +273,7 @@ class DeterministicMockLLMProvider(BaseLLMProvider):
         schema: Type[T],
         system_prompt: Optional[str] = None,
         model: Optional[str] = None,
-        config: Optional[LLMGenerationConfig] = None
+        config: Optional[LLMGenerationConfig] = None,
     ) -> tuple[T, LLMResponse]:
         # Generate default instance of schema by populating fields intelligently
         schema_json = schema.model_json_schema()
@@ -298,4 +329,3 @@ def get_llm_provider(config: Optional[MASConfiguration] = None) -> BaseLLMProvid
         return GeminiRESTProvider(api_key=api_key, default_model=cfg.models.default_model)
 
     return DeterministicMockLLMProvider(default_model=cfg.models.default_model)
-

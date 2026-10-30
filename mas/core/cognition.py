@@ -45,10 +45,7 @@ class CognitiveEngine:
         self.thinking_budget = thinking_budget
 
     def perform_pre_mortem(
-        self,
-        decision_summary: str,
-        subsystem: str,
-        proposed_change: str
+        self, decision_summary: str, subsystem: str, proposed_change: str
     ) -> PreMortemAnalysis:
         """
         Executes a deterministic or structured pre-mortem evaluation for a proposed change.
@@ -75,7 +72,9 @@ class CognitiveEngine:
             mitigations.append("Scrub authentication headers and apply regex token sanitization")
 
         if not risks and not races and not timeouts and not compat:
-            mitigations.append("Validate input parameters with strict Pydantic schemas and boundary checks")
+            mitigations.append(
+                "Validate input parameters with strict Pydantic schemas and boundary checks"
+            )
 
         return PreMortemAnalysis(
             decision_summary=decision_summary,
@@ -84,15 +83,11 @@ class CognitiveEngine:
             timeout_or_lock_risks=timeouts,
             backward_compatibility_risks=compat,
             mitigations=mitigations,
-            pass_pre_mortem=True
+            pass_pre_mortem=True,
         )
 
     def evaluate_trade_off(
-        self,
-        topic: str,
-        option_a: str,
-        option_b: str,
-        reversibility: str = "two-way"
+        self, topic: str, option_a: str, option_b: str, reversibility: str = "two-way"
     ) -> TradeOffEvaluation:
         """
         Computes formal trade-offs between two approaches.
@@ -106,21 +101,24 @@ class CognitiveEngine:
             risk_level="MEDIUM" if reversibility == "one-way" else "LOW",
             reversibility=reversibility,
             recommended_option=option_a,
-            justification=f"Option A ({option_a}) delivers better maintainability and lower blast radius."
+            justification=f"Option A ({option_a}) delivers better maintainability and lower blast radius.",
         )
 
-    def reflect_on_outcome(
-        self,
-        step_goal: str,
-        expected: str,
-        actual: str
-    ) -> CognitiveReflection:
+    def reflect_on_outcome(self, step_goal: str, expected: str, actual: str) -> CognitiveReflection:
         """
         Self-reflection and cognitive diffing loop.
         """
-        is_congruent = (expected.strip().lower() in actual.lower()) or ("success" in actual.lower() and "fail" not in actual.lower())
-        discrepancy = None if is_congruent else f"Expected '{expected}' but received '{actual[:200]}'"
-        adjustment = None if is_congruent else "Refine input parameters or route to diagnostic triage router."
+        is_congruent = (expected.strip().lower() in actual.lower()) or (
+            "success" in actual.lower() and "fail" not in actual.lower()
+        )
+        discrepancy = (
+            None if is_congruent else f"Expected '{expected}' but received '{actual[:200]}'"
+        )
+        adjustment = (
+            None
+            if is_congruent
+            else "Refine input parameters or route to diagnostic triage router."
+        )
 
         return CognitiveReflection(
             step_goal=step_goal,
@@ -128,5 +126,5 @@ class CognitiveEngine:
             actual_outcome=actual,
             is_congruent=is_congruent,
             discrepancy_explanation=discrepancy,
-            next_action_adjustment=adjustment
+            next_action_adjustment=adjustment,
         )

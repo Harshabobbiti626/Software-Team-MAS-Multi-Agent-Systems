@@ -26,15 +26,15 @@ class WorkingMemory:
         # Rough token approximation: 1 token ~ 4 characters
         est_tokens = max(1, len(content) // 4)
         entry = MemoryEntry(
-            role=role,
-            content=content,
-            metadata=metadata or {},
-            estimated_tokens=est_tokens
+            role=role, content=content, metadata=metadata or {}, estimated_tokens=est_tokens
         )
         self.entries.append(entry)
 
         # Trigger compaction if limits exceeded
-        if len(self.entries) > self.window_size or self.get_total_tokens() > self.compaction_threshold:
+        if (
+            len(self.entries) > self.window_size
+            or self.get_total_tokens() > self.compaction_threshold
+        ):
             self.compact()
 
     def get_total_tokens(self) -> int:
@@ -51,7 +51,12 @@ class WorkingMemory:
         to_compact = self.entries[:-keep_count]
         self.entries = self.entries[-keep_count:]
 
-        summaries = [f"[{e.role}] {e.content[:150]}..." if len(e.content) > 150 else f"[{e.role}] {e.content}" for e in to_compact]
+        summaries = [
+            f"[{e.role}] {e.content[:150]}..."
+            if len(e.content) > 150
+            else f"[{e.role}] {e.content}"
+            for e in to_compact
+        ]
         new_summary = "Compacted Prior Steps:\n" + "\n".join(summaries)
 
         if self.compacted_summary:

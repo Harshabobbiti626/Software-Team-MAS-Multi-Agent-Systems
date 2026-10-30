@@ -74,9 +74,7 @@ def test_surgical_patcher_syntax_error_rollback(tmp_path):
     search = "return 100"
     replace = "return (broken syntax without closing parenthesis"
 
-    res = patcher.apply_search_replace_block(
-        "broken.py", search, replace, verify_ast=True
-    )
+    res = patcher.apply_search_replace_block("broken.py", search, replace, verify_ast=True)
     assert res.success is False
     assert res.error_message is not None
     assert "syntax error" in res.error_message.lower()

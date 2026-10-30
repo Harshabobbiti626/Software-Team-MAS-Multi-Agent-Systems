@@ -21,7 +21,7 @@ class OTLPTraceExporter:
         self,
         endpoint_url: Optional[str] = None,
         output_file_path: Optional[str] = ".mas_traces.jsonl",
-        service_name: str = "mas-multi-agent-system"
+        service_name: str = "mas-multi-agent-system",
     ):
         self.endpoint_url = endpoint_url
         self.output_file_path = Path(output_file_path) if output_file_path else None
@@ -54,16 +54,15 @@ class OTLPTraceExporter:
         return {
             "traceId": span.task_id.replace("-", "").ljust(32, "0")[:32],
             "spanId": span.span_id.replace("-", "").ljust(16, "0")[:16],
-            "parentSpanId": span.parent_span_id.replace("-", "").ljust(16, "0")[:16] if span.parent_span_id else "",
+            "parentSpanId": span.parent_span_id.replace("-", "").ljust(16, "0")[:16]
+            if span.parent_span_id
+            else "",
             "name": f"{span.agent_role}.{span.operation}",
             "kind": 1,  # SPAN_KIND_INTERNAL
             "startTimeUnixNano": str(start_nano),
             "endTimeUnixNano": str(end_nano),
             "attributes": attributes,
-            "status": {
-                "code": status_code,
-                "message": span.status
-            }
+            "status": {"code": status_code, "message": span.status},
         }
 
     def export_spans(self, spans: List[TraceSpan]) -> bool:
@@ -80,11 +79,8 @@ class OTLPTraceExporter:
                         ]
                     },
                     "scopeSpans": [
-                        {
-                            "scope": {"name": "mas.tracer", "version": "0.1.0"},
-                            "spans": otlp_spans
-                        }
-                    ]
+                        {"scope": {"name": "mas.tracer", "version": "0.1.0"}, "spans": otlp_spans}
+                    ],
                 }
             ]
         }
@@ -105,7 +101,7 @@ class OTLPTraceExporter:
                     self.endpoint_url,
                     json=otlp_payload,
                     headers={"Content-Type": "application/json"},
-                    timeout=5
+                    timeout=5,
                 )
                 return res.status_code in [200, 202]
             except Exception as e:
@@ -113,4 +109,3 @@ class OTLPTraceExporter:
                 return False
 
         return True
-

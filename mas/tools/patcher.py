@@ -28,15 +28,13 @@ class SurgicalPatcher:
         try:
             target.relative_to(self.workspace_root)
         except ValueError:
-            raise PermissionError(f"Access denied: Path '{relative_path}' traverses outside workspace root.")
+            raise PermissionError(
+                f"Access denied: Path '{relative_path}' traverses outside workspace root."
+            )
         return target
 
     def apply_search_replace_block(
-        self,
-        file_path: str,
-        search_block: str,
-        replace_block: str,
-        verify_ast: bool = True
+        self, file_path: str, search_block: str, replace_block: str, verify_ast: bool = True
     ) -> PatchResult:
         """
         Surgically finds exact search_block and replaces it with replace_block.
@@ -45,9 +43,7 @@ class SurgicalPatcher:
         safe_path = self._resolve_safe_path(file_path)
         if not safe_path.exists():
             return PatchResult(
-                success=False,
-                file_path=file_path,
-                error_message=f"File not found: {file_path}"
+                success=False, file_path=file_path, error_message=f"File not found: {file_path}"
             )
 
         with open(safe_path, "r", encoding="utf-8") as f:
@@ -62,7 +58,7 @@ class SurgicalPatcher:
             return PatchResult(
                 success=False,
                 file_path=file_path,
-                error_message=f"Search block not found in {file_path}. Cannot apply surgical patch."
+                error_message=f"Search block not found in {file_path}. Cannot apply surgical patch.",
             )
 
         occurrences = normalized_original.count(normalized_search)
@@ -70,7 +66,7 @@ class SurgicalPatcher:
             return PatchResult(
                 success=False,
                 file_path=file_path,
-                error_message=f"Ambiguous search block: found {occurrences} occurrences in {file_path}."
+                error_message=f"Ambiguous search block: found {occurrences} occurrences in {file_path}.",
             )
 
         new_content = normalized_original.replace(normalized_search, normalized_replace, 1)
@@ -84,7 +80,7 @@ class SurgicalPatcher:
                     success=False,
                     file_path=file_path,
                     error_message=f"Patch introduces syntax error on line {se.lineno}: {se.msg}",
-                    original_backup=original_content
+                    original_backup=original_content,
                 )
 
         # Atomic write
@@ -96,18 +92,22 @@ class SurgicalPatcher:
             success=True,
             file_path=file_path,
             lines_modified=lines_diff,
-            original_backup=original_content
+            original_backup=original_content,
         )
 
     def parse_and_apply_block_text(self, file_path: str, block_text: str) -> PatchResult:
         """
         Parses standard <<<<<<< SEARCH / ======= / >>>>>>> REPLACE blocks.
         """
-        if "<<<<<<< SEARCH" not in block_text or "=======" not in block_text or ">>>>>>> REPLACE" not in block_text:
+        if (
+            "<<<<<<< SEARCH" not in block_text
+            or "=======" not in block_text
+            or ">>>>>>> REPLACE" not in block_text
+        ):
             return PatchResult(
                 success=False,
                 file_path=file_path,
-                error_message="Invalid block format. Expected <<<<<<< SEARCH ... ======= ... >>>>>>> REPLACE"
+                error_message="Invalid block format. Expected <<<<<<< SEARCH ... ======= ... >>>>>>> REPLACE",
             )
 
         try:
@@ -116,12 +116,11 @@ class SurgicalPatcher:
             return self.apply_search_replace_block(
                 file_path=file_path,
                 search_block=search_part.strip(),
-                replace_block=replace_part.strip()
+                replace_block=replace_part.strip(),
             )
         except Exception as e:
             return PatchResult(
                 success=False,
                 file_path=file_path,
-                error_message=f"Failed to parse patch block: {str(e)}"
+                error_message=f"Failed to parse patch block: {str(e)}",
             )
-

@@ -56,11 +56,15 @@ class GitWorktreeManager:
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE,
                     text=True,
-                    timeout=15
+                    timeout=15,
                 )
                 if res.returncode != 0:
                     # Fallback: copy workspace directly if worktree branch already exists
-                    shutil.copytree(str(self.repo_path), str(pod_dir), ignore=shutil.ignore_patterns(".git", ".worktrees"))
+                    shutil.copytree(
+                        str(self.repo_path),
+                        str(pod_dir),
+                        ignore=shutil.ignore_patterns(".git", ".worktrees"),
+                    )
             except Exception:
                 # Safe filesystem fallback
                 pod_dir.mkdir(parents=True, exist_ok=True)
@@ -80,7 +84,7 @@ class GitWorktreeManager:
                 cwd=str(self.repo_path),
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
-                timeout=10
+                timeout=10,
             )
         except Exception:
             pass
@@ -96,6 +100,31 @@ class GitWorktreeManager:
             except Exception:
                 pass
 
+    def merge_pod_worktrees(
+        self, pod_worktree_paths: List[Path], target_dir: Optional[Path] = None
+    ) -> List[str]:
+        """
+        Merges artifacts produced across isolated pod worktrees back into the target workspace.
+        Returns the list of relative merged file paths.
+        """
+        dest_root = (target_dir or self.repo_path).resolve()
+        merged_files: List[str] = []
+
+        for w_path in pod_worktree_paths:
+            if not w_path.exists():
+                continue
+            artifacts_dir = w_path / "artifacts"
+            if artifacts_dir.exists():
+                for item in artifacts_dir.rglob("*"):
+                    if item.is_file():
+                        rel = item.relative_to(w_path)
+                        target_file = dest_root / rel
+                        target_file.parent.mkdir(parents=True, exist_ok=True)
+                        shutil.copy2(item, target_file)
+                        merged_files.append(str(rel).replace("\\", "/"))
+
+        return merged_files
+
 
 class PullRequestGenerator:
     """
@@ -109,10 +138,14 @@ class PullRequestGenerator:
         test_report: Optional[TestReport] = None,
         adr_id: str = "ADR-001",
         prd_id: str = "PRD-001",
-        modified_files: Optional[List[str]] = None
+        modified_files: Optional[List[str]] = None,
     ) -> PullRequest:
         files = modified_files or ["service.py", "schema.sql", "main.tf", "ResourceView.tsx"]
-        qa_status = "✅ 100% Passed" if (test_report and test_report.passed_all) else "⚠️ Verification Pending"
+        qa_status = (
+            "✅ 100% Passed"
+            if (test_report and test_report.passed_all)
+            else "⚠️ Verification Pending"
+        )
 
         markdown_body = f"""## 🚀 Summary of Changes
 Implemented **{task.title}** according to contract-first parallel pod specifications.
@@ -151,6 +184,5 @@ Implemented **{task.title}** according to contract-first parallel pod specificat
             title=f"feat({task.assigned_pod.value.lower()}): {task.title}",
             description_markdown=markdown_body,
             modified_files=files,
-            qa_passed=(test_report.passed_all if test_report else True)
+            qa_passed=(test_report.passed_all if test_report else True),
         )
-

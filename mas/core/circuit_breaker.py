@@ -10,6 +10,7 @@ from mas.core.config import LimitSettings
 
 class CircuitBreakerTrippedException(Exception):
     """Raised when hard resource ceilings or loop detection thresholds are violated."""
+
     pass
 
 
@@ -29,16 +30,22 @@ class CircuitBreaker:
     def record_turn(self, agent_role: str) -> None:
         """Records an agent step and verifies turn limits."""
         if self.tripped:
-            raise CircuitBreakerTrippedException(f"Circuit breaker already tripped: {self.trip_reason}")
+            raise CircuitBreakerTrippedException(
+                f"Circuit breaker already tripped: {self.trip_reason}"
+            )
 
         self.total_turns += 1
         self.agent_turns[agent_role] = self.agent_turns.get(agent_role, 0) + 1
 
         if self.total_turns > self.limits.max_total_turns_per_task:
-            self._trip(f"Exceeded max total task turns ({self.total_turns} > {self.limits.max_total_turns_per_task})")
+            self._trip(
+                f"Exceeded max total task turns ({self.total_turns} > {self.limits.max_total_turns_per_task})"
+            )
 
         if self.agent_turns[agent_role] > self.limits.max_turns_per_agent:
-            self._trip(f"Agent '{agent_role}' exceeded max turns ({self.agent_turns[agent_role]} > {self.limits.max_turns_per_agent})")
+            self._trip(
+                f"Agent '{agent_role}' exceeded max turns ({self.agent_turns[agent_role]} > {self.limits.max_turns_per_agent})"
+            )
 
     def record_tokens(self, prompt: int = 0, candidate: int = 0, thinking: int = 0) -> None:
         """Accumulates token consumption and checks hard ceilings."""
@@ -48,11 +55,17 @@ class CircuitBreaker:
 
         if self.limits.circuit_breaker_enabled:
             if self.prompt_tokens > self.limits.max_prompt_tokens:
-                self._trip(f"Prompt token cap exceeded: {self.prompt_tokens} > {self.limits.max_prompt_tokens}")
+                self._trip(
+                    f"Prompt token cap exceeded: {self.prompt_tokens} > {self.limits.max_prompt_tokens}"
+                )
             if self.candidate_tokens > self.limits.max_candidate_tokens:
-                self._trip(f"Candidate token cap exceeded: {self.candidate_tokens} > {self.limits.max_candidate_tokens}")
+                self._trip(
+                    f"Candidate token cap exceeded: {self.candidate_tokens} > {self.limits.max_candidate_tokens}"
+                )
             if self.thinking_tokens > self.limits.max_thinking_tokens:
-                self._trip(f"Thinking token cap exceeded: {self.thinking_tokens} > {self.limits.max_thinking_tokens}")
+                self._trip(
+                    f"Thinking token cap exceeded: {self.thinking_tokens} > {self.limits.max_thinking_tokens}"
+                )
 
     def record_failure(self, failure_signature: str) -> None:
         """Tracks consecutive failures and traps repetitive error loops."""
@@ -61,11 +74,15 @@ class CircuitBreaker:
 
         # 3-strike rule
         if self.consecutive_failures >= self.limits.max_consecutive_failures:
-            self._trip(f"Tripped 3-strike failure trap: {self.consecutive_failures} consecutive failures. Last error: {failure_signature}")
+            self._trip(
+                f"Tripped 3-strike failure trap: {self.consecutive_failures} consecutive failures. Last error: {failure_signature}"
+            )
 
         # Repetitive loop trap (same exact error repeated twice consecutively)
         if len(self.failure_history) >= 2 and self.failure_history[-1] == self.failure_history[-2]:
-            self._trip(f"Repetitive loop detected: identical failure repeated '{failure_signature[:120]}'")
+            self._trip(
+                f"Repetitive loop detected: identical failure repeated '{failure_signature[:120]}'"
+            )
 
     def record_success(self) -> None:
         """Resets consecutive failure count after a successful verification or task step."""

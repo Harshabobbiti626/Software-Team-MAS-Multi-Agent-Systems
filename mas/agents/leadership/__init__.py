@@ -9,5 +9,5 @@ __all__ = [
     "ProductManagerAgent",
     "DomainSMEAgent",
     "SystemArchitectAgent",
-    "TechLeadAgent"
+    "TechLeadAgent",
 ]

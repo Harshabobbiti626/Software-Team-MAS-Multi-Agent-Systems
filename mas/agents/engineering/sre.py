@@ -37,7 +37,7 @@ CMD ["python", "main.py"]
             artifact_id=f"dockerfile-{task.id}",
             artifact_type=ArtifactType.CODE_PATCH,
             name="Dockerfile",
-            content=dockerfile_content
+            content=dockerfile_content,
         )
 
         tokens = TokenUsageTracker(prompt_tokens=700, candidate_tokens=350, thinking_tokens=400)
@@ -48,5 +48,5 @@ CMD ["python", "main.py"]
             status="SUCCESS",
             summary="Generated hardened non-root multi-stage Dockerfile with health checks.",
             artifacts_produced=[artifact.id],
-            tokens_used=tokens
+            tokens_used=tokens,
         )

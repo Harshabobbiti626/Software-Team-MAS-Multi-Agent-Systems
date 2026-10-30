@@ -59,7 +59,7 @@ resource "aws_security_group" "service_sg" {{
             artifact_id=f"cloud-iac-{task.id}",
             artifact_type=ArtifactType.CODE_PATCH,
             name="main.tf",
-            content=terraform_hcl
+            content=terraform_hcl,
         )
 
         tokens = TokenUsageTracker(prompt_tokens=850, candidate_tokens=420, thinking_tokens=600)
@@ -70,5 +70,5 @@ resource "aws_security_group" "service_sg" {{
             status="SUCCESS",
             summary="Authored Terraform IaC main.tf with encrypted KMS and least-privilege SG.",
             artifacts_produced=[artifact.id],
-            tokens_used=tokens
+            tokens_used=tokens,
         )

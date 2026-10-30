@@ -55,19 +55,21 @@ class CodeASTVisitor(ast.NodeVisitor):
             file_path=self.file_path,
             line_start=node.lineno,
             line_end=getattr(node, "end_lineno", node.lineno),
-            docstring=doc
+            docstring=doc,
         )
         self.symbols.append(class_symbol)
 
         # Track inheritance edges
         for base in node.bases:
             if isinstance(base, ast.Name):
-                self.edges.append(DependencyEdge(
-                    source_symbol=node.name,
-                    target_symbol=base.id,
-                    relationship="INHERITS",
-                    file_path=self.file_path
-                ))
+                self.edges.append(
+                    DependencyEdge(
+                        source_symbol=node.name,
+                        target_symbol=base.id,
+                        relationship="INHERITS",
+                        file_path=self.file_path,
+                    )
+                )
 
         prev_class = self.current_class
         self.current_class = node.name
@@ -94,7 +96,7 @@ class CodeASTVisitor(ast.NodeVisitor):
             line_end=getattr(node, "end_lineno", node.lineno),
             docstring=doc,
             parameters=params,
-            parent_class=self.current_class
+            parent_class=self.current_class,
         )
         self.symbols.append(symbol)
 
@@ -102,45 +104,53 @@ class CodeASTVisitor(ast.NodeVisitor):
         for child in ast.walk(node):
             if isinstance(child, ast.Call):
                 if isinstance(child.func, ast.Name):
-                    self.edges.append(DependencyEdge(
-                        source_symbol=full_name,
-                        target_symbol=child.func.id,
-                        relationship="CALLS",
-                        file_path=self.file_path
-                    ))
+                    self.edges.append(
+                        DependencyEdge(
+                            source_symbol=full_name,
+                            target_symbol=child.func.id,
+                            relationship="CALLS",
+                            file_path=self.file_path,
+                        )
+                    )
                 elif isinstance(child.func, ast.Attribute):
-                    self.edges.append(DependencyEdge(
-                        source_symbol=full_name,
-                        target_symbol=child.func.attr,
-                        relationship="CALLS",
-                        file_path=self.file_path
-                    ))
+                    self.edges.append(
+                        DependencyEdge(
+                            source_symbol=full_name,
+                            target_symbol=child.func.attr,
+                            relationship="CALLS",
+                            file_path=self.file_path,
+                        )
+                    )
 
         self.generic_visit(node)
 
     def visit_Import(self, node: ast.Import) -> Any:
         for alias in node.names:
-            self.symbols.append(CodeSymbol(
-                name=alias.name,
-                kind=SymbolKind.IMPORT,
-                file_path=self.file_path,
-                line_start=node.lineno,
-                line_end=node.lineno,
-                imported_from=alias.name
-            ))
+            self.symbols.append(
+                CodeSymbol(
+                    name=alias.name,
+                    kind=SymbolKind.IMPORT,
+                    file_path=self.file_path,
+                    line_start=node.lineno,
+                    line_end=node.lineno,
+                    imported_from=alias.name,
+                )
+            )
         self.generic_visit(node)
 
     def visit_ImportFrom(self, node: ast.ImportFrom) -> Any:
         mod = node.module or ""
         for alias in node.names:
-            self.symbols.append(CodeSymbol(
-                name=alias.name,
-                kind=SymbolKind.IMPORT,
-                file_path=self.file_path,
-                line_start=node.lineno,
-                line_end=node.lineno,
-                imported_from=mod
-            ))
+            self.symbols.append(
+                CodeSymbol(
+                    name=alias.name,
+                    kind=SymbolKind.IMPORT,
+                    file_path=self.file_path,
+                    line_start=node.lineno,
+                    line_end=node.lineno,
+                    imported_from=mod,
+                )
+            )
         self.generic_visit(node)
 
 
@@ -182,7 +192,12 @@ class CodeKnowledgeGraph:
 
         for root, dirs, files in os.walk(str(target_root)):
             # Skip hidden, virtualenv, and test cache dirs
-            dirs[:] = [d for d in dirs if not d.startswith(".") and d not in ["venv", "__pycache__", "build", "dist", "node_modules"]]
+            dirs[:] = [
+                d
+                for d in dirs
+                if not d.startswith(".")
+                and d not in ["venv", "__pycache__", "build", "dist", "node_modules"]
+            ]
             for file in files:
                 if file.endswith(".py"):
                     full_p = Path(root) / file
@@ -196,7 +211,11 @@ class CodeKnowledgeGraph:
         return self.symbols.get(name, [])
 
     def find_references_calling(self, target_function: str) -> List[DependencyEdge]:
-        return [e for e in self.edges if e.target_symbol == target_function and e.relationship == "CALLS"]
+        return [
+            e
+            for e in self.edges
+            if e.target_symbol == target_function and e.relationship == "CALLS"
+        ]
 
     def get_context_slice(self, symbol_names: List[str], max_lines: int = 150) -> str:
         """
@@ -221,10 +240,11 @@ class CodeKnowledgeGraph:
                     start = max(0, sym.line_start - 1)
                     end = min(len(file_lines), sym.line_end)
                     snippet = "".join(file_lines[start:end])
-                    lines_out.append(f"// File: {sym.file_path} (lines {sym.line_start}-{sym.line_end})\n{snippet}")
-                    total_lines += (end - start)
+                    lines_out.append(
+                        f"// File: {sym.file_path} (lines {sym.line_start}-{sym.line_end})\n{snippet}"
+                    )
+                    total_lines += end - start
                 except Exception:
                     pass
 
         return "\n\n".join(lines_out)
-

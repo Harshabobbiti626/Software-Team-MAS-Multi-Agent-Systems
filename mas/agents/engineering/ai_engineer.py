@@ -36,7 +36,7 @@ class SemanticRetrievalEngine:
             artifact_id=f"rag-pipeline-{task.id}",
             artifact_type=ArtifactType.CODE_PATCH,
             name="retrieval.py",
-            content=rag_config_py
+            content=rag_config_py,
         )
 
         tokens = TokenUsageTracker(prompt_tokens=800, candidate_tokens=400, thinking_tokens=600)
@@ -47,5 +47,5 @@ class SemanticRetrievalEngine:
             status="SUCCESS",
             summary="Authored SemanticRetrievalEngine and RAG configuration.",
             artifacts_produced=[artifact.id],
-            tokens_used=tokens
+            tokens_used=tokens,
         )

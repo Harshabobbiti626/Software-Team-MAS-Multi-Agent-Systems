@@ -33,18 +33,16 @@ class DiagnosticAutopsyEngine:
         task_id: str,
         test_report: Optional[TestReport] = None,
         error_logs: str = "",
-        timeline_events: Optional[List[Dict[str, Any]]] = None
+        timeline_events: Optional[List[Dict[str, Any]]] = None,
     ) -> AutopsyReport:
         ticket = self.router.triage_failure(
-            task_id=task_id,
-            test_report=test_report,
-            error_output=error_logs
+            task_id=task_id, test_report=test_report, error_output=error_logs
         )
 
         countermeasures = [
             f"Update {ticket.assignee_role} system prompt with strict validation bounds.",
             "Add automated pre-commit lint gate before code review handoff.",
-            "Include regression test case in permanent test harness."
+            "Include regression test case in permanent test harness.",
         ]
 
         return AutopsyReport(
@@ -55,5 +53,5 @@ class DiagnosticAutopsyEngine:
             root_cause_analysis=ticket.root_cause_summary,
             timeline_events=timeline_events or [],
             remediation_ticket=ticket,
-            preventative_countermeasures=countermeasures
+            preventative_countermeasures=countermeasures,
         )

@@ -18,5 +18,5 @@ __all__ = [
     "DomainVerifier",
     "RuleValidationResult",
     "SurgicalPatcher",
-    "PatchResult"
+    "PatchResult",
 ]

@@ -15,7 +15,13 @@ class EscalationPolicy:
         desc = task_description.lower()
         if "delete" in desc or "drop table" in desc or "truncate" in desc:
             score += 0.6
-        if "pci" in desc or "hipaa" in desc or "auth" in desc or "secret" in desc or "payment" in desc:
+        if (
+            "pci" in desc
+            or "hipaa" in desc
+            or "auth" in desc
+            or "secret" in desc
+            or "payment" in desc
+        ):
             score += 0.4
         if "migration" in desc or "schema" in desc:
             score += 0.3

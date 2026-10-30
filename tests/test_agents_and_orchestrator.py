@@ -13,18 +13,14 @@ from mas.core.state import SubsystemClass, TestReport
 def test_orchestrator_blast_radius():
     orch = MASOrchestrator()
     # Data only
-    sub1 = orch.analyze_blast_radius(
-        "Optimize PostgreSQL database migration for user table"
-    )
+    sub1 = orch.analyze_blast_radius("Optimize PostgreSQL database migration for user table")
     assert sub1 == SubsystemClass.DATA
     pods1 = orch.determine_active_pods(sub1)
     assert "DatabaseArchitectAgent" in pods1
     assert "FrontendEngineerAgent" not in pods1
 
     # Frontend only
-    sub2 = orch.analyze_blast_radius(
-        "Update React UI button styles and accessibility CSS"
-    )
+    sub2 = orch.analyze_blast_radius("Update React UI button styles and accessibility CSS")
     assert sub2 == SubsystemClass.FRONTEND
 
     # Full system
@@ -48,9 +44,7 @@ def test_individual_agent_execution(tmp_path):
 def test_concurrent_parallel_pods_execution(tmp_path):
     bb = ArtifactBlackboard(repo_path=str(tmp_path), git_enabled=False)
     orch = MASOrchestrator(blackboard=bb)
-    task = orch.create_task(
-        "T-CONCURRENT", "Order Checkout Service", "Build checkout APIs and UI"
-    )
+    task = orch.create_task("T-CONCURRENT", "Order Checkout Service", "Build checkout APIs and UI")
 
     pod_agents = [
         DatabaseArchitectAgent(blackboard=bb),

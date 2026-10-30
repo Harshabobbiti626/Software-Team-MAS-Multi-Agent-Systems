@@ -15,5 +15,5 @@ __all__ = [
     "UIUXDesignerAgent",
     "FrontendEngineerAgent",
     "CloudEngineerAgent",
-    "DevOpsSREAgent"
+    "DevOpsSREAgent",
 ]
