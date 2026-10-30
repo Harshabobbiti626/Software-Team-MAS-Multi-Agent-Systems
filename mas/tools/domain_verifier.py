@@ -6,6 +6,7 @@ Validates artifacts and source code against domain axioms specified in config/do
 import re
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+
 import yaml
 from pydantic import BaseModel, Field
 
@@ -34,7 +35,8 @@ class DomainVerifier:
     def _load_rules(self) -> None:
         if self.rules_path.exists():
             with open(self.rules_path, "r", encoding="utf-8") as f:
-                self.rules = yaml.safe_load(f) or {}
+                raw_rules = yaml.safe_load(f)
+                self.rules = raw_rules if isinstance(raw_rules, dict) else {}
 
     def verify_content(self, content: str, file_path: Optional[str] = None) -> RuleValidationResult:
         violations: List[InvariantViolation] = []

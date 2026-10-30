@@ -5,6 +5,7 @@ Loads settings from YAML files or environment variables with strict Pydantic val
 
 from pathlib import Path
 from typing import Dict, List, Optional
+
 import yaml
 from pydantic import BaseModel, Field
 
@@ -72,7 +73,8 @@ class MASConfiguration(BaseModel):
 
         if path and Path(path).exists():
             with open(path, "r", encoding="utf-8") as f:
-                data = yaml.safe_load(f) or {}
+                raw_data = yaml.safe_load(f)
+                data = raw_data if isinstance(raw_data, dict) else {}
             return cls(**data)
         return cls()
 

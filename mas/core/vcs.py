@@ -4,15 +4,15 @@ Isolates concurrent pod workspaces via git worktrees, preventing branch collisio
 and synthesizes GitHub/GitLab-compliant Pull Request dossiers.
 """
 
-import os
 import shutil
 import subprocess
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import List, Optional
+
 from pydantic import BaseModel, Field
 
-from mas.core.state import Artifact, ArtifactType, SubsystemClass, Task, TestReport
+from mas.core.state import SubsystemClass, Task, TestReport
 
 
 class PullRequest(BaseModel):

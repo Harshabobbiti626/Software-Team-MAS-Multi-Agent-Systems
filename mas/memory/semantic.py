@@ -4,7 +4,8 @@ Stores domain axioms, design patterns, coding standards, and historical post-mor
 Provides keyword & semantic similarity retrieval.
 """
 
-from typing import Any, Dict, List, Optional
+from typing import Dict, List, Optional
+
 from pydantic import BaseModel, Field
 
 

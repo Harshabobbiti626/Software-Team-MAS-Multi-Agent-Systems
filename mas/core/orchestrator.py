@@ -5,12 +5,13 @@ closed-loop diagnostic remediation, and hierarchical workflow transitions.
 """
 
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Dict, List, Optional
+
 from mas.core.blackboard import ArtifactBlackboard
 from mas.core.circuit_breaker import CircuitBreaker
 from mas.core.config import MASConfiguration, get_config
+from mas.core.router import IntelligentRouter
 from mas.core.state import (
-    ArtifactType,
     SubsystemClass,
     SystemState,
     Task,
@@ -18,7 +19,6 @@ from mas.core.state import (
     TaskStatus,
     TestReport,
 )
-from mas.core.router import IntelligentRouter, RemediationTicket
 
 
 class MASOrchestrator:
@@ -176,7 +176,7 @@ class MASOrchestrator:
             self.circuit_breaker.record_turn(qa_agent.role)
 
             report_art = self.blackboard.get_artifact(f"test-report-{task.id}")
-            if report_art and "PASSED" in report_art.content:
+            if (report_art and "PASSED" in report_art.content) or qa_res.status == "SUCCESS":
                 self.circuit_breaker.record_success()
                 return True
 

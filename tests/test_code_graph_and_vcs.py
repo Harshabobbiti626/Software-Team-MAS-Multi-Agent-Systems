@@ -38,6 +38,7 @@ def process_order(order: Order):
     order_syms = graph.find_symbol("Order")
     assert len(order_syms) == 1
     assert order_syms[0].kind == SymbolKind.CLASS
+    assert order_syms[0].docstring is not None
     assert "customer purchase" in order_syms[0].docstring
 
     # Check method extraction

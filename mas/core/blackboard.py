@@ -4,10 +4,10 @@ Provides an immutable, versioned, contract-first artifact ledger.
 Agents publish, subscribe, and diff canonical artifacts rather than chatting unstructuredly.
 """
 
-import os
 import subprocess
 from pathlib import Path
 from typing import Dict, List, Optional
+
 from mas.core.state import Artifact, ArtifactType
 
 
@@ -98,7 +98,7 @@ class ArtifactBlackboard:
                 timeout=10
             )
             # Commit file
-            res = subprocess.run(
+            subprocess.run(
                 ["git", "commit", "-m", message],
                 cwd=str(self.repo_path),
                 check=False,

@@ -6,7 +6,6 @@ Guarantees path traversal prevention and deterministic file diff/patch handling.
 import difflib
 import hashlib
 from pathlib import Path
-from typing import List, Optional, Tuple
 
 
 class SafeFileOps:

@@ -3,8 +3,7 @@ Escalation Policies and Risk Scoring for HITL Gating.
 Calculates risk scores and triggers emergency escalations.
 """
 
-from typing import Any, Dict, List
-from mas.hitl.gates import GateLevel
+from typing import Any, Dict
 
 
 class EscalationPolicy:

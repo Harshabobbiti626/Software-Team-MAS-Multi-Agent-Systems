@@ -4,7 +4,8 @@ Authors Terraform/OpenTofu Infrastructure-as-Code (IaC), VPC definitions, and IA
 """
 
 from typing import Any, Dict
-from mas.agents.base import BaseAgent, AgentResponse
+
+from mas.agents.base import AgentResponse, BaseAgent
 from mas.core.state import ArtifactType, SubsystemClass, Task, TokenUsageTracker
 
 
@@ -67,7 +68,7 @@ resource "aws_security_group" "service_sg" {{
         return AgentResponse(
             agent_role=self.role,
             status="SUCCESS",
-            summary=f"Authored Terraform IaC main.tf with encrypted KMS and least-privilege SG.",
+            summary="Authored Terraform IaC main.tf with encrypted KMS and least-privilege SG.",
             artifacts_produced=[artifact.id],
             tokens_used=tokens
         )

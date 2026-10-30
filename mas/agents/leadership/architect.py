@@ -5,8 +5,9 @@ and executes pre-mortem failure mode reflections with live LLM reasoning.
 """
 
 from typing import Any, Dict
-from mas.agents.base import BaseAgent, AgentResponse
-from mas.core.state import ADR, ADRStatus, ArtifactType, SubsystemClass, Task, TokenUsageTracker
+
+from mas.agents.base import AgentResponse, BaseAgent
+from mas.core.state import ArtifactType, SubsystemClass, Task, TokenUsageTracker
 
 
 class SystemArchitectAgent(BaseAgent):

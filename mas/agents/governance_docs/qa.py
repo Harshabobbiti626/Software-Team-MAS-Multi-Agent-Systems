@@ -7,7 +7,8 @@ Tailors test assertions dynamically to the task's domain entities.
 import json
 import re
 from typing import Any, Dict
-from mas.agents.base import BaseAgent, AgentResponse
+
+from mas.agents.base import AgentResponse, BaseAgent
 from mas.core.state import ArtifactType, SubsystemClass, Task, TestReport, TokenUsageTracker
 from mas.tools.linter import DeterministicLinter
 

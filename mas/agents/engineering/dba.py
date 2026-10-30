@@ -6,7 +6,8 @@ Leverages live LLM reasoning for domain-specific schemas and non-locking DDL.
 
 import re
 from typing import Any, Dict
-from mas.agents.base import BaseAgent, AgentResponse
+
+from mas.agents.base import AgentResponse, BaseAgent
 from mas.core.state import ArtifactType, SubsystemClass, Task, TokenUsageTracker
 
 

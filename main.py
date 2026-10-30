@@ -10,24 +10,13 @@ Commands:
 import argparse
 import sys
 from pathlib import Path
-from mas.core.config import get_config
-from mas.core.blackboard import ArtifactBlackboard
-from mas.core.circuit_breaker import CircuitBreaker
-from mas.core.orchestrator import MASOrchestrator
-from mas.core.state import Task, TaskPriority, TaskStatus, SubsystemClass
-from mas.agents.leadership import (
-    BusinessSponsorAgent,
-    ProductManagerAgent,
-    DomainSMEAgent,
-    SystemArchitectAgent,
-    TechLeadAgent,
-)
+
 from mas.agents.engineering import (
-    DatabaseArchitectAgent,
     BackendEngineerAgent,
-    FrontendEngineerAgent,
     CloudEngineerAgent,
+    DatabaseArchitectAgent,
     DevOpsSREAgent,
+    FrontendEngineerAgent,
 )
 from mas.agents.governance_docs import (
     AppSecAgent,
@@ -35,10 +24,22 @@ from mas.agents.governance_docs import (
     QASDETAgent,
     TechnicalWriterAgent,
 )
-from mas.observability.tracer import DistributedTracer
-from mas.observability.otlp import OTLPTraceExporter
-from mas.hitl.gates import HITLGateManager, GateLevel, GateDecision
+from mas.agents.leadership import (
+    BusinessSponsorAgent,
+    DomainSMEAgent,
+    ProductManagerAgent,
+    SystemArchitectAgent,
+    TechLeadAgent,
+)
+from mas.core.blackboard import ArtifactBlackboard
+from mas.core.circuit_breaker import CircuitBreaker
+from mas.core.config import get_config
+from mas.core.orchestrator import MASOrchestrator
+from mas.core.state import SubsystemClass, Task, TaskPriority, TestReport
 from mas.core.vcs import PullRequestGenerator
+from mas.hitl.gates import GateDecision, GateLevel, HITLGateManager
+from mas.observability.otlp import OTLPTraceExporter
+from mas.observability.tracer import DistributedTracer
 from mas.tools.domain_verifier import DomainVerifier
 from mas.tools.linter import DeterministicLinter
 
@@ -53,9 +54,9 @@ def interactive_gate_handler(gate: GateLevel, task_id: str, context: dict) -> Ga
 
 
 def run_pipeline(task_title: str, task_desc: str, interactive: bool = False) -> int:
-    print(f"\n================================================================================")
+    print("\n================================================================================")
     print(f"🚀 Initializing MAS Multi-Agent Pipeline for: {task_title}")
-    print(f"================================================================================\n")
+    print("================================================================================\n")
 
     config = get_config()
     blackboard = ArtifactBlackboard(repo_path=".")
@@ -152,6 +153,14 @@ def run_pipeline(task_title: str, task_desc: str, interactive: bool = False) -> 
         print("  ⚠️ QA Failure detected. Triggering Intelligent Remediation Loop...")
         agent_roster = {a.role: a for a in engineering_pods}
         test_report = getattr(r_qa, "test_report", None)
+        if not isinstance(test_report, TestReport):
+            test_report = TestReport(
+                id=f"TR-FAIL-{task.id}",
+                task_id=task.id,
+                test_suite="integration",
+                passed_all=False,
+                stderr=r_qa.summary
+            )
         remediated = orchestrator.trigger_remediation_loop(task, test_report, agent_roster, qa)
         print(f"  [*] Remediation Loop Result: {'SUCCESS' if remediated else 'FAILED'}")
 
@@ -198,19 +207,18 @@ def run_pipeline(task_title: str, task_desc: str, interactive: bool = False) -> 
     otlp_exporter.export_spans([task_span])
 
     # Summary
-    print(f"\n================================================================================")
+    print("\n================================================================================")
     print(f"✅ MAS Task Complete: {task.title}")
     print(f"   Total Turns: {circuit_breaker.total_turns} / {config.limits.max_total_turns_per_task}")
     print(f"   Tokens Consumed: {circuit_breaker.prompt_tokens + circuit_breaker.candidate_tokens + circuit_breaker.thinking_tokens}")
     print(f"   Circuit Breaker: Healthy (Tripped: {circuit_breaker.is_tripped()})")
     print(f"   Artifacts Committed: {len(blackboard.list_artifacts())}")
-    print(f"   Telemetry Trace: Exported to .mas_traces.jsonl")
-    print(f"================================================================================\n")
+    print("   Telemetry Trace: Exported to .mas_traces.jsonl")
+    print("================================================================================\n")
     return 0
 
 
 def generate_pr_command(task_id: str = "TASK-001") -> int:
-    blackboard = ArtifactBlackboard(repo_path=".")
     task = Task(id=task_id, title="Core Service Implementation", description="End-to-end microservice", assigned_pod=SubsystemClass.FULL_SYSTEM)
     pr_gen = PullRequestGenerator()
     pr = pr_gen.generate_pr(task=task, source_branch="feat/task-001")
@@ -257,14 +265,14 @@ def main() -> int:
     elif args.command == "status":
         bb = ArtifactBlackboard(repo_path=".")
         arts = bb.list_artifacts()
-        print(f"\n--- Artifact Blackboard Status ---")
+        print("\n--- Artifact Blackboard Status ---")
         print(f"Total Registered Artifacts: {len(arts)}")
         for a in arts:
             print(f"[{a.type.value}] {a.name} (v{a.version}) created by {a.created_by} -> {a.path}")
         return 0
 
     elif args.command == "verify":
-        print(f"\n--- Running Deterministic Domain & Syntax Verification ---")
+        print("\n--- Running Deterministic Domain & Syntax Verification ---")
         verifier = DomainVerifier()
         linter = DeterministicLinter()
         ast_res = linter.check_python_syntax_ast("main.py")

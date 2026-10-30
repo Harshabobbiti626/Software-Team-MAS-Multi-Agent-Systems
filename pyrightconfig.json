@@ -1,0 +1,19 @@
+{
+  "include": [
+    "mas",
+    "tests",
+    "main.py"
+  ],
+  "exclude": [
+    "**/__pycache__",
+    ".pytest_cache",
+    ".git"
+  ],
+  "extraPaths": [
+    "c:/Users/bobharsh/MAS",
+    "C:/Users/bobharsh/AppData/Local/Packages/PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0/LocalCache/local-packages/Python313/site-packages"
+  ],
+  "pythonVersion": "3.13",
+  "pythonPlatform": "Windows",
+  "typeCheckingMode": "basic"
+}

@@ -74,5 +74,7 @@ def test_artifact_blackboard(tmp_path):
         created_by="ProductManager",
     )
     assert art2.version == 2
-    assert bb.get_artifact("art-1").content == "# Test PRD v2"
+    art_retrieved = bb.get_artifact("art-1")
+    assert art_retrieved is not None
+    assert art_retrieved.content == "# Test PRD v2"
     assert len(bb.get_by_type(ArtifactType.PRD)) == 1

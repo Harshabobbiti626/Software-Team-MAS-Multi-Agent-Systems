@@ -6,6 +6,7 @@ live LLM inference, surgical code patching, and strict resource ceilings.
 
 from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Optional, Type, TypeVar
+
 from pydantic import BaseModel, Field
 
 from mas.core.blackboard import ArtifactBlackboard

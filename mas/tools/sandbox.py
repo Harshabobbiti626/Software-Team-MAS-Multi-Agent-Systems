@@ -9,6 +9,7 @@ import shutil
 import subprocess
 from pathlib import Path
 from typing import Dict, List, Optional
+
 from pydantic import BaseModel
 
 
@@ -187,8 +188,8 @@ class DockerSandbox:
             return SandboxResult(
                 command=" ".join(command_args),
                 exit_code=-1,
-                stdout=te.stdout if te.stdout else "",
-                stderr="Container execution timed out.",
+                stdout=(te.stdout.decode("utf-8", errors="replace") if isinstance(te.stdout, bytes) else (te.stdout or "")),
+                stderr=(te.stderr.decode("utf-8", errors="replace") if isinstance(te.stderr, bytes) else (te.stderr or "Container execution timed out.")),
                 duration_seconds=duration,
                 timed_out=True,
                 runtime_environment="docker"

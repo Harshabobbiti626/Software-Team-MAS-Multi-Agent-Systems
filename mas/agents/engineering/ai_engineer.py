@@ -4,7 +4,8 @@ Builds RAG retrieval pipelines, vector search embeddings, prompt evaluators, and
 """
 
 from typing import Any, Dict
-from mas.agents.base import BaseAgent, AgentResponse
+
+from mas.agents.base import AgentResponse, BaseAgent
 from mas.core.state import ArtifactType, SubsystemClass, Task, TokenUsageTracker
 
 
@@ -27,7 +28,7 @@ class SemanticRetrievalEngine:
     def retrieve_context(self, query: str, top_k: int = 3) -> List[Dict[str, Any]]:
         # Deterministic semantic retrieval logic
         return [
-            {{"doc_id": "DOC-001", "similarity": 0.94, "snippet": f"Context matching {query}"}}
+            {{"doc_id": "DOC-001", "similarity": 0.94, "snippet": f"Context matching {{query}}"}}
         ]
 """
 
@@ -44,7 +45,7 @@ class SemanticRetrievalEngine:
         return AgentResponse(
             agent_role=self.role,
             status="SUCCESS",
-            summary=f"Authored SemanticRetrievalEngine and RAG configuration.",
+            summary="Authored SemanticRetrievalEngine and RAG configuration.",
             artifacts_produced=[artifact.id],
             tokens_used=tokens
         )

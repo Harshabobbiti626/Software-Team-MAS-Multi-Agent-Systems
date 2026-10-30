@@ -4,7 +4,8 @@ Builds ETL/ELT ingestion pipelines (dbt, Spark, Kafka) and streaming transformat
 """
 
 from typing import Any, Dict
-from mas.agents.base import BaseAgent, AgentResponse
+
+from mas.agents.base import AgentResponse, BaseAgent
 from mas.core.state import ArtifactType, SubsystemClass, Task, TokenUsageTracker
 
 
@@ -40,7 +41,7 @@ WHERE updated_at > (SELECT coalesce(max(updated_at), '1970-01-01') FROM {{{{ thi
         return AgentResponse(
             agent_role=self.role,
             status="SUCCESS",
-            summary=f"Authored incremental dbt model resources_incremental.sql.",
+            summary="Authored incremental dbt model resources_incremental.sql.",
             artifacts_produced=[artifact.id],
             tokens_used=tokens
         )

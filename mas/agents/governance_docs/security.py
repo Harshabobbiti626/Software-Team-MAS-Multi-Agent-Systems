@@ -5,7 +5,8 @@ Performs STRIDE threat modeling, secret scanning, and SAST/DAST compliance verif
 
 import json
 from typing import Any, Dict
-from mas.agents.base import BaseAgent, AgentResponse
+
+from mas.agents.base import AgentResponse, BaseAgent
 from mas.core.state import ArtifactType, SubsystemClass, Task, TokenUsageTracker
 from mas.tools.domain_verifier import DomainVerifier
 

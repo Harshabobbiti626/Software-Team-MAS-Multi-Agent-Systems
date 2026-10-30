@@ -4,7 +4,8 @@ Powers structured thinking, pre-mortem failure mode reflection,
 trade-off matrix evaluations, and self-correction loops.
 """
 
-from typing import Any, Dict, List, Optional
+from typing import List, Optional
+
 from pydantic import BaseModel, Field
 
 

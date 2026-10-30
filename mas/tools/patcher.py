@@ -6,7 +6,8 @@ and AST syntax verification.
 
 import ast
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import Optional
+
 from pydantic import BaseModel
 
 

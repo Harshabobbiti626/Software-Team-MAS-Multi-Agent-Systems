@@ -6,9 +6,9 @@ to local telemetry sinks, files, or corporate APM endpoints (Datadog, Jaeger, Ho
 
 import json
 import logging
-import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+
 import requests
 
 from mas.observability.tracer import TraceSpan

@@ -35,3 +35,21 @@ testpaths = ["tests"]
 python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+exclude = [
+    ".git",
+    ".pytest_cache",
+    ".agents",
+    "artifacts",
+    "prompts",
+    "templates",
+    "mcp",
+    "__pycache__"
+]
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+ignore = ["E501"]

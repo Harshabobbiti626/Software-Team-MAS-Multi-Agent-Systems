@@ -4,7 +4,8 @@ Implements client UI components, state stores, and user flows against mock and l
 """
 
 from typing import Any, Dict
-from mas.agents.base import BaseAgent, AgentResponse
+
+from mas.agents.base import AgentResponse, BaseAgent
 from mas.core.state import ArtifactType, SubsystemClass, Task, TokenUsageTracker
 
 
@@ -94,7 +95,7 @@ export const ResourceView: React.FC = () => {{
         return AgentResponse(
             agent_role=self.role,
             status="SUCCESS",
-            summary=f"Created React component ResourceView.tsx wired to api-spec.yaml endpoints.",
+            summary="Created React component ResourceView.tsx wired to api-spec.yaml endpoints.",
             artifacts_produced=[artifact.id],
             tokens_used=tokens
         )

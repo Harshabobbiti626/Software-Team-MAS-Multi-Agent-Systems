@@ -6,7 +6,9 @@ without chaotic chat swarms.
 
 from datetime import datetime, timezone
 from typing import Dict, List, Optional
+
 from pydantic import BaseModel, Field
+
 from mas.core.blackboard import ArtifactBlackboard
 from mas.core.state import ArtifactType, ConsensusDecisionRecord
 

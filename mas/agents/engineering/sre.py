@@ -4,7 +4,8 @@ Creates multi-stage Dockerfiles, GitHub Actions CI/CD workflows, and SLI/SLO hea
 """
 
 from typing import Any, Dict
-from mas.agents.base import BaseAgent, AgentResponse
+
+from mas.agents.base import AgentResponse, BaseAgent
 from mas.core.state import ArtifactType, SubsystemClass, Task, TokenUsageTracker
 
 
@@ -45,7 +46,7 @@ CMD ["python", "main.py"]
         return AgentResponse(
             agent_role=self.role,
             status="SUCCESS",
-            summary=f"Generated hardened non-root multi-stage Dockerfile with health checks.",
+            summary="Generated hardened non-root multi-stage Dockerfile with health checks.",
             artifacts_produced=[artifact.id],
             tokens_used=tokens
         )

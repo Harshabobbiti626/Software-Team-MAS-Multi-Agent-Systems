@@ -6,7 +6,8 @@ Uses live LLM reasoning, domain extraction, and surgical patching.
 
 import re
 from typing import Any, Dict
-from mas.agents.base import BaseAgent, AgentResponse
+
+from mas.agents.base import AgentResponse, BaseAgent
 from mas.core.state import ArtifactType, SubsystemClass, Task, TokenUsageTracker
 
 

@@ -10,10 +10,11 @@ import os
 import random
 import time
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional, Type, TypeVar
-from pydantic import BaseModel, Field
+from typing import Any, Dict, Optional, Type, TypeVar
 
 import requests
+from pydantic import BaseModel
+
 from mas.core.config import MASConfiguration, get_config
 
 logger = logging.getLogger(__name__)
@@ -92,7 +93,7 @@ class GeminiRESTProvider(BaseLLMProvider):
                     time.sleep(backoff)
                 else:
                     raise RuntimeError(f"Gemini API returned error {response.status_code}: {response.text}")
-            except requests.RequestException as e:
+            except requests.RequestException:
                 if attempt == max_retries - 1:
                     raise
                 backoff = (2 ** attempt) + random.uniform(0.1, 0.5)

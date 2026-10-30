@@ -4,6 +4,7 @@ Maintains the immediate context slice with sliding-window compaction to prevent 
 """
 
 from typing import Any, Dict, List, Optional
+
 from pydantic import BaseModel, Field
 
 

@@ -5,7 +5,8 @@ Authors design tokens, layouts, accessibility (WCAG AA/AAA) specifications, and 
 
 import json
 from typing import Any, Dict
-from mas.agents.base import BaseAgent, AgentResponse
+
+from mas.agents.base import AgentResponse, BaseAgent
 from mas.core.state import ArtifactType, SubsystemClass, Task, TokenUsageTracker
 
 
@@ -49,7 +50,7 @@ class UIUXDesignerAgent(BaseAgent):
         return AgentResponse(
             agent_role=self.role,
             status="SUCCESS",
-            summary=f"Created WCAG-compliant design tokens in DesignTokens.json.",
+            summary="Created WCAG-compliant design tokens in DesignTokens.json.",
             artifacts_produced=[artifact.id],
             tokens_used=tokens
         )

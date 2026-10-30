@@ -4,6 +4,7 @@ Enforces hard budgets, turn limits, thinking token caps, and 3-strike failure tr
 """
 
 from typing import Dict, List, Optional
+
 from mas.core.config import LimitSettings
 
 
@@ -44,8 +45,6 @@ class CircuitBreaker:
         self.prompt_tokens += prompt
         self.candidate_tokens += candidate
         self.thinking_tokens += thinking
-
-        total_tokens = self.prompt_tokens + self.candidate_tokens + self.thinking_tokens
 
         if self.limits.circuit_breaker_enabled:
             if self.prompt_tokens > self.limits.max_prompt_tokens:
