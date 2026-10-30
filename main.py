@@ -333,6 +333,16 @@ def main() -> int:
         "--create-pr", action="store_true", help="Create PR using GitHub CLI ('gh pr create')"
     )
 
+    # web command
+    web_parser = subparsers.add_parser(
+        "web", help="Start the MAS Web Mission Control Cockpit server"
+    )
+    web_parser.add_argument("--host", type=str, default="127.0.0.1", help="Server host IP")
+    web_parser.add_argument("--port", type=int, default=8000, help="Server port")
+    web_parser.add_argument(
+        "--open-browser", action="store_true", help="Automatically open browser"
+    )
+
     args = parser.parse_args()
 
     if args.command == "run" or args.command is None:
@@ -379,6 +389,28 @@ def main() -> int:
         print(
             f"[*] Domain Invariant Rules Checked: {rule_res.checked_invariants_count} (Pass: {rule_res.is_valid})"
         )
+        return 0
+
+    elif args.command == "web":
+        from mas.api.server import start_mas_web_server
+
+        host = getattr(args, "host", "127.0.0.1")
+        port = getattr(args, "port", 8000)
+        server = start_mas_web_server(host=host, port=port)
+        url = f"http://{host}:{port}"
+        print("\n================================================================================")
+        print("🚀 MAS Web Mission Control Cockpit Running")
+        print(f"[*] Access URL: {url}")
+        print("================================================================================\n")
+        if getattr(args, "open_browser", False):
+            import webbrowser
+
+            webbrowser.open(url)
+        try:
+            server.serve_forever()
+        except KeyboardInterrupt:
+            print("\nShutting down MAS Web Server...")
+            server.shutdown()
         return 0
 
     return 0

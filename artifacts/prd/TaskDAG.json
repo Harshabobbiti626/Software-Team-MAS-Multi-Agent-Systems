@@ -1,18 +1,18 @@
 {
-  "task_id": "TASK-001",
-  "root_objective": "Integration Test Service",
-  "domain_entity": "Integration",
+  "task_id": "TASK-1793341811701",
+  "root_objective": "API Test Service",
+  "domain_entity": "Resource",
   "parallel_workstreams": [
     {
       "stream_id": "WS-DATA",
       "role": "DatabaseArchitectAgent",
-      "deliverable": "schema_integration.sql",
+      "deliverable": "schema_resource.sql",
       "dependencies": []
     },
     {
       "stream_id": "WS-BACKEND",
       "role": "BackendEngineerAgent",
-      "deliverable": "integration_service.py",
+      "deliverable": "resource_service.py",
       "dependencies": [
         "WS-DATA"
       ]
@@ -20,7 +20,7 @@
     {
       "stream_id": "WS-FRONTEND",
       "role": "FrontendEngineerAgent",
-      "deliverable": "IntegrationView.tsx",
+      "deliverable": "ResourceView.tsx",
       "dependencies": []
     },
     {
@@ -32,7 +32,7 @@
     {
       "stream_id": "WS-QA",
       "role": "QASDETAgent",
-      "deliverable": "test_integration.py",
+      "deliverable": "test_resource.py",
       "dependencies": [
         "WS-BACKEND",
         "WS-FRONTEND"

@@ -1,18 +1,18 @@
-# Product Requirements Document (PRD): Integration Test Service
+# Product Requirements Document (PRD): API Test Service
 
 ## Executive Summary
 This document specifies the business value, technical boundaries, and user acceptance criteria for:
-Build resource service with API and storage
+Integration test description
 
 ## User Stories
 
 ### Story 1: Core Functional Flow
 - **As a**: Client Application / API Consumer
-- **I want**: Deterministic endpoints and services for `Integration Test Service`
+- **I want**: Deterministic endpoints and services for `API Test Service`
 - **So that**: Business operations execute reliably with ACID safety.
 
 #### Acceptance Criteria
-1. **Given** valid authorization credentials, **When** invoking the endpoint for `Integration Test Service`, **Then** a 200/201 response is returned with validated JSON.
+1. **Given** valid authorization credentials, **When** invoking the endpoint for `API Test Service`, **Then** a 200/201 response is returned with validated JSON.
 2. **Given** missing or malformed fields, **When** payload is received, **Then** HTTP 422 Unprocessable Entity is returned with explicit field validation errors.
 3. **Given** concurrent duplicate requests, **When** processed, **Then** operations maintain idempotency via idempotency keys.
 

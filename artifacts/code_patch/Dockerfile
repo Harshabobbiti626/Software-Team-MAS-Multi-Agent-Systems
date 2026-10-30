@@ -1,5 +1,5 @@
-# Multi-stage hardened Dockerfile for Integration Test Service
-# Service: integration-test-service
+# Multi-stage hardened Dockerfile for API Test Service
+# Service: api-test-service
 # Production non-root container with security context and health check
 
 FROM python:3.13-slim AS builder
