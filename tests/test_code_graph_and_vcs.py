@@ -92,3 +92,4 @@ def test_otlp_trace_exporter(tmp_path):
     assert success is True
     assert out_file.exists()
     assert "mas.tracer" in out_file.read_text(encoding="utf-8")
+

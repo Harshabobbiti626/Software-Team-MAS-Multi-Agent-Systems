@@ -226,3 +226,4 @@ class CodeKnowledgeGraph:
                     pass
 
         return "\n\n".join(lines_out)
+

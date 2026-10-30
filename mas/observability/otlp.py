@@ -113,3 +113,4 @@ class OTLPTraceExporter:
                 return False
 
         return True
+
