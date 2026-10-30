@@ -1,4 +1,4 @@
-# Setup & Developer Quickstart: Integration Test Service
+# Setup & Developer Quickstart: Real-Time Payment Gateway
 
 ## Prerequisites
 - Python 3.11+
