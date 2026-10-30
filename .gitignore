@@ -23,6 +23,9 @@ htmlcov/
 .mas_traces.jsonl
 .worktrees/
 PULL_REQUEST.md
+.env
+.env.local
+.env.*.local
 
 # IDE & OS
 .vscode/
