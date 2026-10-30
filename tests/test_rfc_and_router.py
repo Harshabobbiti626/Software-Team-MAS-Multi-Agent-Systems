@@ -1,7 +1,6 @@
-import pytest
 from mas.core.rfc import RFCManager
 from mas.core.router import IntelligentRouter, FailureCategory
-from mas.core.state import TestReport, SubsystemClass
+from mas.core.state import SubsystemClass
 
 
 def test_rfc_consensus_flow():

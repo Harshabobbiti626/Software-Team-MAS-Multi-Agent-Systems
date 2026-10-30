@@ -1,7 +1,5 @@
-import pytest
-from pathlib import Path
 from mas.memory.code_graph import CodeKnowledgeGraph, SymbolKind
-from mas.core.vcs import GitWorktreeManager, PullRequestGenerator, PullRequest
+from mas.core.vcs import GitWorktreeManager, PullRequestGenerator
 from mas.core.state import SubsystemClass, Task, TestReport
 from mas.observability.otlp import OTLPTraceExporter
 from mas.observability.tracer import TraceSpan

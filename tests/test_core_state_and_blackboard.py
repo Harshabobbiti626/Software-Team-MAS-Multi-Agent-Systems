@@ -1,5 +1,3 @@
-import pytest
-from pathlib import Path
 from mas.core.state import (
     Task,
     TaskStatus,
@@ -9,8 +7,6 @@ from mas.core.state import (
     UserStory,
     ADR,
     ADRStatus,
-    CodePatch,
-    TestReport,
     ArtifactType,
 )
 from mas.core.blackboard import ArtifactBlackboard
