@@ -1,15 +1,15 @@
 {
   "id": "test-report-TASK-001",
   "task_id": "TASK-001",
-  "test_suite": "Integration & Unit Verification",
+  "test_suite": "Integration Verification for Integration Test Service",
   "total_tests": 2,
   "passed": 2,
   "failed": 0,
   "errors": 0,
   "duration_seconds": 0.15,
-  "stdout": "PASSED: test_resource_creation_contract\nPASSED: test_resource_error_handling",
+  "stdout": "PASSED: test_integration_creation_contract\nPASSED: test_integration_error_handling",
   "stderr": "",
   "failure_signatures": [],
   "passed_all": true,
-  "created_at": "2026-10-30 04:09:08.248399+00:00"
+  "created_at": "2026-10-30 04:24:19.185248+00:00"
 }
