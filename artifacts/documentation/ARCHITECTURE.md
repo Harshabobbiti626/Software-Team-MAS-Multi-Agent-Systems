@@ -1,4 +1,4 @@
-# System Architecture & Technical Rationale: Integration Test Service
+# System Architecture & Technical Rationale: Real-Time Payment Gateway
 
 ## C4 System Flow
 ```mermaid
