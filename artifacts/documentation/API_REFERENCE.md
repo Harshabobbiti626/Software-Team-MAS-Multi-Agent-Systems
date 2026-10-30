@@ -1,7 +1,7 @@
-# API & SDK Reference: Integration Test Service
+# API & SDK Reference: Real-Time Payment Gateway
 
 ## Endpoint: `POST /api/v1/resource`
-Creates a new resource managed under Integration Test Service.
+Creates a new resource managed under Real-Time Payment Gateway.
 
 ### Runnable Example
 ```bash
