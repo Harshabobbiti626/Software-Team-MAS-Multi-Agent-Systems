@@ -1,4 +1,4 @@
-# Operations Runbook: Integration Test Service
+# Operations Runbook: Real-Time Payment Gateway
 
 ## Deployment & Rollout
 1. Run database migrations:
