@@ -78,3 +78,51 @@ def test_artifact_blackboard(tmp_path):
     assert art_retrieved is not None
     assert art_retrieved.content == "# Test PRD v2"
     assert len(bb.get_by_type(ArtifactType.PRD)) == 1
+
+
+def test_blackboard_target_workspace_sync(tmp_path):
+    target_repo = tmp_path / "target_repo"
+    (target_repo / "src").mkdir(parents=True)
+    (target_repo / "src" / "components").mkdir(parents=True)
+    (target_repo / "migrations").mkdir(parents=True)
+
+    bb_repo = tmp_path / "bb_repo"
+    bb_repo.mkdir()
+
+    bb = ArtifactBlackboard(
+        repo_path=str(bb_repo),
+        git_enabled=False,
+        target_workspace_dir=str(target_repo),
+    )
+
+    # 1. Python backend service -> target_repo/src/service.py
+    bb.register_artifact(
+        artifact_id="code-1",
+        artifact_type=ArtifactType.CODE_PATCH,
+        name="service.py",
+        content="print('service')",
+        created_by="BackendEngineer",
+    )
+    assert (target_repo / "src" / "service.py").exists()
+    assert (target_repo / "src" / "service.py").read_text() == "print('service')"
+
+    # 2. React UI component -> target_repo/src/components/ResourceView.tsx
+    bb.register_artifact(
+        artifact_id="code-2",
+        artifact_type=ArtifactType.CODE_PATCH,
+        name="ResourceView.tsx",
+        content="export const View = () => null;",
+        created_by="FrontendEngineer",
+    )
+    assert (target_repo / "src" / "components" / "ResourceView.tsx").exists()
+
+    # 3. SQL migration -> target_repo/migrations/schema.sql
+    bb.register_artifact(
+        artifact_id="schema-1",
+        artifact_type=ArtifactType.SCHEMA_SQL,
+        name="schema.sql",
+        content="CREATE TABLE users (id UUID);",
+        created_by="DBA",
+    )
+    assert (target_repo / "migrations" / "schema.sql").exists()
+

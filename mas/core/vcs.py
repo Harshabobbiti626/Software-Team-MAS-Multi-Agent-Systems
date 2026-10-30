@@ -1,7 +1,7 @@
 """
 Multi-Branch Git Worktree & Pull Request Engine for MAS.
 Isolates concurrent pod workspaces via git worktrees, preventing branch collisions,
-and synthesizes GitHub/GitLab-compliant Pull Request dossiers.
+and synthesizes GitHub/GitLab-compliant Pull Request dossiers with automated remote publication.
 """
 
 import shutil
@@ -27,6 +27,15 @@ class PullRequest(BaseModel):
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
+class PRSubmissionResult(BaseModel):
+    pr_id: str
+    branch: str
+    pushed_to_remote: bool = False
+    github_pr_url: Optional[str] = None
+    local_markdown_file: Optional[str] = None
+    status_message: str = ""
+
+
 class GitWorktreeManager:
     def __init__(self, repo_path: str = "."):
         self.repo_path = Path(repo_path).resolve()
@@ -42,14 +51,12 @@ class GitWorktreeManager:
         """
         pod_dir = self.worktrees_dir / f"pod_{pod.value.lower()}"
         if pod_dir.exists():
-            # If previous worktree exists, clean it up
             self.remove_worktree(pod_dir)
 
         pod_dir.parent.mkdir(parents=True, exist_ok=True)
 
         if self.is_git_repo():
             try:
-                # git worktree add -b <branch> <path>
                 res = subprocess.run(
                     ["git", "worktree", "add", "-b", branch_name, str(pod_dir)],
                     cwd=str(self.repo_path),
@@ -59,14 +66,12 @@ class GitWorktreeManager:
                     timeout=15,
                 )
                 if res.returncode != 0:
-                    # Fallback: copy workspace directly if worktree branch already exists
                     shutil.copytree(
                         str(self.repo_path),
                         str(pod_dir),
                         ignore=shutil.ignore_patterns(".git", ".worktrees"),
                     )
             except Exception:
-                # Safe filesystem fallback
                 pod_dir.mkdir(parents=True, exist_ok=True)
         else:
             pod_dir.mkdir(parents=True, exist_ok=True)
@@ -129,7 +134,11 @@ class GitWorktreeManager:
 class PullRequestGenerator:
     """
     Constructs high-standard, human-grade GitHub Pull Requests linking PRD, ADRs, and QA passes.
+    Supports local markdown generation, remote git pushing, and GitHub CLI PR submission.
     """
+
+    def __init__(self, repo_path: str = "."):
+        self.repo_path = Path(repo_path).resolve()
 
     def generate_pr(
         self,
@@ -186,3 +195,84 @@ Implemented **{task.title}** according to contract-first parallel pod specificat
             modified_files=files,
             qa_passed=(test_report.passed_all if test_report else True),
         )
+
+    def publish_remote_pr(
+        self,
+        pr: PullRequest,
+        push_to_remote: bool = False,
+        create_github_pr: bool = False,
+        remote_name: str = "origin",
+    ) -> PRSubmissionResult:
+        """
+        Optionally pushes source branch to remote and creates a pull request via GitHub CLI ('gh').
+        Falls back cleanly to local markdown file if remote/gh are unavailable.
+        """
+        result = PRSubmissionResult(
+            pr_id=pr.pr_id,
+            branch=pr.source_branch,
+            local_markdown_file="PULL_REQUEST.md",
+        )
+
+        # 1. Save local PR markdown
+        pr_md_path = self.repo_path / "PULL_REQUEST.md"
+        full_content = f"# {pr.title}\n\n{pr.description_markdown}"
+        pr_md_path.write_text(full_content, encoding="utf-8")
+
+        # 2. Push branch if requested
+        if push_to_remote:
+            try:
+                push_res = subprocess.run(
+                    ["git", "push", "-u", remote_name, pr.source_branch],
+                    cwd=str(self.repo_path),
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    text=True,
+                    timeout=20,
+                )
+                if push_res.returncode == 0:
+                    result.pushed_to_remote = True
+                    result.status_message = f"Pushed branch '{pr.source_branch}' to {remote_name}."
+                else:
+                    result.status_message = f"Git push failed: {push_res.stderr.strip()}"
+            except Exception as e:
+                result.status_message = f"Git push error: {str(e)}"
+
+        # 3. Create GitHub PR via gh CLI if requested
+        if create_github_pr:
+            try:
+                gh_cmd = [
+                    "gh",
+                    "pr",
+                    "create",
+                    "--title",
+                    pr.title,
+                    "--body",
+                    pr.description_markdown,
+                    "--base",
+                    pr.target_branch,
+                    "--head",
+                    pr.source_branch,
+                ]
+                gh_res = subprocess.run(
+                    gh_cmd,
+                    cwd=str(self.repo_path),
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    text=True,
+                    timeout=20,
+                )
+                if gh_res.returncode == 0:
+                    url = gh_res.stdout.strip()
+                    result.github_pr_url = url
+                    result.status_message += f" Created GitHub PR: {url}"
+                else:
+                    result.status_message += f" gh pr create note: {gh_res.stderr.strip()}"
+            except Exception as e:
+                result.status_message += f" gh CLI execution skipped/unavailable: {str(e)}"
+
+        if not result.status_message:
+            result.status_message = (
+                f"Generated local Pull Request dossier at {pr_md_path.resolve()}"
+            )
+
+        return result

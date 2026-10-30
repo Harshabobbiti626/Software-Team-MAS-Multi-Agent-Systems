@@ -4,16 +4,7 @@
   "reviewed_artifacts_count": 5,
   "details": [
     {
-      "artifact_name": "service.py",
-      "ast_syntax_pass": true,
-      "solid_compliance": {
-        "SingleResponsibility": "Compliant: Focused module scope",
-        "DependencyInversion": "Compliant: Relies on abstractions and schemas"
-      },
-      "issues": []
-    },
-    {
-      "artifact_name": "ResourceView.tsx",
+      "artifact_name": "IntegrationView.tsx",
       "ast_syntax_pass": false,
       "solid_compliance": {
         "SingleResponsibility": "Compliant: Focused module scope",
@@ -21,10 +12,10 @@
       },
       "issues": [
         {
-          "file_path": "ResourceView.tsx",
+          "file_path": "IntegrationView.tsx",
           "line_number": 3,
           "severity": "ERROR",
-          "message": "leading zeros in decimal integer literals are not permitted; use an 0o prefix for octal integers (ResourceView.tsx, line 3)",
+          "message": "leading zeros in decimal integer literals are not permitted; use an 0o prefix for octal integers (IntegrationView.tsx, line 3)",
           "rule_code": "SYNTAX_ERROR"
         }
       ]
@@ -39,9 +30,9 @@
       "issues": [
         {
           "file_path": "main.tf",
-          "line_number": 6,
+          "line_number": 7,
           "severity": "ERROR",
-          "message": "invalid syntax. Maybe you meant '==' or ':=' instead of '='? (main.tf, line 6)",
+          "message": "invalid syntax. Maybe you meant '==' or ':=' instead of '='? (main.tf, line 7)",
           "rule_code": "SYNTAX_ERROR"
         }
       ]
@@ -56,15 +47,24 @@
       "issues": [
         {
           "file_path": "Dockerfile",
-          "line_number": 15,
+          "line_number": 20,
           "severity": "ERROR",
-          "message": "invalid decimal literal (Dockerfile, line 15)",
+          "message": "invalid decimal literal (Dockerfile, line 20)",
           "rule_code": "SYNTAX_ERROR"
         }
       ]
     },
     {
-      "artifact_name": "test_real.py",
+      "artifact_name": "service.py",
+      "ast_syntax_pass": true,
+      "solid_compliance": {
+        "SingleResponsibility": "Compliant: Focused module scope",
+        "DependencyInversion": "Compliant: Relies on abstractions and schemas"
+      },
+      "issues": []
+    },
+    {
+      "artifact_name": "test_integration.py",
       "ast_syntax_pass": true,
       "solid_compliance": {
         "SingleResponsibility": "Compliant: Focused module scope",

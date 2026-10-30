@@ -58,13 +58,23 @@ def interactive_gate_handler(gate: GateLevel, task_id: str, context: dict) -> Ga
     return console.prompt_gate_decision(gate=gate, task_id=task_id, context=context)
 
 
-def run_pipeline(task_title: str, task_desc: str, interactive: bool = False) -> int:
+def run_pipeline(
+    task_title: str,
+    task_desc: str,
+    interactive: bool = False,
+    target_dir: str | None = None,
+    git_enabled: bool = False,
+) -> int:
     print("\n================================================================================")
     print(f"🚀 Initializing MAS Multi-Agent Pipeline for: {task_title}")
+    if target_dir:
+        print(f"🎯 Target Workspace: {Path(target_dir).resolve()}")
     print("================================================================================\n")
 
     config = get_config()
-    blackboard = ArtifactBlackboard(repo_path=".")
+    blackboard = ArtifactBlackboard(
+        repo_path=".", target_workspace_dir=target_dir, git_enabled=git_enabled
+    )
     circuit_breaker = CircuitBreaker(config.limits)
     orchestrator = MASOrchestrator(
         config=config, blackboard=blackboard, circuit_breaker=circuit_breaker
@@ -248,7 +258,11 @@ def run_pipeline(task_title: str, task_desc: str, interactive: bool = False) -> 
     return 0
 
 
-def generate_pr_command(task_id: str = "TASK-001") -> int:
+def generate_pr_command(
+    task_id: str = "TASK-001",
+    push_to_remote: bool = False,
+    create_github_pr: bool = False,
+) -> int:
     task = Task(
         id=task_id,
         title="Core Service Implementation",
@@ -257,11 +271,16 @@ def generate_pr_command(task_id: str = "TASK-001") -> int:
     )
     pr_gen = PullRequestGenerator()
     pr = pr_gen.generate_pr(task=task, source_branch="feat/task-001")
+    submission = pr_gen.publish_remote_pr(
+        pr, push_to_remote=push_to_remote, create_github_pr=create_github_pr
+    )
 
     pr_file = Path("PULL_REQUEST.md")
-    pr_file.write_text(pr.description_markdown, encoding="utf-8")
     print(f"\n✅ Synthesized GitHub Pull Request: {pr.title}")
-    print(f"[*] Saved to: {pr_file.resolve()}\n")
+    print(f"[*] Saved to: {pr_file.resolve()}")
+    if submission.github_pr_url:
+        print(f"[*] GitHub PR URL: {submission.github_pr_url}")
+    print(f"[*] Status: {submission.status_message}\n")
     print(pr.description_markdown)
     return 0
 
@@ -284,6 +303,17 @@ def main() -> int:
     run_parser.add_argument(
         "--interactive", action="store_true", help="Enable interactive human approval gates"
     )
+    run_parser.add_argument(
+        "--target-dir",
+        type=str,
+        default=None,
+        help="Target workspace root directory to write synthesized code in-place",
+    )
+    run_parser.add_argument(
+        "--git-commit",
+        action="store_true",
+        help="Automatically commit generated artifacts to local git ledger",
+    )
 
     # status command
     subparsers.add_parser("status", help="Show system status and blackboard artifacts")
@@ -296,6 +326,12 @@ def main() -> int:
     pr_parser.add_argument(
         "--task-id", type=str, default="TASK-001", help="Task ID to generate PR for"
     )
+    pr_parser.add_argument(
+        "--push", action="store_true", help="Push branch to remote origin"
+    )
+    pr_parser.add_argument(
+        "--create-pr", action="store_true", help="Create PR using GitHub CLI ('gh pr create')"
+    )
 
     args = parser.parse_args()
 
@@ -307,10 +343,22 @@ def main() -> int:
             "Implement secure REST API endpoints with PostgreSQL persistence, React UI, and Terraform IaC.",
         )
         interactive = getattr(args, "interactive", False)
-        return run_pipeline(title, desc, interactive=interactive)
+        target_dir = getattr(args, "target_dir", None)
+        git_commit = getattr(args, "git_commit", False)
+        return run_pipeline(
+            title,
+            desc,
+            interactive=interactive,
+            target_dir=target_dir,
+            git_enabled=git_commit,
+        )
 
     elif args.command == "pr":
-        return generate_pr_command(getattr(args, "task_id", "TASK-001"))
+        return generate_pr_command(
+            task_id=getattr(args, "task_id", "TASK-001"),
+            push_to_remote=getattr(args, "push", False),
+            create_github_pr=getattr(args, "create_pr", False),
+        )
 
     elif args.command == "status":
         bb = ArtifactBlackboard(repo_path=".")

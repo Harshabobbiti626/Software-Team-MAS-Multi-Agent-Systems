@@ -1,4 +1,4 @@
-# Audit & Compliance Dossier: Real-Time Payment Gateway
+# Audit & Compliance Dossier: Integration Test Service
 
 ## End-to-End Lineage & Provenance
 - **Task ID**: `TASK-001`

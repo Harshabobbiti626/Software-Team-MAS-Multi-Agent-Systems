@@ -279,22 +279,25 @@ class BaseAgent(ABC):
                 system_prompt=system_prompt,
             )
             code_candidate = llm_resp.text.strip()
-            # Clean markdown code blocks if present
-            if code_candidate.startswith("```python"):
-                code_candidate = code_candidate[9:]
-            elif code_candidate.startswith("```"):
-                code_candidate = code_candidate[3:]
+            # Clean markdown code blocks if present (polyglot)
+            if code_candidate.startswith("```"):
+                # strip opening tag like ```python, ```typescript, ```sql, etc.
+                first_newline = code_candidate.find("\n")
+                if first_newline != -1:
+                    code_candidate = code_candidate[first_newline + 1 :]
+                else:
+                    code_candidate = code_candidate[3:]
             if code_candidate.endswith("```"):
                 code_candidate = code_candidate[:-3]
             code_candidate = code_candidate.strip()
             last_code = code_candidate
 
-            # AST Verification Gate
-            lint_res = self.linter.check_python_syntax_ast(target_file, code_candidate)
+            # Polyglot Syntax Verification Gate
+            lint_res = self.linter.check_syntax_auto(target_file, code_candidate)
             if lint_res.passed:
                 self.working_memory.add_entry(
                     role=self.role,
-                    content=f"ReAct code generation succeeded on attempt {attempt} for {target_file}.",
+                    content=f"ReAct code generation succeeded on attempt {attempt} for {target_file} ({lint_res.tool_name}).",
                 )
                 return code_candidate, True
 
@@ -309,10 +312,10 @@ class BaseAgent(ABC):
                 content=f"ReAct attempt {attempt} failed syntax: {error_details}. Prompting self-repair.",
             )
             current_prompt = (
-                f"The generated code for '{target_file}' failed Python AST syntax verification.\n"
+                f"The generated content for '{target_file}' failed syntax verification ({lint_res.tool_name}).\n"
                 f"Syntax Error: {error_details}\n"
-                f"Failing Code:\n```python\n{code_candidate}\n```\n"
-                f"Fix all syntax issues and return the complete, valid Python code."
+                f"Failing Content:\n```\n{code_candidate}\n```\n"
+                f"Fix all syntax issues and return the complete, valid code without placeholder comments."
             )
 
         return last_code, False

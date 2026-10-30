@@ -74,6 +74,13 @@ def test_git_worktree_and_pull_request(tmp_path):
     assert "100% Passed" in pr.description_markdown
     assert "ADR-001" in pr.description_markdown
 
+    # Test publish_remote_pr with local fallback
+    pr_gen_repo = PullRequestGenerator(repo_path=str(tmp_path))
+    res = pr_gen_repo.publish_remote_pr(pr, push_to_remote=False, create_github_pr=False)
+    assert res.pr_id == "PR-TASK-99"
+    assert (tmp_path / "PULL_REQUEST.md").exists()
+    assert "feat(backend): Implement Checkout" in (tmp_path / "PULL_REQUEST.md").read_text(encoding="utf-8")
+
 
 def test_otlp_trace_exporter(tmp_path):
     out_file = tmp_path / "traces.jsonl"

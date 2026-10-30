@@ -94,6 +94,8 @@ def test_pr_command():
 
 def test_full_pipeline_run():
     exit_code = run_pipeline(
-        "Integration Test Service", "Build resource service with API and storage"
+        "Integration Test Service",
+        "Build resource service with API and storage",
+        git_enabled=False,
     )
     assert exit_code == 0

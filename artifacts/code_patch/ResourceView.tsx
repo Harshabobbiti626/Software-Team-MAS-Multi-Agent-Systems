@@ -40,7 +40,7 @@ export const ResourceView: React.FC = () => {
 
   return (
     <div className="p-4 border rounded shadow-sm">
-      <h2 className="text-xl font-bold">Real-Time Payment Gateway</h2>
+      <h2 className="text-xl font-bold">Integration Test Service</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         <input 
           aria-label="resource-name" 

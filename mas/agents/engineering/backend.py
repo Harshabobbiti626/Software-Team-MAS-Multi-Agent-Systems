@@ -9,6 +9,7 @@ from typing import Any, Dict
 
 from mas.agents.base import AgentResponse, BaseAgent
 from mas.core.state import ArtifactType, SubsystemClass, Task, TokenUsageTracker
+from mas.tools.dependency_reconciler import DependencyReconciler
 
 
 class BackendEngineerAgent(BaseAgent):
@@ -111,6 +112,13 @@ class {domain_noun}Service:
                 target_file="service.py",
                 initial_prompt=f"Generate Python {domain_noun}Service conforming to Pydantic models.",
             )
+
+        # 4. Automated Dependency Reconciliation
+        try:
+            reconciler = DependencyReconciler(workspace_root=self.config.system.blackboard_repo_path)
+            reconciler.reconcile_file("service.py", code_content=service_code)
+        except Exception:
+            pass
 
         artifact = self.publish_artifact(
             artifact_id=f"backend-code-{task.id}",

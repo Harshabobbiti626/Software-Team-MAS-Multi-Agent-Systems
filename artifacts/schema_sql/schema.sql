@@ -5,13 +5,12 @@
 CREATE TABLE IF NOT EXISTS integrations (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name VARCHAR(255) NOT NULL,
-    category VARCHAR(100) NOT NULL,
     status VARCHAR(50) NOT NULL DEFAULT 'ACTIVE',
-    metadata JSONB DEFAULT '{}'::jsonb,
+    metadata JSONB NOT NULL DEFAULT '{}'::jsonb,
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
--- Zero-downtime non-locking index
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_integrations_category_status 
-ON integrations (category, status);
+-- Zero-downtime non-locking compound index on status and timestamps
+CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_integrations_status_created
+ON integrations (status, created_at DESC);
