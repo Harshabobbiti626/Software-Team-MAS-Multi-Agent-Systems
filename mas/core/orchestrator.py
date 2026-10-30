@@ -1,10 +1,11 @@
 """
 MAS Orchestrator & State Machine Engine.
 Coordinates Just-In-Time (JIT) pod activation, contract-first parallel dispatch,
-and hierarchical workflow transitions.
+closed-loop diagnostic remediation, and hierarchical workflow transitions.
 """
 
-from typing import Dict, List, Optional
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from typing import Any, Callable, Dict, List, Optional
 from mas.core.blackboard import ArtifactBlackboard
 from mas.core.circuit_breaker import CircuitBreaker
 from mas.core.config import MASConfiguration, get_config
@@ -15,6 +16,7 @@ from mas.core.state import (
     Task,
     TaskPriority,
     TaskStatus,
+    TestReport,
 )
 from mas.core.router import IntelligentRouter, RemediationTicket
 
@@ -108,3 +110,74 @@ class MASOrchestrator:
             raise ValueError("No active task to advance")
         self.state.current_task.status = new_status
         self.circuit_breaker.record_turn("Orchestrator")
+
+    def execute_parallel_pods(
+        self,
+        task: Task,
+        pod_agents: List[Any],
+        max_workers: int = 5
+    ) -> Dict[str, Any]:
+        """
+        Executes engineering pods concurrently against compiled contracts (api-spec.yaml / schema.sql).
+        Cuts execution time significantly by building backend, frontend, cloud, and DBA in parallel.
+        """
+        results: Dict[str, Any] = {}
+
+        def _run_agent(agent: Any):
+            return agent.role, agent.run(task)
+
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            future_to_agent = {executor.submit(_run_agent, agent): agent for agent in pod_agents}
+            for future in as_completed(future_to_agent):
+                role, response = future.result()
+                results[role] = response
+                self.circuit_breaker.record_turn(role)
+                self.circuit_breaker.record_tokens(
+                    response.tokens_used.prompt_tokens,
+                    response.tokens_used.candidate_tokens,
+                    response.tokens_used.thinking_tokens
+                )
+
+        return results
+
+    def trigger_remediation_loop(
+        self,
+        task: Task,
+        test_report: TestReport,
+        agent_roster: Dict[str, Any],
+        qa_agent: Any,
+        max_remediation_attempts: int = 2
+    ) -> bool:
+        """
+        Closed-loop self-healing mechanism:
+        When a test breaks, attributes responsibility via IntelligentRouter,
+        dispatches a scoped remediation ticket to the culprit agent, and re-verifies.
+        """
+        for attempt in range(1, max_remediation_attempts + 1):
+            if test_report.passed_all:
+                self.circuit_breaker.record_success()
+                return True
+
+            ticket = self.router.triage_failure(
+                task_id=task.id,
+                test_report=test_report,
+                error_output=test_report.stderr
+            )
+
+            self.circuit_breaker.record_failure(ticket.root_cause_summary)
+
+            target_agent = agent_roster.get(ticket.assignee_role)
+            if target_agent and hasattr(target_agent, "apply_surgical_patch"):
+                # Apply remediation patch or re-generate
+                target_agent.execute_turn(task, context={"remediation_ticket": ticket.model_dump()})
+
+            # Re-verify with QA
+            qa_res = qa_agent.run(task)
+            self.circuit_breaker.record_turn(qa_agent.role)
+
+            report_art = self.blackboard.get_artifact(f"test-report-{task.id}")
+            if report_art and "PASSED" in report_art.content:
+                self.circuit_breaker.record_success()
+                return True
+
+        return False

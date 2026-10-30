@@ -4,7 +4,7 @@ Commands:
   run     - Execute an end-to-end task through the contract-first multi-agent pipeline
   status  - Inspect Blackboard artifacts, token usage, and circuit breaker metrics
   verify  - Run deterministic static linters and domain invariant rules
-  autopsy - Run root cause analysis (RCA) on test/build failures
+  pr      - Synthesize a production-ready GitHub Pull Request description
 """
 
 import argparse
@@ -14,7 +14,7 @@ from mas.core.config import get_config
 from mas.core.blackboard import ArtifactBlackboard
 from mas.core.circuit_breaker import CircuitBreaker
 from mas.core.orchestrator import MASOrchestrator
-from mas.core.state import TaskPriority, TaskStatus, SubsystemClass
+from mas.core.state import Task, TaskPriority, TaskStatus, SubsystemClass
 from mas.agents.leadership import (
     BusinessSponsorAgent,
     ProductManagerAgent,
@@ -36,12 +36,23 @@ from mas.agents.governance_docs import (
     TechnicalWriterAgent,
 )
 from mas.observability.tracer import DistributedTracer
-from mas.hitl.gates import HITLGateManager, GateLevel
+from mas.observability.otlp import OTLPTraceExporter
+from mas.hitl.gates import HITLGateManager, GateLevel, GateDecision
+from mas.core.vcs import PullRequestGenerator
 from mas.tools.domain_verifier import DomainVerifier
 from mas.tools.linter import DeterministicLinter
 
 
-def run_pipeline(task_title: str, task_desc: str) -> int:
+def interactive_gate_handler(gate: GateLevel, task_id: str, context: dict) -> GateDecision:
+    print(f"\n[HITL Gate Intervention Required]: {gate.value}")
+    resp = input("Decision [A]pprove / [R]eject / [M]odify (default: Approve): ").strip().upper()
+    if resp == "R":
+        reason = input("Enter rejection reason: ").strip() or "Rejected by human reviewer"
+        return GateDecision(gate=gate, task_id=task_id, decision="REJECTED", reviewer="HumanArchitect", rationale=reason)
+    return GateDecision(gate=gate, task_id=task_id, decision="APPROVED", reviewer="HumanArchitect", rationale="Approved by human reviewer")
+
+
+def run_pipeline(task_title: str, task_desc: str, interactive: bool = False) -> int:
     print(f"\n================================================================================")
     print(f"🚀 Initializing MAS Multi-Agent Pipeline for: {task_title}")
     print(f"================================================================================\n")
@@ -51,7 +62,11 @@ def run_pipeline(task_title: str, task_desc: str) -> int:
     circuit_breaker = CircuitBreaker(config.limits)
     orchestrator = MASOrchestrator(config=config, blackboard=blackboard, circuit_breaker=circuit_breaker)
     tracer = DistributedTracer()
-    hitl = HITLGateManager(auto_approve_in_dev=True)
+    otlp_exporter = OTLPTraceExporter(output_file_path=".mas_traces.jsonl")
+
+    hitl = HITLGateManager(auto_approve_in_dev=not interactive)
+    if interactive:
+        hitl.set_interactive_handler(interactive_gate_handler)
 
     # 1. Create Task & Blast Radius Triage
     task_id = "TASK-001"
@@ -110,32 +125,20 @@ def run_pipeline(task_title: str, task_desc: str) -> int:
     gate2 = hitl.evaluate_gate(GateLevel.GATE_2_ARCHITECTURE_SECURITY, task.id)
     print(f"  [Gate 2: Architecture & Security] -> {gate2.decision} by {gate2.reviewer}\n")
 
-    # 4. Specialized Engineering Pods (Contract-First Parallel Execution)
-    print("[3/5] Executing Contract-First Parallel Engineering Pods...")
-    dba = DatabaseArchitectAgent(**agent_kwargs)
-    r_dba = dba.run(task)
-    circuit_breaker.record_turn(dba.role)
-    print(f"  + [Data Pod] {dba.role}: {r_dba.summary}")
+    # 4. Specialized Engineering Pods (Contract-First Parallel Concurrency)
+    print("[3/5] Executing Contract-First Parallel Engineering Pods (Concurrent Workers)...")
+    engineering_pods = [
+        DatabaseArchitectAgent(**agent_kwargs),
+        BackendEngineerAgent(**agent_kwargs),
+        FrontendEngineerAgent(**agent_kwargs),
+        CloudEngineerAgent(**agent_kwargs),
+        DevOpsSREAgent(**agent_kwargs)
+    ]
 
-    be = BackendEngineerAgent(**agent_kwargs)
-    r_be = be.run(task)
-    circuit_breaker.record_turn(be.role)
-    print(f"  + [Backend Pod] {be.role}: {r_be.summary}")
-
-    fe = FrontendEngineerAgent(**agent_kwargs)
-    r_fe = fe.run(task)
-    circuit_breaker.record_turn(fe.role)
-    print(f"  + [Frontend Pod] {fe.role}: {r_fe.summary}")
-
-    cloud = CloudEngineerAgent(**agent_kwargs)
-    r_cloud = cloud.run(task)
-    circuit_breaker.record_turn(cloud.role)
-    print(f"  + [Cloud Pod] {cloud.role}: {r_cloud.summary}")
-
-    sre = DevOpsSREAgent(**agent_kwargs)
-    r_sre = sre.run(task)
-    circuit_breaker.record_turn(sre.role)
-    print(f"  + [DevOps Pod] {sre.role}: {r_sre.summary}\n")
+    parallel_results = orchestrator.execute_parallel_pods(task, engineering_pods, max_workers=5)
+    for role, resp in parallel_results.items():
+        print(f"  + [Concurrent Pod] {role}: {resp.summary}")
+    print()
 
     # 5. Verification, Security & Gatekeeping
     print("[4/5] Executing QA, Security & Quality Gatekeeping...")
@@ -143,6 +146,14 @@ def run_pipeline(task_title: str, task_desc: str) -> int:
     r_qa = qa.run(task)
     circuit_breaker.record_turn(qa.role)
     print(f"  + {qa.role}: {r_qa.summary}")
+
+    # Closed-loop remediation check if QA failed
+    if r_qa.status != "SUCCESS":
+        print("  ⚠️ QA Failure detected. Triggering Intelligent Remediation Loop...")
+        agent_roster = {a.role: a for a in engineering_pods}
+        test_report = getattr(r_qa, "test_report", None)
+        remediated = orchestrator.trigger_remediation_loop(task, test_report, agent_roster, qa)
+        print(f"  [*] Remediation Loop Result: {'SUCCESS' if remediated else 'FAILED'}")
 
     reviewer = CodeReviewerAgent(**agent_kwargs)
     r_rev = reviewer.run(task)
@@ -168,13 +179,47 @@ def run_pipeline(task_title: str, task_desc: str) -> int:
         if art:
             print(f"     * Generated: {art.path}")
 
+    # 7. Export OpenTelemetry Traces
+    task_span = tracer.start_span(
+        task_id=task.id,
+        agent_name="MASOrchestrator",
+        agent_role="Orchestrator",
+        operation="ExecutePipeline",
+        attributes={"task.title": task.title, "task.assigned_pod": task.assigned_pod.value}
+    )
+    tracer.finish_span(
+        span=task_span,
+        prompt_tokens=circuit_breaker.prompt_tokens,
+        candidate_tokens=circuit_breaker.candidate_tokens,
+        thinking_tokens=circuit_breaker.thinking_tokens,
+        duration_ms=2500.0,
+        status="OK"
+    )
+    otlp_exporter.export_spans([task_span])
+
     # Summary
     print(f"\n================================================================================")
     print(f"✅ MAS Task Complete: {task.title}")
     print(f"   Total Turns: {circuit_breaker.total_turns} / {config.limits.max_total_turns_per_task}")
+    print(f"   Tokens Consumed: {circuit_breaker.prompt_tokens + circuit_breaker.candidate_tokens + circuit_breaker.thinking_tokens}")
     print(f"   Circuit Breaker: Healthy (Tripped: {circuit_breaker.is_tripped()})")
     print(f"   Artifacts Committed: {len(blackboard.list_artifacts())}")
+    print(f"   Telemetry Trace: Exported to .mas_traces.jsonl")
     print(f"================================================================================\n")
+    return 0
+
+
+def generate_pr_command(task_id: str = "TASK-001") -> int:
+    blackboard = ArtifactBlackboard(repo_path=".")
+    task = Task(id=task_id, title="Core Service Implementation", description="End-to-end microservice", assigned_pod=SubsystemClass.FULL_SYSTEM)
+    pr_gen = PullRequestGenerator()
+    pr = pr_gen.generate_pr(task=task, source_branch="feat/task-001")
+    
+    pr_file = Path("PULL_REQUEST.md")
+    pr_file.write_text(pr.description_markdown, encoding="utf-8")
+    print(f"\n✅ Synthesized GitHub Pull Request: {pr.title}")
+    print(f"[*] Saved to: {pr_file.resolve()}\n")
+    print(pr.description_markdown)
     return 0
 
 
@@ -186,19 +231,28 @@ def main() -> int:
     run_parser = subparsers.add_parser("run", help="Run multi-agent engineering workflow")
     run_parser.add_argument("--title", type=str, default="Core Resource Service", help="Task title")
     run_parser.add_argument("--description", type=str, default="Implement secure REST API endpoints with PostgreSQL persistence, React UI, and Terraform IaC.", help="Task description")
+    run_parser.add_argument("--interactive", action="store_true", help="Enable interactive human approval gates")
 
     # status command
-    status_parser = subparsers.add_parser("status", help="Show system status and blackboard artifacts")
+    subparsers.add_parser("status", help="Show system status and blackboard artifacts")
 
     # verify command
-    verify_parser = subparsers.add_parser("verify", help="Run domain verifier and syntax linter")
+    subparsers.add_parser("verify", help="Run domain verifier and syntax linter")
+
+    # pr command
+    pr_parser = subparsers.add_parser("pr", help="Generate GitHub Pull Request markdown")
+    pr_parser.add_argument("--task-id", type=str, default="TASK-001", help="Task ID to generate PR for")
 
     args = parser.parse_args()
 
     if args.command == "run" or args.command is None:
         title = getattr(args, "title", "Core Resource Service")
         desc = getattr(args, "description", "Implement secure REST API endpoints with PostgreSQL persistence, React UI, and Terraform IaC.")
-        return run_pipeline(title, desc)
+        interactive = getattr(args, "interactive", False)
+        return run_pipeline(title, desc, interactive=interactive)
+
+    elif args.command == "pr":
+        return generate_pr_command(getattr(args, "task_id", "TASK-001"))
 
     elif args.command == "status":
         bb = ArtifactBlackboard(repo_path=".")

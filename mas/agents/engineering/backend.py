@@ -1,9 +1,10 @@
 """
 Backend Engineer Agent.
 Implements robust REST/GraphQL service endpoints and business logic strictly conforming to api-spec.yaml.
-Uses live LLM reasoning and surgical patching.
+Uses live LLM reasoning, domain extraction, and surgical patching.
 """
 
+import re
 from typing import Any, Dict
 from mas.agents.base import BaseAgent, AgentResponse
 from mas.core.state import ArtifactType, SubsystemClass, Task, TokenUsageTracker
@@ -13,11 +14,18 @@ class BackendEngineerAgent(BaseAgent):
     def __init__(self, **kwargs: Any):
         super().__init__(role="BackendEngineerAgent", pod=SubsystemClass.BACKEND, **kwargs)
 
+    def _extract_domain_noun(self, title: str) -> str:
+        words = re.findall(r"[A-Za-z]+", title.lower())
+        stopwords = {"service", "api", "microservice", "system", "feature", "build", "implement", "create", "test"}
+        filtered = [w for w in words if w not in stopwords]
+        return filtered[0].capitalize() if filtered else "Resource"
+
     def execute_turn(self, task: Task, context: Dict[str, Any]) -> AgentResponse:
-        # Live reasoning with LLM
+        domain_noun = self._extract_domain_noun(task.title)
+
         prompt = (
             f"Analyze backend service requirements for task '{task.title}': {task.description}. "
-            f"Formulate data models, validation constraints, and ACID-safe transaction bounds."
+            f"Formulate data models for entity {domain_noun}, validation constraints, and ACID-safe transaction bounds."
         )
         llm_resp = self.think_and_generate(prompt=prompt)
 
@@ -34,37 +42,37 @@ from typing import Dict, Any, Optional
 from pydantic import BaseModel, Field
 
 
-class ResourcePayload(BaseModel):
+class {domain_noun}Payload(BaseModel):
     name: str = Field(..., min_length=1, max_length=255)
     category: str = Field(..., min_length=1, max_length=100)
 
 
-class ResourceResponse(BaseModel):
+class {domain_noun}Response(BaseModel):
     id: str
     name: str
     status: str = "ACTIVE"
 
 
-class ResourceService:
+class {domain_noun}Service:
     def __init__(self):
         self._db: Dict[str, Dict[str, Any]] = {{}}
 
-    def create_resource(self, payload: ResourcePayload) -> ResourceResponse:
-        resource_id = str(uuid.uuid4())
+    def create_{domain_noun.lower()}(self, payload: {domain_noun}Payload) -> {domain_noun}Response:
+        entity_id = str(uuid.uuid4())
         record = {{
-            "id": resource_id,
+            "id": entity_id,
             "name": payload.name,
             "category": payload.category,
             "status": "ACTIVE"
         }}
-        self._db[resource_id] = record
-        return ResourceResponse(id=resource_id, name=payload.name, status="ACTIVE")
+        self._db[entity_id] = record
+        return {domain_noun}Response(id=entity_id, name=payload.name, status="ACTIVE")
 
-    def get_resource(self, resource_id: str) -> Optional[ResourceResponse]:
-        record = self._db.get(resource_id)
+    def get_{domain_noun.lower()}(self, entity_id: str) -> Optional[{domain_noun}Response]:
+        record = self._db.get(entity_id)
         if not record:
             return None
-        return ResourceResponse(id=record["id"], name=record["name"], status=record["status"])
+        return {domain_noun}Response(id=record["id"], name=record["name"], status=record["status"])
 """
 
         artifact = self.publish_artifact(
@@ -84,7 +92,7 @@ class ResourceService:
         return AgentResponse(
             agent_role=self.role,
             status="SUCCESS",
-            summary=f"Implemented ResourceService conforming to api-spec.yaml and ADR-001 (reasoning model: {llm_resp.model_name}).",
+            summary=f"Implemented {domain_noun}Service conforming to api-spec.yaml and ADR-001.",
             artifacts_produced=[artifact.id],
             tokens_used=tokens
         )

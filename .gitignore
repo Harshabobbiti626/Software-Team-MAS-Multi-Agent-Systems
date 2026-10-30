@@ -22,6 +22,7 @@ htmlcov/
 .mas_episodic.db
 .mas_traces.jsonl
 .worktrees/
+PULL_REQUEST.md
 
 # IDE & OS
 .vscode/
