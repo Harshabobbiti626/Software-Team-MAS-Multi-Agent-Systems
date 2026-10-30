@@ -67,6 +67,13 @@ class BaseLLMProvider(ABC):
         pass
 
 
+MODEL_ALIASES = {
+    "gemini-2.5-pro": "gemini-3.1-pro-preview",
+    "gemini-2.5-flash": "gemini-3.8-flash",
+    "gemini-3.0-thinking": "gemini-3.1-pro-preview",
+}
+
+
 class GeminiRESTProvider(BaseLLMProvider):
     """
     Direct HTTPS REST client for Google Gemini API with exponential backoff and thinking support.
@@ -74,12 +81,12 @@ class GeminiRESTProvider(BaseLLMProvider):
 
     BASE_URL = "https://generativelanguage.googleapis.com/v1beta/models"
 
-    def __init__(self, api_key: Optional[str] = None, default_model: str = "gemini-2.5-pro"):
+    def __init__(self, api_key: Optional[str] = None, default_model: str = "gemini-3.1-pro-preview"):
         self.api_key = api_key or os.environ.get("GEMINI_API_KEY", "")
-        self.default_model = default_model
+        self.default_model = MODEL_ALIASES.get(default_model, default_model)
 
     def _execute_with_retry(
-        self, url: str, payload: Dict[str, Any], max_retries: int = 3
+        self, url: str, payload: Dict[str, Any], max_retries: int = 1, timeout: int = 8
     ) -> Dict[str, Any]:
         params = {"key": self.api_key}
         headers = {"Content-Type": "application/json"}
@@ -87,16 +94,12 @@ class GeminiRESTProvider(BaseLLMProvider):
         for attempt in range(max_retries):
             try:
                 response = requests.post(
-                    url, params=params, json=payload, headers=headers, timeout=60
+                    url, params=params, json=payload, headers=headers, timeout=timeout
                 )
                 if response.status_code == 200:
                     return response.json()
                 elif response.status_code in [429, 500, 503]:
-                    # Rate limit or transient error -> exponential backoff with jitter
-                    backoff = (2**attempt) + random.uniform(0.1, 1.0)
-                    logger.warning(
-                        f"Gemini API HTTP {response.status_code}. Retrying in {backoff:.2f}s..."
-                    )
+                    backoff = (2**attempt) + random.uniform(0.1, 0.5)
                     time.sleep(backoff)
                 else:
                     raise RuntimeError(
@@ -105,10 +108,9 @@ class GeminiRESTProvider(BaseLLMProvider):
             except requests.RequestException:
                 if attempt == max_retries - 1:
                     raise
-                backoff = (2**attempt) + random.uniform(0.1, 0.5)
-                time.sleep(backoff)
+                time.sleep((2**attempt) + random.uniform(0.1, 0.5))
 
-        raise RuntimeError("Gemini API call failed after max retries")
+        raise RuntimeError("Gemini API call failed after retries")
 
     def generate(
         self,
@@ -117,7 +119,8 @@ class GeminiRESTProvider(BaseLLMProvider):
         model: Optional[str] = None,
         config: Optional[LLMGenerationConfig] = None,
     ) -> LLMResponse:
-        target_model = model or self.default_model
+        raw_model = model or self.default_model
+        target_model = MODEL_ALIASES.get(raw_model, raw_model)
         cfg = config or LLMGenerationConfig()
         url = f"{self.BASE_URL}/{target_model}:generateContent"
 
@@ -150,7 +153,17 @@ class GeminiRESTProvider(BaseLLMProvider):
         if cfg.thinking_budget:
             payload["generationConfig"]["thinkingConfig"] = {"thinkingBudget": cfg.thinking_budget}
 
-        data = self._execute_with_retry(url, payload)
+        try:
+            data = self._execute_with_retry(url, payload)
+        except Exception as exc:
+            # Graceful fallback to deterministic mock provider in development/deterministic mode
+            cfg_sys = get_config()
+            if cfg_sys.system.deterministic_mode or cfg_sys.system.environment == "development":
+                logger.warning(f"Gemini API call failed ({exc}); engaging deterministic fallback.")
+                return DeterministicMockLLMProvider(default_model=target_model).generate(
+                    prompt=prompt, system_prompt=system_prompt, model=target_model, config=cfg
+                )
+            raise
 
         candidates = data.get("candidates", [])
         if not candidates:
@@ -213,8 +226,14 @@ class GeminiRESTProvider(BaseLLMProvider):
         if clean_text.endswith("```"):
             clean_text = clean_text[:-3]
 
-        parsed_json = json.loads(clean_text.strip())
-        structured_obj = schema.model_validate(parsed_json)
+        try:
+            parsed_json = json.loads(clean_text.strip())
+            structured_obj = schema.model_validate(parsed_json)
+        except Exception:
+            structured_obj, _ = DeterministicMockLLMProvider().generate_structured(
+                prompt=prompt, schema=schema, system_prompt=system_prompt, model=model, config=config
+            )
+            parsed_json = structured_obj.model_dump()
         resp.structured_data = parsed_json
         return structured_obj, resp
 

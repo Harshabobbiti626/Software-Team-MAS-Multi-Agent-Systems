@@ -1,8 +1,8 @@
 /**
- * MAS Web Mission Control - Modern React 18 Application
+ * MAS Web Mission Control - Modern React 18 Application with IDE-Grade Workspace
  * Comprehensive multi-agent command cockpit with real-time SSE streaming,
- * reactive pod matrix, 4-state artifact canvas, interactive HITL gates,
- * and keyboard-navigable operational controls.
+ * VS Code-style File Explorer, multi-tab editor, line-number gutter,
+ * disk path traceability, and interactive HITL gates.
  */
 
 const { useState, useEffect, useRef, useMemo, useCallback } = React;
@@ -49,15 +49,46 @@ const POD_CONFIGS = [
   { key: "Governance & QA", icon: "🛡️", name: "Governance & QA Pod", desc: "Sandboxed Pytest & OWASP Top 10 Audit", defaultArtifact: "TestReport.json" }
 ];
 
+// Helper: Determine File Icon by Extension
+function getFileIcon(filename = "") {
+  const f = filename.toLowerCase();
+  if (f.endsWith(".py")) return "🐍";
+  if (f.endsWith(".tsx") || f.endsWith(".jsx")) return "⚛️";
+  if (f.endsWith(".ts") || f.endsWith(".js")) return "📜";
+  if (f.endsWith(".sql")) return "🗄️";
+  if (f.endsWith(".yaml") || f.endsWith(".yml")) return "⚙️";
+  if (f.endsWith(".json")) return "📋";
+  if (f.endsWith(".md")) return "📝";
+  if (f.includes("dockerfile")) return "🐳";
+  if (f.endsWith(".tf")) return "🏗️";
+  return "📄";
+}
+
+// Helper: Determine Prism Language
+function getPrismLanguage(filename = "") {
+  const f = filename.toLowerCase();
+  if (f.endsWith(".py")) return "python";
+  if (f.endsWith(".sql")) return "sql";
+  if (f.endsWith(".tsx") || f.endsWith(".ts")) return "typescript";
+  if (f.endsWith(".yaml") || f.endsWith(".yml")) return "yaml";
+  if (f.endsWith(".json")) return "json";
+  if (f.endsWith(".md")) return "markdown";
+  if (f.includes("dockerfile")) return "docker";
+  return "javascript";
+}
+
 // --- MAIN REACT APP COMPONENT ---
 function App() {
   // --- APPLICATION STATE ---
   const [theme, setTheme] = useState("dark");
   const [activeMissionId, setActiveMissionId] = useState(null);
   const [missionsList, setMissionsList] = useState([]);
+  const [sidebarTab, setSidebarTab] = useState("explorer"); // "explorer" | "pods"
+
   const [missionData, setMissionData] = useState({
     title: "Core Enterprise Resource Service",
     description: "Implement secure REST API endpoints with PostgreSQL persistence, React UI, and Terraform KMS IaC.",
+    target_dir: "artifacts",
     status: "INITIALIZING",
     stage: "CONTRACTS",
     stageIndex: 1,
@@ -67,18 +98,29 @@ function App() {
     artifacts: []
   });
 
-  const [activeTab, setActiveTab] = useState("code");
+  // IDE TABS & ACTIVE FILE
+  const [openTabs, setOpenTabs] = useState([]);
+  const [activeTabId, setActiveTabId] = useState(null);
   const [selectedArtifact, setSelectedArtifact] = useState(null);
   const [artifactLoading, setArtifactLoading] = useState(false);
   const [artifactError, setArtifactError] = useState(null);
-  const [artifactSearch, setArtifactSearch] = useState("");
+  const [fileSearchQuery, setFileSearchQuery] = useState("");
+  const [expandedFolders, setExpandedFolders] = useState({
+    backend: true,
+    frontend: true,
+    database: true,
+    contracts: true,
+    documentation: true,
+    tests: true,
+    cloud: true
+  });
 
   const [pendingGate, setPendingGate] = useState(null);
   const [gateFeedback, setGateFeedback] = useState("");
   const [isResolvingGate, setIsResolvingGate] = useState(false);
 
   const [feedLogs, setFeedLogs] = useState([
-    { time: "00:00:00", type: "SYSTEM", text: "MAS React Mission Control initialized. Connected to local runtime." }
+    { time: "00:00:00", type: "SYSTEM", text: "MAS IDE Workspace & Cockpit initialized. Connected to local runtime." }
   ]);
   const [feedFilter, setFeedFilter] = useState("ALL");
   const [autoScrollFeed, setAutoScrollFeed] = useState(true);
@@ -101,6 +143,7 @@ function App() {
   const [isGeneratingPR, setIsGeneratingPR] = useState(false);
 
   const [copyFeedback, setCopyFeedback] = useState(false);
+  const [pathCopyFeedback, setPathCopyFeedback] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState("IDLE"); // IDLE, STREAMING, DISCONNECTED
 
   // REFS
@@ -141,13 +184,12 @@ function App() {
     }
   }, [activeMissionId]);
 
-  // Initial load
   useEffect(() => {
     refreshMissionsList();
   }, [refreshMissionsList]);
 
-  // --- FETCH SPECIFIC ARTIFACT DETAILS ---
-  const loadArtifactContent = useCallback(async (artifactId) => {
+  // --- FETCH SPECIFIC ARTIFACT DETAILS & OPEN IN TAB ---
+  const openArtifactInEditor = useCallback(async (artifactId) => {
     if (!artifactId) return;
     setArtifactLoading(true);
     setArtifactError(null);
@@ -156,12 +198,40 @@ function App() {
       if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to load artifact`);
       const data = await res.json();
       setSelectedArtifact(data);
+      setActiveTabId(data.id);
+
+      // Add to open tabs if not already present
+      setOpenTabs(prev => {
+        if (!prev.some(t => t.id === data.id)) {
+          return [...prev, data];
+        }
+        return prev;
+      });
     } catch (err) {
       setArtifactError(err.message);
     } finally {
       setArtifactLoading(false);
     }
   }, []);
+
+  // --- CLOSE TAB ---
+  const handleCloseTab = useCallback((e, tabId) => {
+    e.stopPropagation();
+    setOpenTabs(prev => {
+      const remaining = prev.filter(t => t.id !== tabId);
+      if (activeTabId === tabId) {
+        if (remaining.length > 0) {
+          const nextTab = remaining[remaining.length - 1];
+          setActiveTabId(nextTab.id);
+          setSelectedArtifact(nextTab);
+        } else {
+          setActiveTabId(null);
+          setSelectedArtifact(null);
+        }
+      }
+      return remaining;
+    });
+  }, [activeTabId]);
 
   // --- FETCH MISSION STATUS ---
   const fetchMissionDetails = useCallback(async (missionId) => {
@@ -174,6 +244,7 @@ function App() {
         ...prev,
         title: data.title || prev.title,
         description: data.description || prev.description,
+        target_dir: data.target_dir || "artifacts",
         status: data.status,
         stage: data.stage,
         stageIndex: getStageIndex(data.stage),
@@ -189,15 +260,15 @@ function App() {
         setPendingGate(null);
       }
 
-      // If active tab has matching artifact, load it
+      // If no file is open, open the primary synthesized service
       if (data.artifacts && data.artifacts.length > 0 && !selectedArtifact) {
-        const match = data.artifacts[data.artifacts.length - 1];
-        loadArtifactContent(match.id);
+        const primary = data.artifacts.find(a => a.name.includes("service.py")) || data.artifacts[0];
+        openArtifactInEditor(primary.id);
       }
     } catch (err) {
       console.error("Failed to fetch mission details:", err);
     }
-  }, [loadArtifactContent, selectedArtifact]);
+  }, [openArtifactInEditor, selectedArtifact]);
 
   // --- CONNECT TO REAL-TIME SSE STREAM ---
   useEffect(() => {
@@ -276,13 +347,13 @@ function App() {
         break;
 
       case "ARTIFACT_COMMITTED":
-        addFeedLog("ARTIFACT", `Committed artifact: ${data.artifact.name} (${data.artifact.type})`);
+        addFeedLog("ARTIFACT", `Synthesized file on disk: ${data.artifact.name} (${data.artifact.path})`);
         setMissionData(prev => ({
           ...prev,
           artifacts: [...prev.artifacts, data.artifact]
         }));
-        // Auto-select newly committed artifact
-        loadArtifactContent(data.artifact.id);
+        // Auto-open newly generated file in IDE
+        openArtifactInEditor(data.artifact.id);
         break;
 
       case "TOKEN_BURN":
@@ -302,7 +373,7 @@ function App() {
           status: "COMPLETED",
           tokens: data.tokens_used || prev.tokens
         }));
-        addFeedLog("SUCCESS", `🎉 Mission completed! ${data.artifacts_count || 0} artifacts locked.`);
+        addFeedLog("SUCCESS", `🎉 Mission completed! ${data.artifacts_count || 0} code files written to disk.`);
         refreshMissionsList();
         break;
 
@@ -314,9 +385,8 @@ function App() {
       default:
         break;
     }
-  }, [addFeedLog, loadArtifactContent, refreshMissionsList]);
+  }, [addFeedLog, openArtifactInEditor, refreshMissionsList]);
 
-  // Helper to map stage name to index
   function getStageIndex(stageName) {
     switch (stageName) {
       case "CONTRACTS": return 1;
@@ -353,10 +423,9 @@ function App() {
     }
   }, [activeMissionId, pendingGate, isResolvingGate, gateFeedback, addFeedLog]);
 
-  // --- KEYBOARD SHORTCUTS FOR ACCESSIBILITY & SPEED ---
+  // --- KEYBOARD SHORTCUTS ---
   useEffect(() => {
     const handleKeyDown = (e) => {
-      // Ignore if user is typing in input or textarea
       if (["INPUT", "TEXTAREA"].includes(document.activeElement?.tagName)) return;
 
       if (pendingGate) {
@@ -399,19 +468,28 @@ function App() {
     }
   }, [terminalLogs]);
 
-  // --- SYNTAX HIGHLIGHTING EFFECT ---
+  // --- SYNTAX HIGHLIGHTING ---
   useEffect(() => {
     if (codeViewerRef.current && window.Prism) {
       window.Prism.highlightElement(codeViewerRef.current);
     }
-  }, [selectedArtifact, activeTab]);
+  }, [selectedArtifact, activeTabId]);
 
-  // --- COPY CANVAS CODE ---
+  // --- COPY CODE & PATH ---
   const handleCopyCode = useCallback(() => {
     if (!selectedArtifact?.content) return;
     navigator.clipboard.writeText(selectedArtifact.content).then(() => {
       setCopyFeedback(true);
       setTimeout(() => setCopyFeedback(false), 2000);
+    });
+  }, [selectedArtifact]);
+
+  const handleCopyPath = useCallback(() => {
+    if (!selectedArtifact?.path) return;
+    const fullPath = `c:\\Users\\bobharsh\\MAS\\${selectedArtifact.path.replace(/\//g, '\\')}`;
+    navigator.clipboard.writeText(fullPath).then(() => {
+      setPathCopyFeedback(true);
+      setTimeout(() => setPathCopyFeedback(false), 2000);
     });
   }, [selectedArtifact]);
 
@@ -445,7 +523,7 @@ function App() {
     }
   }, [newMissionForm, addFeedLog, refreshMissionsList]);
 
-  // --- GENERATE GITHUB PULL REQUEST ---
+  // --- GENERATE GITHUB PR ---
   const handleGeneratePR = useCallback(async (pushToRemote = false, createGhPr = false) => {
     if (!activeMissionId) return;
     setIsGeneratingPR(true);
@@ -467,36 +545,75 @@ function App() {
     }
   }, [activeMissionId, addFeedLog]);
 
-  // Filtered artifacts
-  const filteredArtifacts = useMemo(() => {
-    if (!missionData.artifacts) return [];
-    if (!artifactSearch.trim()) return missionData.artifacts;
-    const q = artifactSearch.toLowerCase();
-    return missionData.artifacts.filter(a =>
-      a.name.toLowerCase().includes(q) ||
-      a.type.toLowerCase().includes(q) ||
-      (a.created_by && a.created_by.toLowerCase().includes(q))
-    );
-  }, [missionData.artifacts, artifactSearch]);
+  // --- GROUP ARTIFACTS INTO HIERARCHICAL IDE DIRECTORY TREE ---
+  const directoryTree = useMemo(() => {
+    const rawList = missionData.artifacts || [];
+    const query = fileSearchQuery.toLowerCase().trim();
+    const list = query
+      ? rawList.filter(a => a.name.toLowerCase().includes(query) || a.type.toLowerCase().includes(query))
+      : rawList;
 
-  // Filtered feed entries
-  const filteredFeed = useMemo(() => {
-    if (feedFilter === "ALL") return feedLogs;
-    return feedLogs.filter(item => item.type === feedFilter);
-  }, [feedLogs, feedFilter]);
+    const folders = {
+      backend: { name: "src/backend", icon: "📦", items: [] },
+      frontend: { name: "src/frontend", icon: "🎨", items: [] },
+      database: { name: "db/migrations", icon: "🗄️", items: [] },
+      contracts: { name: "contracts/api", icon: "📑", items: [] },
+      documentation: { name: "docs/spec", icon: "📚", items: [] },
+      tests: { name: "tests/suite", icon: "🧪", items: [] },
+      cloud: { name: "infra/cloud", icon: "☁️", items: [] },
+    };
 
-  // Determine language for Prism
-  const codeLanguage = useMemo(() => {
-    if (!selectedArtifact) return "javascript";
-    const name = selectedArtifact.name.toLowerCase();
-    if (name.endsWith(".py")) return "python";
-    if (name.endsWith(".sql")) return "sql";
-    if (name.endsWith(".tsx") || name.endsWith(".ts")) return "typescript";
-    if (name.endsWith(".yaml") || name.endsWith(".yml")) return "yaml";
-    if (name.endsWith(".json")) return "json";
-    if (name.endsWith(".md")) return "markdown";
-    if (name.includes("dockerfile")) return "docker";
-    return "javascript";
+    list.forEach(a => {
+      const name = a.name.toLowerCase();
+      if (name.endsWith(".py") && !name.includes("test")) {
+        folders.backend.items.push(a);
+      } else if (name.endsWith(".tsx") || name.endsWith(".jsx")) {
+        folders.frontend.items.push(a);
+      } else if (name.endsWith(".sql")) {
+        folders.database.items.push(a);
+      } else if (name.includes("api-spec") || name.includes("dag") || name.includes("charter")) {
+        folders.contracts.items.push(a);
+      } else if (name.endsWith(".md") && !name.includes("test")) {
+        folders.documentation.items.push(a);
+      } else if (name.includes("test") || name.includes("audit")) {
+        folders.tests.items.push(a);
+      } else if (name.includes("docker") || name.endsWith(".tf")) {
+        folders.cloud.items.push(a);
+      } else {
+        folders.backend.items.push(a);
+      }
+    });
+
+    return folders;
+  }, [missionData.artifacts, fileSearchQuery]);
+
+  // Toggle folder open/closed
+  const toggleFolder = useCallback((folderKey) => {
+    setExpandedFolders(prev => ({ ...prev, [folderKey]: !prev[folderKey] }));
+  }, []);
+
+  // Compute code lines for line-number gutter
+  const lineCount = useMemo(() => {
+    if (!selectedArtifact?.content) return 1;
+    return selectedArtifact.content.split("\n").length;
+  }, [selectedArtifact]);
+
+  const lineNumbers = useMemo(() => {
+    const lines = [];
+    for (let i = 1; i <= lineCount; i++) {
+      lines.push(i);
+    }
+    return lines;
+  }, [lineCount]);
+
+  const currentLanguage = useMemo(() => {
+    return getPrismLanguage(selectedArtifact?.name);
+  }, [selectedArtifact]);
+
+  // Full disk path on user's machine
+  const localDiskPath = useMemo(() => {
+    if (!selectedArtifact?.path) return "No file selected";
+    return `c:\\Users\\bobharsh\\MAS\\${selectedArtifact.path.replace(/\//g, '\\')}`;
   }, [selectedArtifact]);
 
   return (
@@ -504,7 +621,7 @@ function App() {
       {/* 1. TOP COMMAND BAR */}
       <header className="top-bar" role="banner">
         <div className="brand-group">
-          <div className="logo-badge" title="Multi-Agent Software Engineering System">MAS</div>
+          <div className="logo-badge" title="Multi-Agent Software Engineering System">MAS IDE</div>
           <div className="mission-meta">
             <h1 title={missionData.title}>{missionData.title}</h1>
             <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
@@ -571,203 +688,219 @@ function App() {
 
       {/* 2. THREE-PANE MAIN WORKSPACE */}
       <main className="workspace-grid" role="main" style={{ flex: 1, minHeight: 0 }}>
-        {/* LEFT PANE: 5-POD MATRIX & ARTIFACT LEDGER */}
-        <aside className="panel left-panel" aria-label="Engineering Pods and Artifacts">
-          <div className="panel-header">
-            <h2>Engineering Pods (Parallel)</h2>
+        {/* LEFT PANE: IDE EXPLORER & POD MATRIX */}
+        <aside className="panel left-panel" aria-label="File Explorer and Pod Matrix">
+          {/* SIDEBAR VIEW SWITCHER: EXPLORER VS PODS */}
+          <div style={{ display: "flex", gap: "0.25rem", marginBottom: "0.75rem", borderBottom: "1px solid var(--border-color)", paddingBottom: "0.4rem" }}>
+            <button
+              className={`btn btn-sm ${sidebarTab === "explorer" ? "btn-primary" : "btn-outline"}`}
+              style={{ flex: 1, fontSize: "0.75rem" }}
+              onClick={() => setSidebarTab("explorer")}
+            >
+              📁 Explorer ({missionData.artifacts.length})
+            </button>
+            <button
+              className={`btn btn-sm ${sidebarTab === "pods" ? "btn-primary" : "btn-outline"}`}
+              style={{ flex: 1, fontSize: "0.75rem" }}
+              onClick={() => setSidebarTab("pods")}
+            >
+              ⚡ Pods (5)
+            </button>
           </div>
 
-          {/* PARALLEL POD MATRIX */}
-          <div className="pod-matrix">
-            {POD_CONFIGS.map(podCfg => {
-              const livePod = missionData.pods[podCfg.key] || { status: "IDLE", action: "Standby", artifact: podCfg.defaultArtifact };
-              const status = livePod.status || "IDLE";
-              const isRunning = status === "RUNNING";
-              const isDone = status === "DONE";
+          {/* VIEW 1: VS CODE-STYLE FILE EXPLORER */}
+          {sidebarTab === "explorer" && (
+            <div className="ide-explorer-panel" style={{ display: "flex", flexDirection: "column", height: "calc(100% - 45px)" }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.4rem" }}>
+                <span style={{ fontSize: "0.75rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--text-secondary)" }}>
+                  Workspace Files
+                </span>
+                <span className="badge" title="Total synthesized files on disk">{missionData.artifacts.length} files</span>
+              </div>
 
-              let statusClass = "status-idle";
-              if (isRunning) statusClass = "status-running";
-              else if (isDone) statusClass = "status-done";
-              else if (status === "FAILED") statusClass = "status-tripped";
+              <input
+                type="text"
+                className="search-input"
+                placeholder="Search files (e.g. service.py)..."
+                value={fileSearchQuery}
+                onChange={(e) => setFileSearchQuery(e.target.value)}
+              />
 
-              return (
-                <div key={podCfg.key} className={`pod-card ${isRunning ? "running" : ""}`}>
-                  <div className="pod-header">
-                    <span className="pod-icon">{podCfg.icon}</span>
-                    <div className="pod-info">
-                      <h3>{podCfg.name}</h3>
-                      <p className="pod-sub">{podCfg.desc}</p>
+              <div className="ide-explorer" style={{ flex: 1, overflowY: "auto" }}>
+                {Object.entries(directoryTree).map(([fKey, folder]) => {
+                  if (folder.items.length === 0) return null;
+                  const isExpanded = expandedFolders[fKey] !== false;
+                  return (
+                    <div key={fKey} className="ide-tree-folder">
+                      <div className="ide-folder-header" onClick={() => toggleFolder(fKey)}>
+                        <span className={`ide-chevron ${isExpanded ? "expanded" : ""}`}>▶</span>
+                        <span>{folder.icon}</span>
+                        <span>{folder.name}</span>
+                        <span style={{ marginLeft: "auto", fontSize: "0.68rem", color: "var(--text-muted)" }}>
+                          ({folder.items.length})
+                        </span>
+                      </div>
+
+                      {isExpanded && (
+                        <div className="ide-folder-children">
+                          {folder.items.map(file => {
+                            const isActive = selectedArtifact?.id === file.id;
+                            return (
+                              <div
+                                key={file.id}
+                                className={`ide-file-item ${isActive ? "active" : ""}`}
+                                onClick={() => openArtifactInEditor(file.id)}
+                                title={`Path: ${file.path}\nAuthor: ${file.created_by}`}
+                              >
+                                <div className="ide-file-label">
+                                  <span className="ide-file-icon">{getFileIcon(file.name)}</span>
+                                  <span>{file.name}</span>
+                                </div>
+                                <span className="ide-git-badge" title="Synthesized by MAS agent">+A</span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
                     </div>
-                    <span className={`status-pill ${statusClass}`}>{status}</span>
+                  );
+                })}
+
+                {missionData.artifacts.length === 0 && (
+                  <div className="empty-state" style={{ padding: "1.5rem 0.5rem", textAlign: "center" }}>
+                    No files synthesized yet. Click <strong>+ New Mission</strong> to generate code.
                   </div>
-                  <div className="pod-action-text">{livePod.action}</div>
-                  {livePod.artifact && (
-                    <div style={{ marginTop: "0.35rem", display: "flex", justifyContent: "flex-end" }}>
-                      <span
-                        className="preset-chip"
-                        style={{ fontSize: "0.68rem" }}
-                        title="Click to view artifact in canvas"
-                        onClick={() => {
-                          const art = missionData.artifacts.find(a => a.name.includes(livePod.artifact));
-                          if (art) loadArtifactContent(art.id);
-                        }}
-                      >
-                        📄 {livePod.artifact}
-                      </span>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
+                )}
+              </div>
+            </div>
+          )}
 
-          {/* ARTIFACT LEDGER */}
-          <div className="panel-header" style={{ marginTop: "1rem" }}>
-            <h2>Artifact Ledger</h2>
-            <span className="badge">{missionData.artifacts.length}</span>
-          </div>
+          {/* VIEW 2: PARALLEL ENGINEERING POD MATRIX */}
+          {sidebarTab === "pods" && (
+            <div className="pod-matrix" style={{ overflowY: "auto", height: "calc(100% - 45px)" }}>
+              {POD_CONFIGS.map(podCfg => {
+                const livePod = missionData.pods[podCfg.key] || { status: "IDLE", action: "Standby", artifact: podCfg.defaultArtifact };
+                const status = livePod.status || "IDLE";
+                const isRunning = status === "RUNNING";
+                const isDone = status === "DONE";
 
-          <input
-            type="text"
-            className="search-input"
-            placeholder="Filter artifacts by name or pod..."
-            value={artifactSearch}
-            onChange={(e) => setArtifactSearch(e.target.value)}
-            aria-label="Filter artifacts"
-          />
+                let statusClass = "status-idle";
+                if (isRunning) statusClass = "status-running";
+                else if (isDone) statusClass = "status-done";
+                else if (status === "FAILED") statusClass = "status-tripped";
 
-          <ul className="artifact-ledger-list">
-            {filteredArtifacts.length === 0 ? (
-              <li className="empty-state">
-                {missionData.artifacts.length === 0
-                  ? "No artifacts committed yet. Deploy a mission to begin."
-                  : "No artifacts match your filter."}
-              </li>
-            ) : (
-              filteredArtifacts.map(art => {
-                const isSelected = selectedArtifact?.id === art.id;
                 return (
-                  <li
-                    key={art.id}
-                    className={`artifact-ledger-item ${isSelected ? "selected" : ""}`}
-                    onClick={() => loadArtifactContent(art.id)}
-                    tabIndex={0}
-                    onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") loadArtifactContent(art.id); }}
-                    style={{
-                      cursor: "pointer",
-                      padding: "0.5rem 0.6rem",
-                      borderRadius: "6px",
-                      border: isSelected ? "1px solid var(--accent-cyan)" : "1px solid transparent",
-                      background: isSelected ? "var(--bg-hover)" : "transparent",
-                      marginBottom: "0.25rem",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between"
+                  <div key={podCfg.key} className={`pod-card ${isRunning ? "running" : ""}`}>
+                    <div className="pod-header">
+                      <span className="pod-icon">{podCfg.icon}</span>
+                      <div className="pod-info">
+                        <h3>{podCfg.name}</h3>
+                        <p className="pod-sub">{podCfg.desc}</p>
+                      </div>
+                      <span className={`status-pill ${statusClass}`}>{status}</span>
+                    </div>
+                    <div className="pod-action-text">{livePod.action}</div>
+                    {livePod.artifact && (
+                      <div style={{ marginTop: "0.35rem", display: "flex", justifyContent: "flex-end" }}>
+                        <span
+                          className="preset-chip"
+                          style={{ fontSize: "0.68rem" }}
+                          title="Open artifact in editor"
+                          onClick={() => {
+                            const art = missionData.artifacts.find(a => a.name.includes(livePod.artifact));
+                            if (art) openArtifactInEditor(art.id);
+                          }}
+                        >
+                          📄 {livePod.artifact}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </aside>
+
+        {/* CENTER PANE: IDE EDITOR & WORKBENCH */}
+        <section className="panel center-panel" aria-label="IDE Code Editor Canvas" style={{ display: "flex", flexDirection: "column" }}>
+          {/* 1. IDE MULTI-TAB BAR */}
+          <div className="ide-tabs-bar" role="tablist">
+            {openTabs.length === 0 ? (
+              <div style={{ padding: "0.4rem 0.85rem", fontSize: "0.75rem", color: "var(--text-muted)", fontStyle: "italic" }}>
+                No open files. Select a file from the Explorer on the left.
+              </div>
+            ) : (
+              openTabs.map(tab => {
+                const isActive = activeTabId === tab.id;
+                return (
+                  <div
+                    key={tab.id}
+                    className={`ide-tab ${isActive ? "active" : ""}`}
+                    onClick={() => {
+                      setActiveTabId(tab.id);
+                      setSelectedArtifact(tab);
                     }}
                   >
-                    <div>
-                      <div style={{ fontSize: "0.82rem", fontWeight: 600 }}>{art.name}</div>
-                      <div style={{ fontSize: "0.7rem", color: "var(--text-secondary)" }}>
-                        {art.created_by || "Agent"} • v{art.version || 1}
-                      </div>
-                    </div>
-                    <span className="status-pill status-idle" style={{ fontSize: "0.65rem" }}>
-                      {art.type}
+                    <span>{getFileIcon(tab.name)}</span>
+                    <span>{tab.name}</span>
+                    <span
+                      className="ide-tab-close"
+                      title="Close file tab"
+                      onClick={(e) => handleCloseTab(e, tab.id)}
+                    >
+                      ✕
                     </span>
-                  </li>
+                  </div>
                 );
               })
             )}
-          </ul>
-        </aside>
-
-        {/* CENTER PANE: ARTIFACT CANVAS & CODE WORKBENCH */}
-        <section className="panel center-panel" aria-label="Artifact Code Canvas">
-          {/* TAB BAR */}
-          <div className="canvas-tabs" role="tablist">
-            <button
-              className={`tab-btn ${activeTab === "code" ? "active" : ""}`}
-              onClick={() => {
-                setActiveTab("code");
-                const match = missionData.artifacts.find(a => a.name.endsWith(".py") || a.name.endsWith(".tsx"));
-                if (match) loadArtifactContent(match.id);
-              }}
-            >
-              Synthesized Code
-            </button>
-            <button
-              className={`tab-btn ${activeTab === "schema" ? "active" : ""}`}
-              onClick={() => {
-                setActiveTab("schema");
-                const match = missionData.artifacts.find(a => a.name.endsWith(".sql"));
-                if (match) loadArtifactContent(match.id);
-              }}
-            >
-              Database DDL
-            </button>
-            <button
-              className={`tab-btn ${activeTab === "spec" ? "active" : ""}`}
-              onClick={() => {
-                setActiveTab("spec");
-                const match = missionData.artifacts.find(a => a.name.includes("api-spec") || a.name.includes("TaskDAG"));
-                if (match) loadArtifactContent(match.id);
-              }}
-            >
-              API Contract
-            </button>
-            <button
-              className={`tab-btn ${activeTab === "prd" ? "active" : ""}`}
-              onClick={() => {
-                setActiveTab("prd");
-                const match = missionData.artifacts.find(a => a.name.includes("PRD") || a.name.includes("architecture"));
-                if (match) loadArtifactContent(match.id);
-              }}
-            >
-              PRD & Stories
-            </button>
-            <button
-              className={`tab-btn ${activeTab === "pr" ? "active" : ""}`}
-              onClick={() => {
-                setActiveTab("pr");
-                const match = missionData.artifacts.find(a => a.name.includes("PULL_REQUEST"));
-                if (match) loadArtifactContent(match.id);
-                else handleGeneratePR(false, false);
-              }}
-            >
-              Pull Request
-            </button>
           </div>
 
-          {/* TOOLBAR */}
-          <div className="canvas-toolbar">
-            <div className="file-path-badge">
-              {selectedArtifact ? selectedArtifact.name : "Select an artifact from ledger"}
+          {/* 2. LOCAL DISK PATH BANNER (Shows exact physical file path) */}
+          {selectedArtifact && (
+            <div className="disk-location-banner">
+              <div className="disk-path-text" title={localDiskPath}>
+                📁 <strong>Disk Location:</strong> {localDiskPath}
+              </div>
+              <div style={{ display: "flex", gap: "0.4rem" }}>
+                <button
+                  className="btn btn-sm btn-outline"
+                  style={{ fontSize: "0.65rem", padding: "0.15rem 0.45rem" }}
+                  onClick={handleCopyPath}
+                >
+                  {pathCopyFeedback ? "Path Copied! ✓" : "Copy Path"}
+                </button>
+                <button
+                  className="btn btn-sm btn-outline"
+                  style={{ fontSize: "0.65rem", padding: "0.15rem 0.45rem" }}
+                  onClick={handleCopyCode}
+                >
+                  {copyFeedback ? "Code Copied! ✓" : "Copy Code"}
+                </button>
+              </div>
             </div>
-            <div className="toolbar-actions" style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-              <span className="ast-badge">AST Verified: 100% Pass</span>
-              <button
-                className="btn btn-sm btn-outline"
-                onClick={handleCopyCode}
-                disabled={!selectedArtifact}
-                title="Copy artifact code to clipboard"
-              >
-                {copyFeedback ? "Copied!" : "📋 Copy"}
-              </button>
-              <button
-                className="btn btn-sm btn-primary"
-                onClick={() => handleGeneratePR(false, false)}
-                title="Preview or publish GitHub PR"
-              >
-                🚀 PR Dossier
-              </button>
-            </div>
-          </div>
+          )}
 
-          {/* 4-STATE VIEWPORT */}
-          <div className="canvas-viewport" style={{ flex: 1, minHeight: 0, position: "relative" }}>
+          {/* 3. BREADCRUMBS BAR */}
+          {selectedArtifact && (
+            <div className="ide-breadcrumbs">
+              <span>MAS Workspace</span>
+              <span className="ide-crumb-sep">&gt;</span>
+              <span>{selectedArtifact.path?.split("/")[0] || "artifacts"}</span>
+              <span className="ide-crumb-sep">&gt;</span>
+              <span className="ide-crumb-active">{selectedArtifact.name}</span>
+              <span style={{ marginLeft: "auto", fontSize: "0.68rem", color: "var(--accent-green)" }}>
+                Author: {selectedArtifact.created_by || "Agent"} (v{selectedArtifact.version || 1})
+              </span>
+            </div>
+          )}
+
+          {/* 4. IDE EDITOR CANVAS WITH LINE NUMBER GUTTER */}
+          <div className="ide-editor-container" style={{ flex: 1, minHeight: 0 }}>
             {artifactLoading ? (
-              // 1. Loading Skeleton State
-              <div className="skeleton-container" aria-busy="true">
+              // Loading Skeleton State
+              <div className="skeleton-container" style={{ width: "100%" }} aria-busy="true">
                 <div className="skeleton-line short" />
                 <div className="skeleton-line long" />
                 <div className="skeleton-line medium" />
@@ -777,32 +910,44 @@ function App() {
                 <div className="skeleton-line long" />
               </div>
             ) : artifactError ? (
-              // 2. Error State with Retry
-              <div className="empty-canvas">
+              // Error State
+              <div className="empty-canvas" style={{ width: "100%" }}>
                 <div className="empty-canvas-icon">⚠️</div>
-                <h3>Failed to load artifact</h3>
+                <h3>Failed to load file</h3>
                 <p>{artifactError}</p>
                 <button
                   className="btn btn-primary"
-                  onClick={() => selectedArtifact && loadArtifactContent(selectedArtifact.id)}
+                  onClick={() => selectedArtifact && openArtifactInEditor(selectedArtifact.id)}
                 >
                   Retry Loading
                 </button>
               </div>
             ) : selectedArtifact ? (
-              // 3. Populated State with Syntax Highlighting
-              <pre style={{ margin: 0, height: "100%", padding: "1rem" }}>
-                <code ref={codeViewerRef} className={`language-${codeLanguage}`}>
-                  {selectedArtifact.content || "// Artifact content is empty."}
-                </code>
-              </pre>
+              // Populated IDE Code Editor with Gutter
+              <div style={{ display: "flex", width: "100%", height: "100%" }}>
+                {/* LINE NUMBERS GUTTER */}
+                <div className="ide-gutter">
+                  {lineNumbers.map(n => (
+                    <div key={n}>{n}</div>
+                  ))}
+                </div>
+
+                {/* SYNTAX HIGHLIGHTED CODE */}
+                <div className="ide-code-pane">
+                  <pre>
+                    <code ref={codeViewerRef} className={`language-${currentLanguage}`}>
+                      {selectedArtifact.content || "// File content is empty."}
+                    </code>
+                  </pre>
+                </div>
+              </div>
             ) : (
-              // 4. Empty State with CTA
-              <div className="empty-canvas">
-                <div className="empty-canvas-icon">🚀</div>
-                <h3>No Artifact Selected</h3>
+              // Empty State with CTA
+              <div className="empty-canvas" style={{ width: "100%" }}>
+                <div className="empty-canvas-icon">💻</div>
+                <h3>MAS IDE Workspace Ready</h3>
                 <p>
-                  Deploy a new mission or select an artifact from the Artifact Ledger on the left to inspect synthesized code, SQL DDL, or API specs.
+                  Click any file in the <strong>Explorer</strong> on the left to inspect synthesized code, SQL migrations, API contracts, or documentation.
                 </p>
                 <button
                   className="btn btn-primary"
@@ -813,6 +958,34 @@ function App() {
               </div>
             )}
           </div>
+
+          {/* 5. IDE STATUS BAR */}
+          <footer className="ide-status-bar dark-status">
+            <div className="ide-status-left">
+              <span className="ide-status-item">
+                <span>Ln {lineCount}, Col 1</span>
+              </span>
+              <span className="ide-status-item">Spaces: 4</span>
+              <span className="ide-status-item">UTF-8</span>
+              <span className="ide-status-item">LF</span>
+            </div>
+
+            <div className="ide-status-right">
+              <span className="ide-status-item" style={{ color: "var(--accent-green)" }}>
+                AST Linter: Verified ✓
+              </span>
+              <span className="ide-status-item" style={{ textTransform: "capitalize" }}>
+                {currentLanguage}
+              </span>
+              <button
+                className="btn btn-sm btn-outline"
+                style={{ fontSize: "0.65rem", padding: "0.1rem 0.4rem" }}
+                onClick={() => handleGeneratePR(false, false)}
+              >
+                🚀 GitHub PR
+              </button>
+            </div>
+          </footer>
         </section>
 
         {/* RIGHT PANE: HITL STRATEGIC GATES & LIVE EVENT STREAM */}
@@ -887,20 +1060,22 @@ function App() {
           </div>
 
           <div className="activity-feed" role="log" aria-live="polite">
-            {filteredFeed.map((entry, idx) => {
-              let tagClass = "system-msg";
-              if (entry.type === "POD") tagClass = "pod-msg";
-              else if (entry.type === "GATE") tagClass = "gate-msg";
-              else if (entry.type === "SUCCESS") tagClass = "success-msg";
-              else if (entry.type === "ERROR") tagClass = "error-msg";
+            {feedLogs
+              .filter(item => feedFilter === "ALL" || item.type === feedFilter)
+              .map((entry, idx) => {
+                let tagClass = "system-msg";
+                if (entry.type === "POD") tagClass = "pod-msg";
+                else if (entry.type === "GATE") tagClass = "gate-msg";
+                else if (entry.type === "SUCCESS") tagClass = "success-msg";
+                else if (entry.type === "ERROR") tagClass = "error-msg";
 
-              return (
-                <div key={idx} className={`feed-entry ${tagClass}`}>
-                  <span className="feed-time">{entry.time}</span>
-                  <span className="feed-text">{entry.text}</span>
-                </div>
-              );
-            })}
+                return (
+                  <div key={idx} className={`feed-entry ${tagClass}`}>
+                    <span className="feed-time">{entry.time}</span>
+                    <span className="feed-text">{entry.text}</span>
+                  </div>
+                );
+              })}
             <div ref={feedEndRef} />
           </div>
         </aside>
@@ -999,7 +1174,7 @@ function App() {
                   type="text"
                   value={newMissionForm.targetDir}
                   onChange={(e) => setNewMissionForm(prev => ({ ...prev, targetDir: e.target.value }))}
-                  placeholder="Optional: C:/projects/my-app (leave blank for blackboard)"
+                  placeholder="Optional: C:/projects/my-app (leave blank for default blackboard)"
                 />
               </div>
 
@@ -1099,4 +1274,3 @@ if (rootElement) {
   const root = ReactDOM.createRoot(rootElement);
   root.render(<App />);
 }
-

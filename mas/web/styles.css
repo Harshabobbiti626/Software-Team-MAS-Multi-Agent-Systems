@@ -787,3 +787,286 @@ body {
   background-color: var(--accent-red);
   box-shadow: 0 0 6px var(--accent-red);
 }
+
+/* ==============================================================================
+   IDE-LIKE WORKSPACE STYLES (VS CODE / JETBRAINS COMMAND INTERFACE)
+   ============================================================================== */
+
+/* File Explorer Tree */
+.ide-explorer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  font-family: var(--font-sans);
+  font-size: 0.8rem;
+  user-select: none;
+}
+
+.ide-tree-folder {
+  margin-bottom: 0.2rem;
+}
+
+.ide-folder-header {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: 0.78rem;
+  letter-spacing: 0.02em;
+  transition: background 0.15s ease;
+}
+
+.ide-folder-header:hover {
+  background: var(--bg-hover);
+}
+
+.ide-chevron {
+  display: inline-block;
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  transition: transform 0.15s ease;
+  width: 12px;
+  text-align: center;
+}
+
+.ide-chevron.expanded {
+  transform: rotate(90deg);
+}
+
+.ide-folder-children {
+  padding-left: 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  border-left: 1px solid rgba(255, 255, 255, 0.07);
+  margin-left: 0.6rem;
+}
+
+.ide-file-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.28rem 0.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  transition: all 0.15s ease;
+}
+
+.ide-file-item:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.ide-file-item.active {
+  background: rgba(56, 189, 248, 0.15);
+  color: var(--accent-cyan);
+  font-weight: 600;
+  border-left: 2px solid var(--accent-cyan);
+}
+
+.ide-file-label {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ide-file-icon {
+  font-size: 0.85rem;
+}
+
+.ide-git-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 0.05rem 0.3rem;
+  border-radius: 3px;
+  background: rgba(16, 185, 129, 0.2);
+  color: var(--accent-green);
+}
+
+/* IDE Multi-Tab Bar */
+.ide-tabs-bar {
+  display: flex;
+  align-items: center;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+  overflow-x: auto;
+  scrollbar-width: thin;
+  min-height: 35px;
+}
+
+.ide-tab {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.85rem;
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  color: var(--text-secondary);
+  background: transparent;
+  border-right: 1px solid var(--border-color);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+  position: relative;
+}
+
+.ide-tab:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.ide-tab.active {
+  background: var(--bg-primary);
+  color: var(--accent-cyan);
+  font-weight: 600;
+  border-top: 2px solid var(--accent-cyan);
+}
+
+.ide-tab-close {
+  display: inline-block;
+  padding: 0.1rem 0.25rem;
+  border-radius: 3px;
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  line-height: 1;
+}
+
+.ide-tab-close:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: var(--text-primary);
+}
+
+/* Breadcrumb Navigation */
+.ide-breadcrumbs {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.85rem;
+  background: var(--bg-primary);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.ide-crumb-sep {
+  color: rgba(255, 255, 255, 0.2);
+}
+
+.ide-crumb-active {
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+/* IDE Editor Layout with Line Numbers Gutter */
+.ide-editor-container {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  background: #0b0f17;
+  overflow: auto;
+  position: relative;
+}
+
+.ide-gutter {
+  padding: 0.85rem 0.5rem;
+  background: #080c13;
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
+  color: #4b5563;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  line-height: 1.5;
+  text-align: right;
+  user-select: none;
+  min-width: 45px;
+}
+
+.ide-code-pane {
+  flex: 1;
+  min-width: 0;
+  padding: 0.85rem 1rem;
+  overflow: auto;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+.ide-code-pane pre {
+  margin: 0;
+  background: transparent !important;
+  padding: 0 !important;
+}
+
+/* IDE Bottom Status Bar */
+.ide-status-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.25rem 0.85rem;
+  background: #0284c7;
+  color: #ffffff;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 500;
+}
+
+.ide-status-bar.dark-status {
+  background: var(--bg-secondary);
+  border-top: 1px solid var(--border-color);
+  color: var(--text-secondary);
+}
+
+.ide-status-left, .ide-status-right {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.ide-status-item {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+/* Disk Location Callout Banner */
+.disk-location-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.4rem 0.85rem;
+  background: rgba(56, 189, 248, 0.08);
+  border-bottom: 1px solid rgba(56, 189, 248, 0.2);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--accent-cyan);
+}
+
+.disk-path-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 80%;
+}
+
+/* Diff View */
+.ide-diff-line-added {
+  background: rgba(16, 185, 129, 0.18);
+  border-left: 3px solid var(--accent-green);
+  display: block;
+}
+
+.ide-diff-line-removed {
+  background: rgba(239, 68, 68, 0.18);
+  border-left: 3px solid var(--accent-red);
+  display: block;
+}
