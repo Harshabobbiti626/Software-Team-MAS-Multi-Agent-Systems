@@ -1,0 +1,9 @@
+{
+  "project_charter_id": "CHARTER-TASK-1793695326204",
+  "business_goal_id": "GOAL-001",
+  "target_objective": "Core Enterprise Service",
+  "business_justification": "Implement full-stack service with APIs, storage, and UI.",
+  "allocated_token_budget": 128000,
+  "target_sla": "High Availability (99.99%)",
+  "sponsor_sign_off": "APPROVED"
+}

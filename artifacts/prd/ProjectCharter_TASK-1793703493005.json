@@ -1,0 +1,9 @@
+{
+  "project_charter_id": "CHARTER-TASK-1793703493005",
+  "business_goal_id": "GOAL-001",
+  "target_objective": "API Test Service",
+  "business_justification": "Integration test description",
+  "allocated_token_budget": 128000,
+  "target_sla": "High Availability (99.99%)",
+  "sponsor_sign_off": "APPROVED"
+}

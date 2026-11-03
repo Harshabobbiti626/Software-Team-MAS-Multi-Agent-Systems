@@ -1,8 +1,42 @@
 {
   "task_id": "TASK-001",
   "review_decision": "REVISION_REQUESTED",
-  "reviewed_artifacts_count": 5,
+  "reviewed_artifacts_count": 19,
   "details": [
+    {
+      "artifact_name": "CoreView.tsx",
+      "ast_syntax_pass": false,
+      "solid_compliance": {
+        "SingleResponsibility": "Compliant: Focused module scope",
+        "DependencyInversion": "Compliant: Relies on abstractions and schemas"
+      },
+      "issues": [
+        {
+          "file_path": "CoreView.tsx",
+          "line_number": 4,
+          "severity": "ERROR",
+          "message": "leading zeros in decimal integer literals are not permitted; use an 0o prefix for octal integers (CoreView.tsx, line 4)",
+          "rule_code": "SYNTAX_ERROR"
+        }
+      ]
+    },
+    {
+      "artifact_name": "Dockerfile",
+      "ast_syntax_pass": false,
+      "solid_compliance": {
+        "SingleResponsibility": "Compliant: Focused module scope",
+        "DependencyInversion": "Compliant: Relies on abstractions and schemas"
+      },
+      "issues": [
+        {
+          "file_path": "Dockerfile",
+          "line_number": 20,
+          "severity": "ERROR",
+          "message": "invalid decimal literal (Dockerfile, line 20)",
+          "rule_code": "SYNTAX_ERROR"
+        }
+      ]
+    },
     {
       "artifact_name": "IntegrationView.tsx",
       "ast_syntax_pass": false,
@@ -38,6 +72,40 @@
       ]
     },
     {
+      "artifact_name": "PaymentView.tsx",
+      "ast_syntax_pass": false,
+      "solid_compliance": {
+        "SingleResponsibility": "Compliant: Focused module scope",
+        "DependencyInversion": "Compliant: Relies on abstractions and schemas"
+      },
+      "issues": [
+        {
+          "file_path": "PaymentView.tsx",
+          "line_number": 4,
+          "severity": "ERROR",
+          "message": "leading zeros in decimal integer literals are not permitted; use an 0o prefix for octal integers (PaymentView.tsx, line 4)",
+          "rule_code": "SYNTAX_ERROR"
+        }
+      ]
+    },
+    {
+      "artifact_name": "ResourceView.tsx",
+      "ast_syntax_pass": false,
+      "solid_compliance": {
+        "SingleResponsibility": "Compliant: Focused module scope",
+        "DependencyInversion": "Compliant: Relies on abstractions and schemas"
+      },
+      "issues": [
+        {
+          "file_path": "ResourceView.tsx",
+          "line_number": 4,
+          "severity": "ERROR",
+          "message": "leading zeros in decimal integer literals are not permitted; use an 0o prefix for octal integers (ResourceView.tsx, line 4)",
+          "rule_code": "SYNTAX_ERROR"
+        }
+      ]
+    },
+    {
       "artifact_name": "service.py",
       "ast_syntax_pass": true,
       "solid_compliance": {
@@ -45,6 +113,111 @@
         "DependencyInversion": "Compliant: Relies on abstractions and schemas"
       },
       "issues": []
+    },
+    {
+      "artifact_name": "StripeView.tsx",
+      "ast_syntax_pass": false,
+      "solid_compliance": {
+        "SingleResponsibility": "Compliant: Focused module scope",
+        "DependencyInversion": "Compliant: Relies on abstractions and schemas"
+      },
+      "issues": [
+        {
+          "file_path": "StripeView.tsx",
+          "line_number": 4,
+          "severity": "ERROR",
+          "message": "leading zeros in decimal integer literals are not permitted; use an 0o prefix for octal integers (StripeView.tsx, line 4)",
+          "rule_code": "SYNTAX_ERROR"
+        }
+      ]
+    },
+    {
+      "artifact_name": "test_core.py",
+      "ast_syntax_pass": true,
+      "solid_compliance": {
+        "SingleResponsibility": "Compliant: Focused module scope",
+        "DependencyInversion": "Compliant: Relies on abstractions and schemas"
+      },
+      "issues": []
+    },
+    {
+      "artifact_name": "test_integration.py",
+      "ast_syntax_pass": true,
+      "solid_compliance": {
+        "SingleResponsibility": "Compliant: Focused module scope",
+        "DependencyInversion": "Compliant: Relies on abstractions and schemas"
+      },
+      "issues": []
+    },
+    {
+      "artifact_name": "test_payment.py",
+      "ast_syntax_pass": true,
+      "solid_compliance": {
+        "SingleResponsibility": "Compliant: Focused module scope",
+        "DependencyInversion": "Compliant: Relies on abstractions and schemas"
+      },
+      "issues": []
+    },
+    {
+      "artifact_name": "test_real.py",
+      "ast_syntax_pass": true,
+      "solid_compliance": {
+        "SingleResponsibility": "Compliant: Focused module scope",
+        "DependencyInversion": "Compliant: Relies on abstractions and schemas"
+      },
+      "issues": []
+    },
+    {
+      "artifact_name": "test_resource.py",
+      "ast_syntax_pass": true,
+      "solid_compliance": {
+        "SingleResponsibility": "Compliant: Focused module scope",
+        "DependencyInversion": "Compliant: Relies on abstractions and schemas"
+      },
+      "issues": []
+    },
+    {
+      "artifact_name": "test_stripe.py",
+      "ast_syntax_pass": true,
+      "solid_compliance": {
+        "SingleResponsibility": "Compliant: Focused module scope",
+        "DependencyInversion": "Compliant: Relies on abstractions and schemas"
+      },
+      "issues": []
+    },
+    {
+      "artifact_name": "IntegrationView.tsx",
+      "ast_syntax_pass": false,
+      "solid_compliance": {
+        "SingleResponsibility": "Compliant: Focused module scope",
+        "DependencyInversion": "Compliant: Relies on abstractions and schemas"
+      },
+      "issues": [
+        {
+          "file_path": "IntegrationView.tsx",
+          "line_number": 3,
+          "severity": "ERROR",
+          "message": "leading zeros in decimal integer literals are not permitted; use an 0o prefix for octal integers (IntegrationView.tsx, line 3)",
+          "rule_code": "SYNTAX_ERROR"
+        }
+      ]
+    },
+    {
+      "artifact_name": "main.tf",
+      "ast_syntax_pass": false,
+      "solid_compliance": {
+        "SingleResponsibility": "Compliant: Focused module scope",
+        "DependencyInversion": "Compliant: Relies on abstractions and schemas"
+      },
+      "issues": [
+        {
+          "file_path": "main.tf",
+          "line_number": 7,
+          "severity": "ERROR",
+          "message": "invalid syntax. Maybe you meant '==' or ':=' instead of '='? (main.tf, line 7)",
+          "rule_code": "SYNTAX_ERROR"
+        }
+      ]
     },
     {
       "artifact_name": "Dockerfile",
@@ -62,6 +235,15 @@
           "rule_code": "SYNTAX_ERROR"
         }
       ]
+    },
+    {
+      "artifact_name": "service.py",
+      "ast_syntax_pass": true,
+      "solid_compliance": {
+        "SingleResponsibility": "Compliant: Focused module scope",
+        "DependencyInversion": "Compliant: Relies on abstractions and schemas"
+      },
+      "issues": []
     },
     {
       "artifact_name": "test_integration.py",
