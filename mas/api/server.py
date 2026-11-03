@@ -14,7 +14,7 @@ from http import HTTPStatus
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any, Dict, List, Optional
-from urllib.parse import urlparse
+from urllib.parse import parse_qs, urlparse
 
 from mas.agents.engineering import (
     BackendEngineerAgent,
@@ -276,6 +276,45 @@ class MASRequestHandler(SimpleHTTPRequestHandler):
 
             rep = compute_mission_cost_report(session=session)
             self._send_json_response(rep.model_dump())
+            return
+
+        elif path.startswith("/api/v1/missions/") and path.endswith("/symbols"):
+            mission_id = path.split("/")[4]
+            query_params = parse_qs(parsed_url.query)
+            q = query_params.get("query", [None])[0] or query_params.get("q", [None])[0]
+            tier = query_params.get("tier", [None])[0]
+            kind = query_params.get("kind", [None])[0]
+
+            from mas.core.symbol_indexer import index_workspace_symbols
+
+            symbols = index_workspace_symbols(
+                workspace_root=".",
+                query=q,
+                tier_filter=tier,
+                kind_filter=kind,
+            )
+            self._send_json_response([s.model_dump() for s in symbols])
+            return
+
+        elif (
+            path in ("/api/v1/workspace/symbols", "/api/v1/symbols")
+            or path.startswith("/api/v1/symbols?")
+            or path.startswith("/api/v1/workspace/symbols?")
+        ):
+            query_params = parse_qs(parsed_url.query)
+            q = query_params.get("query", [None])[0] or query_params.get("q", [None])[0]
+            tier = query_params.get("tier", [None])[0]
+            kind = query_params.get("kind", [None])[0]
+
+            from mas.core.symbol_indexer import index_workspace_symbols
+
+            symbols = index_workspace_symbols(
+                workspace_root=".",
+                query=q,
+                tier_filter=tier,
+                kind_filter=kind,
+            )
+            self._send_json_response([s.model_dump() for s in symbols])
             return
 
         elif path in ("/api/v1/telemetry/tokens", "/api/v1/tokens") or path.startswith("/api/v1/tokens?"):

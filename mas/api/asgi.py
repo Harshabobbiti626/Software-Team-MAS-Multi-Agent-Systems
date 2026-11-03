@@ -214,6 +214,42 @@ async def get_mission_dag_endpoint(mission_id: str):
     return dag.model_dump()
 
 
+@app.get("/api/v1/workspace/symbols")
+@app.get("/api/v1/symbols")
+async def get_workspace_symbols(
+    query: Optional[str] = None,
+    tier: Optional[str] = None,
+    kind: Optional[str] = None,
+):
+    from mas.core.symbol_indexer import index_workspace_symbols
+
+    symbols = index_workspace_symbols(
+        workspace_root=".",
+        query=query,
+        tier_filter=tier,
+        kind_filter=kind,
+    )
+    return [s.model_dump() for s in symbols]
+
+
+@app.get("/api/v1/missions/{mission_id}/symbols")
+async def get_mission_symbols(
+    mission_id: str,
+    query: Optional[str] = None,
+    tier: Optional[str] = None,
+    kind: Optional[str] = None,
+):
+    from mas.core.symbol_indexer import index_workspace_symbols
+
+    symbols = index_workspace_symbols(
+        workspace_root=".",
+        query=query,
+        tier_filter=tier,
+        kind_filter=kind,
+    )
+    return [s.model_dump() for s in symbols]
+
+
 @app.get("/api/v1/missions/{mission_id}/events")
 async def sse_event_stream(mission_id: str):
     event_bus = get_event_bus()

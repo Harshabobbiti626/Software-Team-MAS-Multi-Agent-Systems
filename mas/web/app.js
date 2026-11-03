@@ -838,6 +838,15 @@ function App() {
   const [isCommittingGit, setIsCommittingGit] = useState(false);
   const [gitCommitFeedback, setGitCommitFeedback] = useState(null);
 
+  // In-Cockpit Quick-Open & AST Symbol Search (Micro-Step 11)
+  const [isQuickOpenVisible, setIsQuickOpenVisible] = useState(false);
+  const [quickOpenQuery, setQuickOpenQuery] = useState("");
+  const [quickOpenFilterKind, setQuickOpenFilterKind] = useState("all");
+  const [quickOpenSelectedIndex, setQuickOpenSelectedIndex] = useState(0);
+  const [workspaceSymbols, setWorkspaceSymbols] = useState([]);
+  const [isLoadingSymbols, setIsLoadingSymbols] = useState(false);
+  const quickOpenInputRef = useRef(null);
+
   // REFS
   const eventSourceRef = useRef(null);
   const codeViewerRef = useRef(null);
@@ -978,6 +987,50 @@ function App() {
   useEffect(() => {
     fetchCostTelemetry();
   }, [fetchCostTelemetry]);
+
+  // --- FETCH WORKSPACE & ARTIFACT SYMBOLS (QUICK OPEN) ---
+  const fetchWorkspaceSymbols = useCallback(async (query = "", kind = "all") => {
+    setIsLoadingSymbols(true);
+    try {
+      const params = new URLSearchParams();
+      if (query && query.trim()) params.set("query", query.trim());
+      if (kind && kind !== "all") params.set("kind", kind);
+      const url = activeMissionId ? `/api/v1/missions/${activeMissionId}/symbols?${params.toString()}` : `/api/v1/workspace/symbols?${params.toString()}`;
+      const res = await fetch(url);
+      if (res.ok) {
+        const data = await res.json();
+        setWorkspaceSymbols(data);
+      }
+    } catch (err) {
+      console.warn("Failed to fetch symbols for Quick Open:", err);
+    } finally {
+      setIsLoadingSymbols(false);
+    }
+  }, [activeMissionId]);
+  useEffect(() => {
+    if (isQuickOpenVisible) {
+      fetchWorkspaceSymbols(quickOpenQuery, quickOpenFilterKind);
+    }
+  }, [isQuickOpenVisible, quickOpenQuery, quickOpenFilterKind, fetchWorkspaceSymbols]);
+  useEffect(() => {
+    if (isQuickOpenVisible && quickOpenInputRef.current) {
+      setTimeout(() => quickOpenInputRef.current?.focus(), 50);
+    }
+  }, [isQuickOpenVisible]);
+  const handleSelectSymbol = useCallback(symbol => {
+    if (!symbol) return;
+    setIsQuickOpenVisible(false);
+    const fileName = symbol.file_path.split("/").pop();
+    const matched = missionData.artifacts?.find(a => a.name === fileName || a.path === symbol.file_path || symbol.file_path.endsWith(a.name));
+    if (matched) {
+      openArtifactInEditor(matched.id);
+    } else {
+      openArtifactInEditor(fileName);
+    }
+    setViewMode("cockpit");
+    setEditorViewMode("code");
+    addFeedLog("SYSTEM", `🔍 Jumped to ${symbol.kind} [${symbol.name}] in ${symbol.file_path}:${symbol.line_number}`);
+  }, [missionData.artifacts, openArtifactInEditor, addFeedLog]);
 
   // --- COMPUTE SPLIT (SIDE-BY-SIDE) DIFF ROWS ---
   const computeSplitDiffRows = useCallback(diffText => {
@@ -1622,6 +1675,18 @@ function App() {
     hint: "Enter",
     action: () => setIsNewMissionOpen(true)
   }, {
+    id: "quick-open",
+    icon: "🔍",
+    title: "Quick Open File or Symbol",
+    sub: "Instant fuzzy jump to any class, function, schema, or file",
+    hint: "Ctrl+P",
+    action: () => {
+      setQuickOpenQuery("");
+      setQuickOpenFilterKind("all");
+      setQuickOpenSelectedIndex(0);
+      setIsQuickOpenVisible(true);
+    }
+  }, {
     id: "local-commit",
     icon: "📦",
     title: "Create Local Git Snapshot",
@@ -1763,6 +1828,47 @@ function App() {
   // --- KEYBOARD SHORTCUTS ---
   useEffect(() => {
     const handleKeyDown = e => {
+      // 0. Quick-Open Symbol Search Toggle (Ctrl+P / Cmd+P)
+      if ((e.ctrlKey || e.metaKey) && (e.key === "p" || e.key === "P")) {
+        e.preventDefault();
+        setIsQuickOpenVisible(prev => {
+          if (!prev) {
+            setQuickOpenQuery("");
+            setQuickOpenFilterKind("all");
+            setQuickOpenSelectedIndex(0);
+          }
+          return !prev;
+        });
+        return;
+      }
+
+      // Quick-Open Navigation Keys (Works when quick-open is active)
+      if (isQuickOpenVisible) {
+        if (e.key === "Escape") {
+          e.preventDefault();
+          setIsQuickOpenVisible(false);
+          return;
+        }
+        if (e.key === "ArrowDown") {
+          e.preventDefault();
+          setQuickOpenSelectedIndex(prev => Math.min(prev + 1, Math.max(0, workspaceSymbols.length - 1)));
+          return;
+        }
+        if (e.key === "ArrowUp") {
+          e.preventDefault();
+          setQuickOpenSelectedIndex(prev => Math.max(prev - 1, 0));
+          return;
+        }
+        if (e.key === "Enter") {
+          e.preventDefault();
+          if (workspaceSymbols[quickOpenSelectedIndex]) {
+            handleSelectSymbol(workspaceSymbols[quickOpenSelectedIndex]);
+          }
+          return;
+        }
+        return;
+      }
+
       // 1. Command Palette Toggle (Ctrl+K / Cmd+K)
       if ((e.ctrlKey || e.metaKey) && (e.key === "k" || e.key === "K")) {
         e.preventDefault();
@@ -1839,11 +1945,12 @@ function App() {
         setInspectedPod(null);
         setIsCommandPaletteOpen(false);
         setIsVersionHistoryOpen(false);
+        setIsQuickOpenVisible(false);
       }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [pendingGate, handleGateDecision, isCommandPaletteOpen, filteredCommands, commandPaletteSelectedIndex, lastTestFailure, isAutoFixing, handleAutoFixTestFailure]);
+  }, [pendingGate, handleGateDecision, isCommandPaletteOpen, filteredCommands, commandPaletteSelectedIndex, lastTestFailure, isAutoFixing, handleAutoFixTestFailure, isQuickOpenVisible, workspaceSymbols, quickOpenSelectedIndex, handleSelectSymbol]);
 
   // --- AUTO-SCROLL LOGS ---
   useEffect(() => {
@@ -3252,18 +3359,41 @@ function App() {
                 color: "var(--text-muted)",
                 fontStyle: "italic"
               },
-              children: "No open files. Select a file from Explorer or view architecture DAG."
-            }), /*#__PURE__*/_jsx("div", {
-              className: "view-switcher-pill",
-              children: /*#__PURE__*/_jsx("button", {
-                className: `view-switcher-btn ${editorViewMode === "dag" ? "active" : ""}`,
-                onClick: () => setEditorViewMode("dag"),
+              children: "No open files. Select from Explorer, press Ctrl+P for Quick Open, or explore DAG."
+            }), /*#__PURE__*/_jsxs("div", {
+              style: {
+                display: "flex",
+                alignItems: "center",
+                gap: "0.4rem"
+              },
+              children: [/*#__PURE__*/_jsx("button", {
+                className: "btn btn-sm btn-outline",
                 style: {
                   fontSize: "0.65rem",
-                  padding: "0.15rem 0.45rem"
+                  padding: "0.15rem 0.45rem",
+                  color: "var(--accent-cyan)",
+                  borderColor: "rgba(56, 189, 248, 0.4)"
                 },
-                children: "🕸️ Architecture DAG"
-              })
+                onClick: () => {
+                  setQuickOpenQuery("");
+                  setQuickOpenFilterKind("all");
+                  setQuickOpenSelectedIndex(0);
+                  setIsQuickOpenVisible(true);
+                },
+                title: "Quick-Open Symbol or File (Ctrl+P / Cmd+P)",
+                children: "🔍 Quick Open"
+              }), /*#__PURE__*/_jsx("div", {
+                className: "view-switcher-pill",
+                children: /*#__PURE__*/_jsx("button", {
+                  className: `view-switcher-btn ${editorViewMode === "dag" ? "active" : ""}`,
+                  onClick: () => setEditorViewMode("dag"),
+                  style: {
+                    fontSize: "0.65rem",
+                    padding: "0.15rem 0.45rem"
+                  },
+                  children: "🕸️ Architecture DAG"
+                })
+              })]
             })]
           }) : openTabs.map(tab => {
             const isActive = activeTabId === tab.id;
@@ -3329,6 +3459,22 @@ function App() {
                 },
                 children: "🕸️ DAG"
               })]
+            }), /*#__PURE__*/_jsx("button", {
+              className: "btn btn-sm btn-outline",
+              style: {
+                fontSize: "0.65rem",
+                padding: "0.15rem 0.45rem",
+                color: "var(--accent-cyan)",
+                borderColor: "rgba(56, 189, 248, 0.4)"
+              },
+              onClick: () => {
+                setQuickOpenQuery("");
+                setQuickOpenFilterKind("all");
+                setQuickOpenSelectedIndex(0);
+                setIsQuickOpenVisible(true);
+              },
+              title: "Quick-Open Symbol or File (Ctrl+P / Cmd+P)",
+              children: "🔍 Quick Open"
             }), /*#__PURE__*/_jsx("button", {
               className: "btn btn-sm btn-outline",
               style: {
@@ -4975,6 +5121,130 @@ function App() {
             onClick: () => setIsVersionHistoryOpen(false),
             children: "Close"
           })
+        })]
+      })
+    }), isQuickOpenVisible && /*#__PURE__*/_jsx("div", {
+      className: "quick-open-backdrop",
+      onClick: () => setIsQuickOpenVisible(false),
+      role: "dialog",
+      "aria-modal": "true",
+      "aria-label": "Quick Open Symbol or File",
+      children: /*#__PURE__*/_jsxs("div", {
+        className: "quick-open-card",
+        onClick: e => e.stopPropagation(),
+        children: [/*#__PURE__*/_jsxs("div", {
+          className: "quick-open-input-wrap",
+          children: [/*#__PURE__*/_jsx("span", {
+            className: "quick-open-icon",
+            children: "🔍"
+          }), /*#__PURE__*/_jsx("input", {
+            ref: quickOpenInputRef,
+            type: "text",
+            className: "quick-open-input",
+            placeholder: "Search files, classes, functions, endpoints... (Ctrl+P)",
+            value: quickOpenQuery,
+            onChange: e => {
+              setQuickOpenQuery(e.target.value);
+              setQuickOpenSelectedIndex(0);
+            }
+          }), /*#__PURE__*/_jsx("span", {
+            className: "command-palette-badge",
+            children: "Esc to close"
+          })]
+        }), /*#__PURE__*/_jsx("div", {
+          className: "quick-open-chips",
+          children: [{
+            id: "all",
+            label: "All Symbols"
+          }, {
+            id: "file",
+            label: "📄 Files"
+          }, {
+            id: "class",
+            label: "📦 Classes"
+          }, {
+            id: "function",
+            label: "⚡ Functions"
+          }, {
+            id: "endpoint",
+            label: "🌐 Endpoints"
+          }, {
+            id: "table",
+            label: "🗄️ Schemas"
+          }].map(chip => /*#__PURE__*/_jsx("button", {
+            type: "button",
+            className: `quick-open-chip ${quickOpenFilterKind === chip.id ? "active" : ""}`,
+            onClick: () => {
+              setQuickOpenFilterKind(chip.id);
+              setQuickOpenSelectedIndex(0);
+            },
+            children: chip.label
+          }, chip.id))
+        }), /*#__PURE__*/_jsx("div", {
+          className: "quick-open-list",
+          children: isLoadingSymbols ? /*#__PURE__*/_jsx("div", {
+            style: {
+              padding: "2rem",
+              textAlign: "center",
+              color: "#64748b",
+              fontSize: "0.8rem"
+            },
+            children: "⏳ Scanning workspace AST symbols..."
+          }) : workspaceSymbols.length === 0 ? /*#__PURE__*/_jsx("div", {
+            style: {
+              padding: "2rem",
+              textAlign: "center",
+              color: "#64748b",
+              fontSize: "0.8rem"
+            },
+            children: "No matching files or symbols found."
+          }) : workspaceSymbols.map((s, idx) => {
+            const isActive = idx === quickOpenSelectedIndex;
+            const kindClass = `badge-kind-${s.kind}`;
+            return /*#__PURE__*/_jsxs("div", {
+              className: `quick-open-item ${isActive ? "active" : ""}`,
+              onClick: () => handleSelectSymbol(s),
+              onMouseEnter: () => setQuickOpenSelectedIndex(idx),
+              children: [/*#__PURE__*/_jsxs("div", {
+                className: "quick-open-item-left",
+                children: [/*#__PURE__*/_jsx("span", {
+                  className: `quick-open-kind-badge ${kindClass}`,
+                  children: s.kind
+                }), /*#__PURE__*/_jsx("span", {
+                  className: "quick-open-name",
+                  children: s.name
+                }), s.container_name && /*#__PURE__*/_jsxs("span", {
+                  className: "quick-open-container",
+                  children: ["(", s.container_name, ")"]
+                }), /*#__PURE__*/_jsx("span", {
+                  className: "quick-open-path",
+                  children: s.file_path
+                })]
+              }), /*#__PURE__*/_jsxs("div", {
+                className: "quick-open-item-right",
+                children: [/*#__PURE__*/_jsx("span", {
+                  className: "quick-open-tier-tag",
+                  children: s.tier
+                }), /*#__PURE__*/_jsxs("span", {
+                  className: "quick-open-line-tag",
+                  children: [":", s.line_number]
+                })]
+              })]
+            }, `${s.file_path}-${s.name}-${idx}`);
+          })
+        }), /*#__PURE__*/_jsxs("div", {
+          className: "quick-open-footer",
+          children: [/*#__PURE__*/_jsxs("span", {
+            children: [workspaceSymbols.length, " symbols indexed"]
+          }), /*#__PURE__*/_jsxs("span", {
+            children: ["Navigate with ", /*#__PURE__*/_jsx("kbd", {
+              children: "↑"
+            }), " ", /*#__PURE__*/_jsx("kbd", {
+              children: "↓"
+            }), " • Jump with ", /*#__PURE__*/_jsx("kbd", {
+              children: "Enter"
+            })]
+          })]
         })]
       })
     }), /*#__PURE__*/_jsx(TokenCostInspectorModal, {
