@@ -1,4 +1,3 @@
-import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-runtime";
 /**
  * MAS Web Mission Control - Modern React 18 Application with IDE-Grade Workspace
  * Comprehensive multi-agent command cockpit with real-time SSE streaming,
@@ -164,299 +163,230 @@ function DAGWorkbenchView({
     critical_path_depth: 6,
     completion_percentage: 0
   };
-  return /*#__PURE__*/_jsxs("div", {
-    className: "dag-workbench-container",
-    children: [/*#__PURE__*/_jsxs("div", {
-      className: "dag-action-toolbar",
-      children: [/*#__PURE__*/_jsxs("div", {
-        className: "dag-toolbar-left",
-        children: [/*#__PURE__*/_jsxs("span", {
-          className: "dag-toolbar-title",
-          children: [/*#__PURE__*/_jsx("span", {
-            children: "🕸️"
-          }), " Dependency DAG"]
-        }), /*#__PURE__*/_jsxs("span", {
-          className: "dag-metrics-pill",
-          children: ["📦 ", stats.total_nodes, " Nodes"]
-        }), /*#__PURE__*/_jsxs("span", {
-          className: "dag-metrics-pill",
-          children: ["🔗 ", stats.total_edges, " Edges"]
-        }), /*#__PURE__*/_jsxs("span", {
-          className: "dag-metrics-pill",
-          children: ["⚡ ", stats.critical_path_depth, " Tiers"]
-        }), /*#__PURE__*/_jsxs("span", {
-          className: "dag-metrics-pill success",
-          children: ["✅ ", stats.completion_percentage, "% Ready"]
-        })]
-      }), /*#__PURE__*/_jsxs("div", {
+  return /*#__PURE__*/React.createElement("div", {
+    className: "dag-workbench-container"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "dag-action-toolbar"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "dag-toolbar-left"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "dag-toolbar-title"
+  }, /*#__PURE__*/React.createElement("span", null, "🕸️"), " Dependency DAG"), /*#__PURE__*/React.createElement("span", {
+    className: "dag-metrics-pill"
+  }, "📦 ", stats.total_nodes, " Nodes"), /*#__PURE__*/React.createElement("span", {
+    className: "dag-metrics-pill"
+  }, "🔗 ", stats.total_edges, " Edges"), /*#__PURE__*/React.createElement("span", {
+    className: "dag-metrics-pill"
+  }, "⚡ ", stats.critical_path_depth, " Tiers"), /*#__PURE__*/React.createElement("span", {
+    className: "dag-metrics-pill success"
+  }, "✅ ", stats.completion_percentage, "% Ready")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: "0.4rem"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "dag-toolbar-filters"
+  }, /*#__PURE__*/React.createElement("button", {
+    className: `dag-filter-btn ${dagFilterTier === "ALL" ? "active" : ""}`,
+    onClick: () => setDagFilterTier("ALL")
+  }, "All"), /*#__PURE__*/React.createElement("button", {
+    className: `dag-filter-btn ${dagFilterTier === "contract" ? "active" : ""}`,
+    onClick: () => setDagFilterTier("contract")
+  }, "Contracts"), /*#__PURE__*/React.createElement("button", {
+    className: `dag-filter-btn ${dagFilterTier === "data" ? "active" : ""}`,
+    onClick: () => setDagFilterTier("data")
+  }, "Data"), /*#__PURE__*/React.createElement("button", {
+    className: `dag-filter-btn ${dagFilterTier === "backend" ? "active" : ""}`,
+    onClick: () => setDagFilterTier("backend")
+  }, "Backend"), /*#__PURE__*/React.createElement("button", {
+    className: `dag-filter-btn ${dagFilterTier === "pod_parallel" ? "active" : ""}`,
+    onClick: () => setDagFilterTier("pod_parallel")
+  }, "Pods"), /*#__PURE__*/React.createElement("button", {
+    className: `dag-filter-btn ${dagFilterTier === "verification" ? "active" : ""}`,
+    onClick: () => setDagFilterTier("verification")
+  }, "QA")), /*#__PURE__*/React.createElement("input", {
+    type: "text",
+    className: "dag-search-input",
+    placeholder: "🔍 Filter deliverables...",
+    value: dagSearchQuery,
+    onChange: e => setDagSearchQuery(e.target.value)
+  }), /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-sm btn-outline",
+    style: {
+      fontSize: "0.68rem",
+      padding: "0.18rem 0.45rem"
+    },
+    onClick: onRefresh,
+    title: "Refresh dependency graph from server"
+  }, isLoading ? "⏳" : "⟳ Refresh"))), /*#__PURE__*/React.createElement("div", {
+    className: "dag-canvas-scroll-wrapper"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "dag-tiers-grid"
+  }, tiers.map(tier => {
+    const tierNodes = filteredNodes.filter(n => n.tier === tier.id);
+    if (dagFilterTier !== "ALL" && dagFilterTier !== tier.id) return null;
+    return /*#__PURE__*/React.createElement("div", {
+      key: tier.id,
+      className: "dag-tier-col"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "dag-tier-header",
+      style: {
+        borderTop: `3px solid ${tier.color}`
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        color: tier.color
+      }
+    }, tier.title), /*#__PURE__*/React.createElement("span", {
+      className: "dag-tier-counter"
+    }, tierNodes.length)), /*#__PURE__*/React.createElement("div", {
+      className: "dag-tier-nodes-list"
+    }, tierNodes.length === 0 ? /*#__PURE__*/React.createElement("div", {
+      style: {
+        padding: "1rem",
+        textAlign: "center",
+        color: "var(--text-muted)",
+        fontSize: "0.72rem",
+        fontStyle: "italic"
+      }
+    }, "No deliverables in this tier match current filters.") : tierNodes.map(node => {
+      const isSelected = selectedDagNode?.id === node.id;
+      const isUpstream = upstreamIds.includes(node.id);
+      const isDownstream = downstreamIds.includes(node.id);
+      let cardStateClass = "";
+      if (isSelected) cardStateClass = "selected";else if (isUpstream) cardStateClass = "is-upstream";else if (isDownstream) cardStateClass = "is-downstream";
+      return /*#__PURE__*/React.createElement("div", {
+        key: node.id,
+        className: `dag-node-card ${cardStateClass}`,
+        onClick: () => setSelectedDagNode(node)
+      }, /*#__PURE__*/React.createElement("div", {
+        className: "dag-node-top-row"
+      }, /*#__PURE__*/React.createElement("span", {
+        className: "dag-node-badge",
         style: {
+          background: tier.bg,
+          color: tier.color,
+          border: `1px solid ${tier.color}40`
+        }
+      }, node.tier.toUpperCase()), /*#__PURE__*/React.createElement("span", {
+        className: `dag-node-status ${node.status}`
+      }, node.status === "COMPLETED" ? "✓ READY" : node.status === "VERIFIED" ? "🛡️ VERIFIED" : node.status === "IN_PROGRESS" ? "⚡ WORKING" : "⏳ PENDING")), /*#__PURE__*/React.createElement("div", {
+        className: "dag-node-title-row"
+      }, /*#__PURE__*/React.createElement("span", null, getFileIcon(node.label)), /*#__PURE__*/React.createElement("span", null, node.name)), /*#__PURE__*/React.createElement("div", {
+        className: "dag-node-file-pill"
+      }, /*#__PURE__*/React.createElement("code", null, node.label)), /*#__PURE__*/React.createElement("p", {
+        className: "dag-node-desc"
+      }, node.description), /*#__PURE__*/React.createElement("div", {
+        className: "dag-node-meta-row"
+      }, /*#__PURE__*/React.createElement("span", null, "👤 ", node.pod), /*#__PURE__*/React.createElement("span", null, node.symbols_count > 0 ? `${node.symbols_count} symbols • ` : "", node.line_count > 0 ? `${node.line_count} lines` : "spec")), node.dependencies && node.dependencies.length > 0 && /*#__PURE__*/React.createElement("div", {
+        style: {
+          fontSize: "0.65rem",
+          color: "#64748b",
           display: "flex",
+          gap: "0.25rem",
           alignItems: "center",
-          gap: "0.4rem"
+          flexWrap: "wrap"
+        }
+      }, /*#__PURE__*/React.createElement("span", null, "Depends on:"), node.dependencies.map(dep => {
+        const depNode = nodes.find(n => n.id === dep);
+        return /*#__PURE__*/React.createElement("span", {
+          key: dep,
+          className: "dag-drawer-dep-chip upstream",
+          style: {
+            fontSize: "0.6rem",
+            padding: "0.05rem 0.3rem"
+          }
+        }, depNode?.label || dep);
+      })), /*#__PURE__*/React.createElement("div", {
+        className: "dag-node-actions"
+      }, /*#__PURE__*/React.createElement("button", {
+        className: "dag-node-action-btn",
+        onClick: e => {
+          e.stopPropagation();
+          onOpenArtifact(node.artifact_id || node.label);
         },
-        children: [/*#__PURE__*/_jsxs("div", {
-          className: "dag-toolbar-filters",
-          children: [/*#__PURE__*/_jsx("button", {
-            className: `dag-filter-btn ${dagFilterTier === "ALL" ? "active" : ""}`,
-            onClick: () => setDagFilterTier("ALL"),
-            children: "All"
-          }), /*#__PURE__*/_jsx("button", {
-            className: `dag-filter-btn ${dagFilterTier === "contract" ? "active" : ""}`,
-            onClick: () => setDagFilterTier("contract"),
-            children: "Contracts"
-          }), /*#__PURE__*/_jsx("button", {
-            className: `dag-filter-btn ${dagFilterTier === "data" ? "active" : ""}`,
-            onClick: () => setDagFilterTier("data"),
-            children: "Data"
-          }), /*#__PURE__*/_jsx("button", {
-            className: `dag-filter-btn ${dagFilterTier === "backend" ? "active" : ""}`,
-            onClick: () => setDagFilterTier("backend"),
-            children: "Backend"
-          }), /*#__PURE__*/_jsx("button", {
-            className: `dag-filter-btn ${dagFilterTier === "pod_parallel" ? "active" : ""}`,
-            onClick: () => setDagFilterTier("pod_parallel"),
-            children: "Pods"
-          }), /*#__PURE__*/_jsx("button", {
-            className: `dag-filter-btn ${dagFilterTier === "verification" ? "active" : ""}`,
-            onClick: () => setDagFilterTier("verification"),
-            children: "QA"
-          })]
-        }), /*#__PURE__*/_jsx("input", {
-          type: "text",
-          className: "dag-search-input",
-          placeholder: "🔍 Filter deliverables...",
-          value: dagSearchQuery,
-          onChange: e => setDagSearchQuery(e.target.value)
-        }), /*#__PURE__*/_jsx("button", {
-          className: "btn btn-sm btn-outline",
-          style: {
-            fontSize: "0.68rem",
-            padding: "0.18rem 0.45rem"
-          },
-          onClick: onRefresh,
-          title: "Refresh dependency graph from server",
-          children: isLoading ? "⏳" : "⟳ Refresh"
-        })]
-      })]
-    }), /*#__PURE__*/_jsx("div", {
-      className: "dag-canvas-scroll-wrapper",
-      children: /*#__PURE__*/_jsx("div", {
-        className: "dag-tiers-grid",
-        children: tiers.map(tier => {
-          const tierNodes = filteredNodes.filter(n => n.tier === tier.id);
-          if (dagFilterTier !== "ALL" && dagFilterTier !== tier.id) return null;
-          return /*#__PURE__*/_jsxs("div", {
-            className: "dag-tier-col",
-            children: [/*#__PURE__*/_jsxs("div", {
-              className: "dag-tier-header",
-              style: {
-                borderTop: `3px solid ${tier.color}`
-              },
-              children: [/*#__PURE__*/_jsx("span", {
-                style: {
-                  color: tier.color
-                },
-                children: tier.title
-              }), /*#__PURE__*/_jsx("span", {
-                className: "dag-tier-counter",
-                children: tierNodes.length
-              })]
-            }), /*#__PURE__*/_jsx("div", {
-              className: "dag-tier-nodes-list",
-              children: tierNodes.length === 0 ? /*#__PURE__*/_jsx("div", {
-                style: {
-                  padding: "1rem",
-                  textAlign: "center",
-                  color: "var(--text-muted)",
-                  fontSize: "0.72rem",
-                  fontStyle: "italic"
-                },
-                children: "No deliverables in this tier match current filters."
-              }) : tierNodes.map(node => {
-                const isSelected = selectedDagNode?.id === node.id;
-                const isUpstream = upstreamIds.includes(node.id);
-                const isDownstream = downstreamIds.includes(node.id);
-                let cardStateClass = "";
-                if (isSelected) cardStateClass = "selected";else if (isUpstream) cardStateClass = "is-upstream";else if (isDownstream) cardStateClass = "is-downstream";
-                return /*#__PURE__*/_jsxs("div", {
-                  className: `dag-node-card ${cardStateClass}`,
-                  onClick: () => setSelectedDagNode(node),
-                  children: [/*#__PURE__*/_jsxs("div", {
-                    className: "dag-node-top-row",
-                    children: [/*#__PURE__*/_jsx("span", {
-                      className: "dag-node-badge",
-                      style: {
-                        background: tier.bg,
-                        color: tier.color,
-                        border: `1px solid ${tier.color}40`
-                      },
-                      children: node.tier.toUpperCase()
-                    }), /*#__PURE__*/_jsx("span", {
-                      className: `dag-node-status ${node.status}`,
-                      children: node.status === "COMPLETED" ? "✓ READY" : node.status === "VERIFIED" ? "🛡️ VERIFIED" : node.status === "IN_PROGRESS" ? "⚡ WORKING" : "⏳ PENDING"
-                    })]
-                  }), /*#__PURE__*/_jsxs("div", {
-                    className: "dag-node-title-row",
-                    children: [/*#__PURE__*/_jsx("span", {
-                      children: getFileIcon(node.label)
-                    }), /*#__PURE__*/_jsx("span", {
-                      children: node.name
-                    })]
-                  }), /*#__PURE__*/_jsx("div", {
-                    className: "dag-node-file-pill",
-                    children: /*#__PURE__*/_jsx("code", {
-                      children: node.label
-                    })
-                  }), /*#__PURE__*/_jsx("p", {
-                    className: "dag-node-desc",
-                    children: node.description
-                  }), /*#__PURE__*/_jsxs("div", {
-                    className: "dag-node-meta-row",
-                    children: [/*#__PURE__*/_jsxs("span", {
-                      children: ["👤 ", node.pod]
-                    }), /*#__PURE__*/_jsxs("span", {
-                      children: [node.symbols_count > 0 ? `${node.symbols_count} symbols • ` : "", node.line_count > 0 ? `${node.line_count} lines` : "spec"]
-                    })]
-                  }), node.dependencies && node.dependencies.length > 0 && /*#__PURE__*/_jsxs("div", {
-                    style: {
-                      fontSize: "0.65rem",
-                      color: "#64748b",
-                      display: "flex",
-                      gap: "0.25rem",
-                      alignItems: "center",
-                      flexWrap: "wrap"
-                    },
-                    children: [/*#__PURE__*/_jsx("span", {
-                      children: "Depends on:"
-                    }), node.dependencies.map(dep => {
-                      const depNode = nodes.find(n => n.id === dep);
-                      return /*#__PURE__*/_jsx("span", {
-                        className: "dag-drawer-dep-chip upstream",
-                        style: {
-                          fontSize: "0.6rem",
-                          padding: "0.05rem 0.3rem"
-                        },
-                        children: depNode?.label || dep
-                      }, dep);
-                    })]
-                  }), /*#__PURE__*/_jsxs("div", {
-                    className: "dag-node-actions",
-                    children: [/*#__PURE__*/_jsx("button", {
-                      className: "dag-node-action-btn",
-                      onClick: e => {
-                        e.stopPropagation();
-                        onOpenArtifact(node.artifact_id || node.label);
-                      },
-                      title: "Open file in Cockpit Code Editor",
-                      children: "📄 Open"
-                    }), /*#__PURE__*/_jsx("button", {
-                      className: "dag-node-action-btn secondary",
-                      onClick: e => {
-                        e.stopPropagation();
-                        onViewDiff(node.artifact_id || node.label);
-                      },
-                      title: "Compare file diff against baseline",
-                      children: "🔍 Diff"
-                    })]
-                  })]
-                }, node.id);
-              })
-            })]
-          }, tier.id);
-        })
-      })
-    }), selectedDagNode && /*#__PURE__*/_jsxs("div", {
-      className: "dag-selected-drawer",
-      children: [/*#__PURE__*/_jsxs("div", {
-        className: "dag-drawer-info",
-        children: [/*#__PURE__*/_jsxs("div", {
-          children: [/*#__PURE__*/_jsxs("div", {
-            className: "dag-drawer-title",
-            children: [getFileIcon(selectedDagNode.label), " ", selectedDagNode.name]
-          }), /*#__PURE__*/_jsxs("div", {
-            style: {
-              display: "flex",
-              gap: "0.5rem",
-              alignItems: "center",
-              marginTop: "0.15rem"
-            },
-            children: [/*#__PURE__*/_jsx("span", {
-              className: "dag-drawer-path",
-              children: selectedDagNode.path || `artifacts/${selectedDagNode.label}`
-            }), /*#__PURE__*/_jsxs("span", {
-              style: {
-                fontSize: "0.7rem",
-                color: "var(--text-secondary)"
-              },
-              children: ["Role: ", /*#__PURE__*/_jsx("strong", {
-                children: selectedDagNode.role
-              })]
-            })]
-          })]
-        }), /*#__PURE__*/_jsxs("div", {
-          className: "dag-drawer-deps-list",
-          children: [upstreamIds.length > 0 && /*#__PURE__*/_jsxs("div", {
-            style: {
-              display: "flex",
-              alignItems: "center",
-              gap: "0.3rem"
-            },
-            children: [/*#__PURE__*/_jsx("span", {
-              children: "Upstream:"
-            }), upstreamIds.map(uid => {
-              const un = nodes.find(n => n.id === uid);
-              return /*#__PURE__*/_jsxs("span", {
-                className: "dag-drawer-dep-chip upstream",
-                title: "Prerequisite upstream dependency",
-                children: ["← ", un?.label || uid]
-              }, uid);
-            })]
-          }), downstreamIds.length > 0 && /*#__PURE__*/_jsxs("div", {
-            style: {
-              display: "flex",
-              alignItems: "center",
-              gap: "0.3rem",
-              marginLeft: "0.5rem"
-            },
-            children: [/*#__PURE__*/_jsx("span", {
-              children: "Downstream:"
-            }), downstreamIds.map(did => {
-              const dn = nodes.find(n => n.id === did);
-              return /*#__PURE__*/_jsxs("span", {
-                className: "dag-drawer-dep-chip downstream",
-                title: "Downstream dependent consumer",
-                children: ["→ ", dn?.label || did]
-              }, did);
-            })]
-          })]
-        })]
-      }), /*#__PURE__*/_jsxs("div", {
-        style: {
-          display: "flex",
-          gap: "0.5rem"
+        title: "Open file in Cockpit Code Editor"
+      }, "📄 Open"), /*#__PURE__*/React.createElement("button", {
+        className: "dag-node-action-btn secondary",
+        onClick: e => {
+          e.stopPropagation();
+          onViewDiff(node.artifact_id || node.label);
         },
-        children: [/*#__PURE__*/_jsx("button", {
-          className: "btn btn-sm btn-outline",
-          style: {
-            fontSize: "0.72rem",
-            color: "#38bdf8",
-            borderColor: "rgba(56, 189, 248, 0.4)"
-          },
-          onClick: () => onOpenArtifact(selectedDagNode.artifact_id || selectedDagNode.label),
-          children: "📄 Open in Cockpit Editor ↗"
-        }), /*#__PURE__*/_jsx("button", {
-          className: "btn btn-sm btn-outline",
-          style: {
-            fontSize: "0.72rem",
-            color: "#fbbf24",
-            borderColor: "rgba(251, 191, 36, 0.4)"
-          },
-          onClick: () => onViewDiff(selectedDagNode.artifact_id || selectedDagNode.label),
-          children: "🔍 Inspect Diff"
-        })]
-      })]
-    })]
-  });
+        title: "Compare file diff against baseline"
+      }, "🔍 Diff")));
+    })));
+  }))), selectedDagNode && /*#__PURE__*/React.createElement("div", {
+    className: "dag-selected-drawer"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "dag-drawer-info"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    className: "dag-drawer-title"
+  }, getFileIcon(selectedDagNode.label), " ", selectedDagNode.name), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: "0.5rem",
+      alignItems: "center",
+      marginTop: "0.15rem"
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "dag-drawer-path"
+  }, selectedDagNode.path || `artifacts/${selectedDagNode.label}`), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: "0.7rem",
+      color: "var(--text-secondary)"
+    }
+  }, "Role: ", /*#__PURE__*/React.createElement("strong", null, selectedDagNode.role)))), /*#__PURE__*/React.createElement("div", {
+    className: "dag-drawer-deps-list"
+  }, upstreamIds.length > 0 && /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: "0.3rem"
+    }
+  }, /*#__PURE__*/React.createElement("span", null, "Upstream:"), upstreamIds.map(uid => {
+    const un = nodes.find(n => n.id === uid);
+    return /*#__PURE__*/React.createElement("span", {
+      key: uid,
+      className: "dag-drawer-dep-chip upstream",
+      title: "Prerequisite upstream dependency"
+    }, "← ", un?.label || uid);
+  })), downstreamIds.length > 0 && /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: "0.3rem",
+      marginLeft: "0.5rem"
+    }
+  }, /*#__PURE__*/React.createElement("span", null, "Downstream:"), downstreamIds.map(did => {
+    const dn = nodes.find(n => n.id === did);
+    return /*#__PURE__*/React.createElement("span", {
+      key: did,
+      className: "dag-drawer-dep-chip downstream",
+      title: "Downstream dependent consumer"
+    }, "→ ", dn?.label || did);
+  })))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: "0.5rem"
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-sm btn-outline",
+    style: {
+      fontSize: "0.72rem",
+      color: "#38bdf8",
+      borderColor: "rgba(56, 189, 248, 0.4)"
+    },
+    onClick: () => onOpenArtifact(selectedDagNode.artifact_id || selectedDagNode.label)
+  }, "📄 Open in Cockpit Editor ↗"), /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-sm btn-outline",
+    style: {
+      fontSize: "0.72rem",
+      color: "#fbbf24",
+      borderColor: "rgba(251, 191, 36, 0.4)"
+    },
+    onClick: () => onViewDiff(selectedDagNode.artifact_id || selectedDagNode.label)
+  }, "🔍 Inspect Diff"))));
 }
 
 // --- REAL-TIME TOKEN BURN & COST EFFICIENCY INSPECTOR MODAL ---
@@ -485,231 +415,150 @@ function TokenCostInspectorModal({
     pod_breakdown: []
   };
   const pods = rep.pod_breakdown && rep.pod_breakdown.length > 0 ? rep.pod_breakdown : [];
-  return /*#__PURE__*/_jsx("div", {
+  return /*#__PURE__*/React.createElement("div", {
     className: "modal-backdrop",
     onClick: onClose,
     role: "dialog",
-    "aria-modal": "true",
-    children: /*#__PURE__*/_jsxs("div", {
-      className: "cost-inspector-card",
-      onClick: e => e.stopPropagation(),
-      children: [/*#__PURE__*/_jsxs("div", {
-        style: {
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          borderBottom: "1px solid var(--border-color)",
-          paddingBottom: "0.75rem"
-        },
-        children: [/*#__PURE__*/_jsxs("div", {
-          children: [/*#__PURE__*/_jsxs("h3", {
-            style: {
-              fontSize: "1.05rem",
-              fontWeight: 700,
-              display: "flex",
-              alignItems: "center",
-              gap: "0.4rem"
-            },
-            children: [/*#__PURE__*/_jsx("span", {
-              children: "⚡"
-            }), " Real-Time Token Burn & Cost Efficiency Tracker"]
-          }), /*#__PURE__*/_jsxs("span", {
-            style: {
-              fontSize: "0.72rem",
-              color: "var(--text-muted)"
-            },
-            children: ["Mission ", /*#__PURE__*/_jsx("strong", {
-              children: rep.mission_id
-            }), " • Google Gemini API Inference & Context Caching"]
-          })]
-        }), /*#__PURE__*/_jsx("button", {
-          className: "close-btn",
-          onClick: onClose,
-          "aria-label": "Close",
-          children: "×"
-        })]
-      }), /*#__PURE__*/_jsxs("div", {
-        className: "cost-grid-cards",
-        children: [/*#__PURE__*/_jsxs("div", {
-          className: "cost-metric-box",
-          children: [/*#__PURE__*/_jsx("span", {
-            className: "cost-metric-label",
-            children: "Estimated Spend"
-          }), /*#__PURE__*/_jsxs("span", {
-            className: "cost-metric-value",
-            style: {
-              color: "#34d399"
-            },
-            children: ["$", Number(rep.net_cost_usd || 0).toFixed(4)]
-          }), /*#__PURE__*/_jsxs("span", {
-            className: "cost-metric-sub",
-            children: ["Gross: $", Number(rep.gross_cost_usd || 0).toFixed(4), " USD"]
-          })]
-        }), /*#__PURE__*/_jsxs("div", {
-          className: "cost-metric-box",
-          children: [/*#__PURE__*/_jsx("span", {
-            className: "cost-metric-label",
-            children: "Context Caching"
-          }), /*#__PURE__*/_jsxs("span", {
-            className: "cost-metric-value",
-            style: {
-              color: "#38bdf8"
-            },
-            children: [Math.round(rep.cache_hit_rate_pct || 0), "%"]
-          }), /*#__PURE__*/_jsxs("span", {
-            className: "cost-metric-sub",
-            style: {
-              color: "#34d399"
-            },
-            children: ["Saved -$", Number(rep.savings_usd || 0).toFixed(4), " (75% off)"]
-          })]
-        }), /*#__PURE__*/_jsxs("div", {
-          className: "cost-metric-box",
-          children: [/*#__PURE__*/_jsx("span", {
-            className: "cost-metric-label",
-            children: "Token Consumption"
-          }), /*#__PURE__*/_jsxs("span", {
-            className: "cost-metric-value",
-            children: [(Number(rep.total_tokens || 0) / 1000).toFixed(1), "k"]
-          }), /*#__PURE__*/_jsxs("span", {
-            className: "cost-metric-sub",
-            children: [rep.budget_consumed_pct || 0, "% of ", Math.round((rep.budget_cap_tokens || 209920) / 1000), "k Cap"]
-          })]
-        }), /*#__PURE__*/_jsxs("div", {
-          className: "cost-metric-box",
-          children: [/*#__PURE__*/_jsx("span", {
-            className: "cost-metric-label",
-            children: "Burn Rate"
-          }), /*#__PURE__*/_jsx("span", {
-            className: "cost-metric-value",
-            style: {
-              color: "#fbbf24"
-            },
-            children: Math.round(rep.burn_rate_tokens_per_turn || 0)
-          }), /*#__PURE__*/_jsxs("span", {
-            className: "cost-metric-sub",
-            children: ["tokens / agent turn ($", Number(rep.cost_per_turn_usd || 0).toFixed(5), ")"]
-          })]
-        })]
-      }), /*#__PURE__*/_jsxs("div", {
-        style: {
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: "0.4rem"
-        },
-        children: [/*#__PURE__*/_jsx("span", {
-          style: {
-            fontSize: "0.75rem",
-            fontWeight: 700,
-            color: "var(--text-secondary)",
-            textTransform: "uppercase",
-            letterSpacing: "0.03em"
-          },
-          children: "Pod-by-Pod Allocation & Model Tiers"
-        }), /*#__PURE__*/_jsxs("span", {
-          style: {
-            fontSize: "0.68rem",
-            color: "var(--text-muted)",
-            fontFamily: "var(--font-mono)"
-          },
-          children: ["Prompt: ", rep.total_prompt_tokens, " • Output: ", rep.total_candidate_tokens, " • Thinking: ", rep.total_thinking_tokens]
-        })]
-      }), /*#__PURE__*/_jsx("div", {
-        className: "cost-table-container",
-        children: /*#__PURE__*/_jsxs("table", {
-          className: "cost-pod-table",
-          children: [/*#__PURE__*/_jsx("thead", {
-            children: /*#__PURE__*/_jsxs("tr", {
-              children: [/*#__PURE__*/_jsx("th", {
-                children: "Pod & Role"
-              }), /*#__PURE__*/_jsx("th", {
-                children: "Model"
-              }), /*#__PURE__*/_jsx("th", {
-                children: "Turns"
-              }), /*#__PURE__*/_jsx("th", {
-                children: "Prompt (Cached)"
-              }), /*#__PURE__*/_jsx("th", {
-                children: "Output"
-              }), /*#__PURE__*/_jsx("th", {
-                children: "Thinking"
-              }), /*#__PURE__*/_jsx("th", {
-                children: "Total Tokens"
-              }), /*#__PURE__*/_jsx("th", {
-                children: "Net Cost"
-              })]
-            })
-          }), /*#__PURE__*/_jsx("tbody", {
-            children: pods.map((p, idx) => /*#__PURE__*/_jsxs("tr", {
-              children: [/*#__PURE__*/_jsxs("td", {
-                style: {
-                  fontWeight: 600,
-                  color: "#f1f5f9"
-                },
-                children: [/*#__PURE__*/_jsx("span", {
-                  children: p.icon
-                }), " ", p.pod_name]
-              }), /*#__PURE__*/_jsx("td", {
-                children: /*#__PURE__*/_jsx("span", {
-                  style: {
-                    padding: "0.1rem 0.35rem",
-                    borderRadius: "4px",
-                    fontSize: "0.62rem",
-                    fontWeight: 700,
-                    background: p.model && p.model.includes("pro") ? "rgba(168, 85, 247, 0.15)" : "rgba(56, 189, 248, 0.15)",
-                    color: p.model && p.model.includes("pro") ? "#c084fc" : "#38bdf8"
-                  },
-                  children: p.model && p.model.includes("pro") ? "Pro (Reasoning)" : "Flash-Lite"
-                })
-              }), /*#__PURE__*/_jsx("td", {
-                children: p.turns
-              }), /*#__PURE__*/_jsxs("td", {
-                children: [p.prompt_tokens, /*#__PURE__*/_jsxs("span", {
-                  style: {
-                    color: "#34d399",
-                    fontSize: "0.62rem",
-                    marginLeft: "0.2rem"
-                  },
-                  children: ["(", p.cached_tokens, ")"]
-                })]
-              }), /*#__PURE__*/_jsx("td", {
-                children: p.candidate_tokens
-              }), /*#__PURE__*/_jsx("td", {
-                children: p.thinking_tokens
-              }), /*#__PURE__*/_jsx("td", {
-                style: {
-                  fontWeight: 700,
-                  color: "var(--text-primary)"
-                },
-                children: p.total_tokens
-              }), /*#__PURE__*/_jsxs("td", {
-                style: {
-                  fontWeight: 700,
-                  color: "#34d399"
-                },
-                children: ["$", Number(p.cost_usd).toFixed(5)]
-              })]
-            }, idx))
-          })]
-        })
-      }), /*#__PURE__*/_jsxs("div", {
-        className: "cost-footer-banner",
-        children: [/*#__PURE__*/_jsxs("div", {
-          children: [/*#__PURE__*/_jsx("strong", {
-            children: "Pricing Model:"
-          }), " Gemini 3.5 Flash-Lite ($0.075/1M in, $0.01875 cached, $0.30 out) • Gemini 2.5 Pro ($1.25/1M in, $5.00 out)"]
-        }), /*#__PURE__*/_jsx("div", {
-          children: /*#__PURE__*/_jsx("span", {
-            style: {
-              color: "#34d399",
-              fontWeight: 700
-            },
-            children: "✓ Anti-Loop Circuit Breaker Armed"
-          })
-        })]
-      })]
-    })
-  });
+    "aria-modal": "true"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "cost-inspector-card",
+    onClick: e => e.stopPropagation()
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between",
+      borderBottom: "1px solid var(--border-color)",
+      paddingBottom: "0.75rem"
+    }
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h3", {
+    style: {
+      fontSize: "1.05rem",
+      fontWeight: 700,
+      display: "flex",
+      alignItems: "center",
+      gap: "0.4rem"
+    }
+  }, /*#__PURE__*/React.createElement("span", null, "⚡"), " Real-Time Token Burn & Cost Efficiency Tracker"), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: "0.72rem",
+      color: "var(--text-muted)"
+    }
+  }, "Mission ", /*#__PURE__*/React.createElement("strong", null, rep.mission_id), " • Google Gemini API Inference & Context Caching")), /*#__PURE__*/React.createElement("button", {
+    className: "close-btn",
+    onClick: onClose,
+    "aria-label": "Close"
+  }, "×")), /*#__PURE__*/React.createElement("div", {
+    className: "cost-grid-cards"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "cost-metric-box"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "cost-metric-label"
+  }, "Estimated Spend"), /*#__PURE__*/React.createElement("span", {
+    className: "cost-metric-value",
+    style: {
+      color: "#34d399"
+    }
+  }, "$", Number(rep.net_cost_usd || 0).toFixed(4)), /*#__PURE__*/React.createElement("span", {
+    className: "cost-metric-sub"
+  }, "Gross: $", Number(rep.gross_cost_usd || 0).toFixed(4), " USD")), /*#__PURE__*/React.createElement("div", {
+    className: "cost-metric-box"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "cost-metric-label"
+  }, "Context Caching"), /*#__PURE__*/React.createElement("span", {
+    className: "cost-metric-value",
+    style: {
+      color: "#38bdf8"
+    }
+  }, Math.round(rep.cache_hit_rate_pct || 0), "%"), /*#__PURE__*/React.createElement("span", {
+    className: "cost-metric-sub",
+    style: {
+      color: "#34d399"
+    }
+  }, "Saved -$", Number(rep.savings_usd || 0).toFixed(4), " (75% off)")), /*#__PURE__*/React.createElement("div", {
+    className: "cost-metric-box"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "cost-metric-label"
+  }, "Token Consumption"), /*#__PURE__*/React.createElement("span", {
+    className: "cost-metric-value"
+  }, (Number(rep.total_tokens || 0) / 1000).toFixed(1), "k"), /*#__PURE__*/React.createElement("span", {
+    className: "cost-metric-sub"
+  }, rep.budget_consumed_pct || 0, "% of ", Math.round((rep.budget_cap_tokens || 209920) / 1000), "k Cap")), /*#__PURE__*/React.createElement("div", {
+    className: "cost-metric-box"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "cost-metric-label"
+  }, "Burn Rate"), /*#__PURE__*/React.createElement("span", {
+    className: "cost-metric-value",
+    style: {
+      color: "#fbbf24"
+    }
+  }, Math.round(rep.burn_rate_tokens_per_turn || 0)), /*#__PURE__*/React.createElement("span", {
+    className: "cost-metric-sub"
+  }, "tokens / agent turn ($", Number(rep.cost_per_turn_usd || 0).toFixed(5), ")"))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: "0.4rem"
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: "0.75rem",
+      fontWeight: 700,
+      color: "var(--text-secondary)",
+      textTransform: "uppercase",
+      letterSpacing: "0.03em"
+    }
+  }, "Pod-by-Pod Allocation & Model Tiers"), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: "0.68rem",
+      color: "var(--text-muted)",
+      fontFamily: "var(--font-mono)"
+    }
+  }, "Prompt: ", rep.total_prompt_tokens, " • Output: ", rep.total_candidate_tokens, " • Thinking: ", rep.total_thinking_tokens)), /*#__PURE__*/React.createElement("div", {
+    className: "cost-table-container"
+  }, /*#__PURE__*/React.createElement("table", {
+    className: "cost-pod-table"
+  }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", null, "Pod & Role"), /*#__PURE__*/React.createElement("th", null, "Model"), /*#__PURE__*/React.createElement("th", null, "Turns"), /*#__PURE__*/React.createElement("th", null, "Prompt (Cached)"), /*#__PURE__*/React.createElement("th", null, "Output"), /*#__PURE__*/React.createElement("th", null, "Thinking"), /*#__PURE__*/React.createElement("th", null, "Total Tokens"), /*#__PURE__*/React.createElement("th", null, "Net Cost"))), /*#__PURE__*/React.createElement("tbody", null, pods.map((p, idx) => /*#__PURE__*/React.createElement("tr", {
+    key: idx
+  }, /*#__PURE__*/React.createElement("td", {
+    style: {
+      fontWeight: 600,
+      color: "#f1f5f9"
+    }
+  }, /*#__PURE__*/React.createElement("span", null, p.icon), " ", p.pod_name), /*#__PURE__*/React.createElement("td", null, /*#__PURE__*/React.createElement("span", {
+    style: {
+      padding: "0.1rem 0.35rem",
+      borderRadius: "4px",
+      fontSize: "0.62rem",
+      fontWeight: 700,
+      background: p.model && p.model.includes("pro") ? "rgba(168, 85, 247, 0.15)" : "rgba(56, 189, 248, 0.15)",
+      color: p.model && p.model.includes("pro") ? "#c084fc" : "#38bdf8"
+    }
+  }, p.model && p.model.includes("pro") ? "Pro (Reasoning)" : "Flash-Lite")), /*#__PURE__*/React.createElement("td", null, p.turns), /*#__PURE__*/React.createElement("td", null, p.prompt_tokens, /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: "#34d399",
+      fontSize: "0.62rem",
+      marginLeft: "0.2rem"
+    }
+  }, "(", p.cached_tokens, ")")), /*#__PURE__*/React.createElement("td", null, p.candidate_tokens), /*#__PURE__*/React.createElement("td", null, p.thinking_tokens), /*#__PURE__*/React.createElement("td", {
+    style: {
+      fontWeight: 700,
+      color: "var(--text-primary)"
+    }
+  }, p.total_tokens), /*#__PURE__*/React.createElement("td", {
+    style: {
+      fontWeight: 700,
+      color: "#34d399"
+    }
+  }, "$", Number(p.cost_usd).toFixed(5))))))), /*#__PURE__*/React.createElement("div", {
+    className: "cost-footer-banner"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("strong", null, "Pricing Model:"), " Gemini 3.5 Flash-Lite ($0.075/1M in, $0.01875 cached, $0.30 out) • Gemini 2.5 Pro ($1.25/1M in, $5.00 out)"), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: "#34d399",
+      fontWeight: 700
+    }
+  }, "✓ Anti-Loop Circuit Breaker Armed")))));
 }
 
 // --- MAIN REACT APP COMPONENT ---
@@ -2196,3064 +2045,2432 @@ function App() {
     if (!query.trim() || !text) return text;
     const q = query.trim();
     const parts = text.split(new RegExp(`(${q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi'));
-    return parts.map((part, i) => part.toLowerCase() === q.toLowerCase() ? /*#__PURE__*/_jsx("mark", {
+    return parts.map((part, i) => part.toLowerCase() === q.toLowerCase() ? /*#__PURE__*/React.createElement("mark", {
+      key: i,
       style: {
         backgroundColor: "rgba(56, 189, 248, 0.25)",
         color: "#38bdf8",
         borderRadius: "2px",
         padding: "0 2px"
-      },
-      children: part
-    }, i) : part);
+      }
+    }, part) : part);
   };
   if (viewMode === "hub") {
-    return /*#__PURE__*/_jsxs("div", {
-      className: "hub-container pattern-grid",
-      children: [/*#__PURE__*/_jsxs("header", {
-        className: "hub-nav",
-        role: "banner",
-        children: [/*#__PURE__*/_jsxs("div", {
-          className: "hub-nav-brand",
-          onClick: () => setViewMode("hub"),
-          children: [/*#__PURE__*/_jsx("div", {
-            className: "hub-brand-logo",
-            children: "M"
-          }), /*#__PURE__*/_jsx("span", {
-            children: "MAS OS"
-          })]
-        }), /*#__PURE__*/_jsxs("nav", {
-          className: "hub-nav-links",
-          children: [/*#__PURE__*/_jsx("button", {
-            className: "hub-nav-link active",
-            onClick: () => setViewMode("hub"),
-            children: "Overview Hub"
-          }), /*#__PURE__*/_jsx("button", {
-            className: "hub-nav-link",
-            onClick: () => setViewMode("cockpit"),
-            children: "IDE Cockpit"
-          }), /*#__PURE__*/_jsx("a", {
-            className: "hub-nav-link",
-            href: "#capabilities",
-            children: "14 Pods"
-          }), /*#__PURE__*/_jsxs("a", {
-            className: "hub-nav-link",
-            href: "#missions",
-            children: ["Missions (", missionsList.length, ")"]
-          }), /*#__PURE__*/_jsx("a", {
-            className: "hub-nav-link",
-            href: "#presets",
-            children: "Enterprise Presets"
-          })]
-        }), /*#__PURE__*/_jsxs("div", {
-          className: "hub-nav-actions",
-          children: [/*#__PURE__*/_jsxs("div", {
-            className: "hub-status-chip",
-            children: [/*#__PURE__*/_jsx("span", {
-              className: "hub-status-dot"
-            }), /*#__PURE__*/_jsx("span", {
-              children: "14 Agents Online"
-            })]
-          }), /*#__PURE__*/_jsxs("div", {
-            className: "view-switcher-pill",
-            children: [/*#__PURE__*/_jsx("button", {
-              className: `view-switcher-btn ${viewMode === "hub" ? "active" : ""}`,
-              onClick: () => setViewMode("hub"),
-              children: "🌐 Hub"
-            }), /*#__PURE__*/_jsx("button", {
-              className: `view-switcher-btn ${viewMode === "cockpit" ? "active" : ""}`,
-              onClick: () => setViewMode("cockpit"),
-              children: "💻 Cockpit"
-            })]
-          }), /*#__PURE__*/_jsx("button", {
-            className: "btn btn-outline btn-sm",
-            onClick: toggleTheme,
-            title: "Toggle Dark/Light Mode",
-            children: theme === "dark" ? "☀️ Light" : "🌙 Dark"
-          }), /*#__PURE__*/_jsx("button", {
-            className: "btn btn-primary",
-            onClick: () => setIsNewMissionOpen(true),
-            style: {
-              background: "var(--gradient-brand)",
-              border: "none",
-              borderRadius: "20px",
-              padding: "0.45rem 1.15rem"
-            },
-            children: "+ Launch Mission"
-          })]
-        })]
-      }), pendingGate && /*#__PURE__*/_jsxs("div", {
+    return /*#__PURE__*/React.createElement("div", {
+      className: "hub-container pattern-grid"
+    }, /*#__PURE__*/React.createElement("header", {
+      className: "hub-nav",
+      role: "banner"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "hub-nav-brand",
+      onClick: () => setViewMode("hub")
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "hub-brand-logo"
+    }, "M"), /*#__PURE__*/React.createElement("span", null, "MAS OS")), /*#__PURE__*/React.createElement("nav", {
+      className: "hub-nav-links"
+    }, /*#__PURE__*/React.createElement("button", {
+      className: "hub-nav-link active",
+      onClick: () => setViewMode("hub")
+    }, "Overview Hub"), /*#__PURE__*/React.createElement("button", {
+      className: "hub-nav-link",
+      onClick: () => setViewMode("cockpit")
+    }, "IDE Cockpit"), /*#__PURE__*/React.createElement("a", {
+      className: "hub-nav-link",
+      href: "#capabilities"
+    }, "14 Pods"), /*#__PURE__*/React.createElement("a", {
+      className: "hub-nav-link",
+      href: "#missions"
+    }, "Missions (", missionsList.length, ")"), /*#__PURE__*/React.createElement("a", {
+      className: "hub-nav-link",
+      href: "#presets"
+    }, "Enterprise Presets")), /*#__PURE__*/React.createElement("div", {
+      className: "hub-nav-actions"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "hub-status-chip"
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "hub-status-dot"
+    }), /*#__PURE__*/React.createElement("span", null, "14 Agents Online")), /*#__PURE__*/React.createElement("div", {
+      className: "view-switcher-pill"
+    }, /*#__PURE__*/React.createElement("button", {
+      className: `view-switcher-btn ${viewMode === "hub" ? "active" : ""}`,
+      onClick: () => setViewMode("hub")
+    }, "🌐 Hub"), /*#__PURE__*/React.createElement("button", {
+      className: `view-switcher-btn ${viewMode === "cockpit" ? "active" : ""}`,
+      onClick: () => setViewMode("cockpit")
+    }, "💻 Cockpit")), /*#__PURE__*/React.createElement("button", {
+      className: "btn btn-outline btn-sm",
+      onClick: toggleTheme,
+      title: "Toggle Dark/Light Mode"
+    }, theme === "dark" ? "☀️ Light" : "🌙 Dark"), /*#__PURE__*/React.createElement("button", {
+      className: "btn btn-primary",
+      onClick: () => setIsNewMissionOpen(true),
+      style: {
+        background: "var(--gradient-brand)",
+        border: "none",
+        borderRadius: "20px",
+        padding: "0.45rem 1.15rem"
+      }
+    }, "+ Launch Mission"))), pendingGate && /*#__PURE__*/React.createElement("div", {
+      style: {
+        background: "rgba(245, 158, 11, 0.15)",
+        borderBottom: "1px solid rgba(245, 158, 11, 0.3)",
+        padding: "0.75rem 2rem",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between"
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        alignItems: "center",
+        gap: "0.5rem",
+        color: "var(--accent-amber)",
+        fontWeight: 600,
+        fontSize: "0.85rem"
+      }
+    }, /*#__PURE__*/React.createElement("span", null, "⚠️"), /*#__PURE__*/React.createElement("span", null, "Human Decision Required: ", /*#__PURE__*/React.createElement("strong", null, pendingGate.name), " is awaiting your review.")), /*#__PURE__*/React.createElement("button", {
+      className: "btn btn-warning btn-sm",
+      onClick: () => setViewMode("cockpit")
+    }, "Review & Approve in Cockpit →")), /*#__PURE__*/React.createElement("section", {
+      className: "hub-hero"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "hub-pill-banner"
+    }, /*#__PURE__*/React.createElement("span", null, "✨"), /*#__PURE__*/React.createElement("span", null, "INTRODUCING MULTI-AGENT AUTOPILOT • CONTRACT-FIRST PARALLEL PODS")), /*#__PURE__*/React.createElement("h1", {
+      className: "hub-hero-title"
+    }, "The Multi-Agent Workspace that", /*#__PURE__*/React.createElement("br", null), /*#__PURE__*/React.createElement("span", {
+      className: "hub-gradient-text"
+    }, "thinks while you work.")), /*#__PURE__*/React.createElement("p", {
+      className: "hub-hero-subtitle"
+    }, "Empowering software engineering teams with 14 specialized autonomous agents operating across contract-first parallel pods, Git-backed blackboards, and zero-black-box mathematical governance."), /*#__PURE__*/React.createElement("div", {
+      className: "hub-hero-ctas"
+    }, /*#__PURE__*/React.createElement("button", {
+      className: "btn-hero-primary",
+      onClick: () => setIsNewMissionOpen(true)
+    }, "Launch Autonomous Mission"), /*#__PURE__*/React.createElement("button", {
+      className: "btn-hero-secondary",
+      onClick: () => setViewMode("cockpit")
+    }, "Open IDE Cockpit →")), /*#__PURE__*/React.createElement("div", {
+      className: "hub-preview-card"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "hub-preview-header"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "hub-preview-dots"
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "hub-dot red"
+    }), /*#__PURE__*/React.createElement("span", {
+      className: "hub-dot yellow"
+    }), /*#__PURE__*/React.createElement("span", {
+      className: "hub-dot green"
+    })), /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        alignItems: "center",
+        gap: "0.75rem"
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: "0.8rem",
+        color: "var(--text-muted)",
+        fontFamily: "var(--font-mono)"
+      }
+    }, activeMissionId || "MISSION-IDLE"), /*#__PURE__*/React.createElement("span", {
+      className: "hub-status-chip",
+      style: {
+        padding: "0.2rem 0.6rem",
+        fontSize: "0.7rem"
+      }
+    }, missionData.status))), /*#__PURE__*/React.createElement("div", {
+      style: {
+        marginBottom: "1.25rem"
+      }
+    }, /*#__PURE__*/React.createElement("h3", {
+      style: {
+        fontSize: "1.2rem",
+        fontWeight: 700,
+        color: "var(--text-primary)",
+        marginBottom: "0.35rem"
+      }
+    }, missionData.title), /*#__PURE__*/React.createElement("p", {
+      style: {
+        fontSize: "0.88rem",
+        color: "var(--text-secondary)",
+        lineHeight: 1.5
+      }
+    }, missionData.description)), /*#__PURE__*/React.createElement("div", {
+      className: "hub-preview-grid"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "hub-preview-stat"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "hub-preview-stat-label"
+    }, "Pipeline Stage"), /*#__PURE__*/React.createElement("div", {
+      className: "hub-preview-stat-value",
+      style: {
+        fontSize: "1rem"
+      }
+    }, missionData.stage)), /*#__PURE__*/React.createElement("div", {
+      className: "hub-preview-stat"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "hub-preview-stat-label"
+    }, "Tokens Burned"), /*#__PURE__*/React.createElement("div", {
+      className: "hub-preview-stat-value"
+    }, Number(missionData.tokens?.total || 0).toLocaleString())), /*#__PURE__*/React.createElement("div", {
+      className: "hub-preview-stat"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "hub-preview-stat-label"
+    }, "Circuit Breaker"), /*#__PURE__*/React.createElement("div", {
+      className: "hub-preview-stat-value",
+      style: {
+        color: "var(--accent-green)"
+      }
+    }, missionData.circuitBreaker?.healthy !== false ? "HEALTHY" : "TRIPPED")), /*#__PURE__*/React.createElement("div", {
+      className: "hub-preview-stat"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "hub-preview-stat-label"
+    }, "Artifacts Produced"), /*#__PURE__*/React.createElement("div", {
+      className: "hub-preview-stat-value"
+    }, missionData.artifacts?.length || 0))), /*#__PURE__*/React.createElement("div", {
+      style: {
+        marginTop: "1.25rem",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        paddingTop: "1rem",
+        borderTop: "1px solid var(--border-color)"
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        alignItems: "center",
+        gap: "0.5rem",
+        fontSize: "0.82rem",
+        color: "var(--text-secondary)"
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        color: "var(--accent-cyan)"
+      }
+    }, "⚙️ Active Execution:"), /*#__PURE__*/React.createElement("span", null, Object.values(missionData.pods || {})[0]?.action || "ReAct Multi-Turn Verification Engine Ready")), /*#__PURE__*/React.createElement("button", {
+      className: "btn btn-sm btn-primary",
+      onClick: () => setViewMode("cockpit")
+    }, "Jump to Live Cockpit →")))), /*#__PURE__*/React.createElement("section", {
+      className: "hub-metrics-section"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "hub-metrics-grid"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "hub-metric-tile"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "hub-metric-tile-number"
+    }, "70K+"), /*#__PURE__*/React.createElement("div", {
+      className: "hub-metric-tile-label"
+    }, "Cognitive Tokens Burned & Verified")), /*#__PURE__*/React.createElement("div", {
+      className: "hub-metric-tile"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "hub-metric-tile-number"
+    }, "14"), /*#__PURE__*/React.createElement("div", {
+      className: "hub-metric-tile-label"
+    }, "Specialized Autonomous Agents")), /*#__PURE__*/React.createElement("div", {
+      className: "hub-metric-tile"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "hub-metric-tile-number"
+    }, "5"), /*#__PURE__*/React.createElement("div", {
+      className: "hub-metric-tile-label"
+    }, "Parallel Engineering Pods")), /*#__PURE__*/React.createElement("div", {
+      className: "hub-metric-tile"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "hub-metric-tile-number"
+    }, "100%"), /*#__PURE__*/React.createElement("div", {
+      className: "hub-metric-tile-label"
+    }, "AST & Domain Invariant Pass Rate")))), /*#__PURE__*/React.createElement("section", {
+      id: "missions",
+      className: "hub-section"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "hub-section-header"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "hub-section-tag"
+    }, "DURABLE PERSISTENCE"), /*#__PURE__*/React.createElement("h2", {
+      className: "hub-section-title"
+    }, "Active & Stored Missions"), /*#__PURE__*/React.createElement("p", {
+      className: "hub-section-subtitle"
+    }, "SQLite WAL event-sourced mission registry with cold-start session hydration.")), missionsList && missionsList.length > 0 ? /*#__PURE__*/React.createElement("div", {
+      className: "hub-missions-grid"
+    }, missionsList.map(m => {
+      const isActive = m.mission_id === activeMissionId;
+      return /*#__PURE__*/React.createElement("div", {
+        key: m.mission_id,
+        className: "hub-mission-card",
+        onClick: () => handleOpenMissionInCockpit(m.mission_id),
+        style: isActive ? {
+          borderColor: "var(--accent-cyan)",
+          boxShadow: "0 0 15px rgba(56, 189, 248, 0.2)"
+        } : {}
+      }, /*#__PURE__*/React.createElement("div", {
+        className: "hub-mission-card-header"
+      }, /*#__PURE__*/React.createElement("span", {
+        className: "hub-mission-id"
+      }, m.mission_id), /*#__PURE__*/React.createElement("span", {
+        className: `status-pill ${m.status?.toLowerCase() || "idle"}`
+      }, m.status)), /*#__PURE__*/React.createElement("div", {
+        className: "hub-mission-title"
+      }, m.title), /*#__PURE__*/React.createElement("div", {
         style: {
-          background: "rgba(245, 158, 11, 0.15)",
-          borderBottom: "1px solid rgba(245, 158, 11, 0.3)",
-          padding: "0.75rem 2rem",
           display: "flex",
           alignItems: "center",
-          justifyContent: "space-between"
-        },
-        children: [/*#__PURE__*/_jsxs("div", {
-          style: {
-            display: "flex",
-            alignItems: "center",
-            gap: "0.5rem",
-            color: "var(--accent-amber)",
-            fontWeight: 600,
-            fontSize: "0.85rem"
-          },
-          children: [/*#__PURE__*/_jsx("span", {
-            children: "⚠️"
-          }), /*#__PURE__*/_jsxs("span", {
-            children: ["Human Decision Required: ", /*#__PURE__*/_jsx("strong", {
-              children: pendingGate.name
-            }), " is awaiting your review."]
-          })]
-        }), /*#__PURE__*/_jsx("button", {
-          className: "btn btn-warning btn-sm",
-          onClick: () => setViewMode("cockpit"),
-          children: "Review & Approve in Cockpit →"
-        })]
-      }), /*#__PURE__*/_jsxs("section", {
-        className: "hub-hero",
-        children: [/*#__PURE__*/_jsxs("div", {
-          className: "hub-pill-banner",
-          children: [/*#__PURE__*/_jsx("span", {
-            children: "✨"
-          }), /*#__PURE__*/_jsx("span", {
-            children: "INTRODUCING MULTI-AGENT AUTOPILOT • CONTRACT-FIRST PARALLEL PODS"
-          })]
-        }), /*#__PURE__*/_jsxs("h1", {
-          className: "hub-hero-title",
-          children: ["The Multi-Agent Workspace that", /*#__PURE__*/_jsx("br", {}), /*#__PURE__*/_jsx("span", {
-            className: "hub-gradient-text",
-            children: "thinks while you work."
-          })]
-        }), /*#__PURE__*/_jsx("p", {
-          className: "hub-hero-subtitle",
-          children: "Empowering software engineering teams with 14 specialized autonomous agents operating across contract-first parallel pods, Git-backed blackboards, and zero-black-box mathematical governance."
-        }), /*#__PURE__*/_jsxs("div", {
-          className: "hub-hero-ctas",
-          children: [/*#__PURE__*/_jsx("button", {
-            className: "btn-hero-primary",
-            onClick: () => setIsNewMissionOpen(true),
-            children: "Launch Autonomous Mission"
-          }), /*#__PURE__*/_jsx("button", {
-            className: "btn-hero-secondary",
-            onClick: () => setViewMode("cockpit"),
-            children: "Open IDE Cockpit →"
-          })]
-        }), /*#__PURE__*/_jsxs("div", {
-          className: "hub-preview-card",
-          children: [/*#__PURE__*/_jsxs("div", {
-            className: "hub-preview-header",
-            children: [/*#__PURE__*/_jsxs("div", {
-              className: "hub-preview-dots",
-              children: [/*#__PURE__*/_jsx("span", {
-                className: "hub-dot red"
-              }), /*#__PURE__*/_jsx("span", {
-                className: "hub-dot yellow"
-              }), /*#__PURE__*/_jsx("span", {
-                className: "hub-dot green"
-              })]
-            }), /*#__PURE__*/_jsxs("div", {
-              style: {
-                display: "flex",
-                alignItems: "center",
-                gap: "0.75rem"
-              },
-              children: [/*#__PURE__*/_jsx("span", {
-                style: {
-                  fontSize: "0.8rem",
-                  color: "var(--text-muted)",
-                  fontFamily: "var(--font-mono)"
-                },
-                children: activeMissionId || "MISSION-IDLE"
-              }), /*#__PURE__*/_jsx("span", {
-                className: "hub-status-chip",
-                style: {
-                  padding: "0.2rem 0.6rem",
-                  fontSize: "0.7rem"
-                },
-                children: missionData.status
-              })]
-            })]
-          }), /*#__PURE__*/_jsxs("div", {
-            style: {
-              marginBottom: "1.25rem"
-            },
-            children: [/*#__PURE__*/_jsx("h3", {
-              style: {
-                fontSize: "1.2rem",
-                fontWeight: 700,
-                color: "var(--text-primary)",
-                marginBottom: "0.35rem"
-              },
-              children: missionData.title
-            }), /*#__PURE__*/_jsx("p", {
-              style: {
-                fontSize: "0.88rem",
-                color: "var(--text-secondary)",
-                lineHeight: 1.5
-              },
-              children: missionData.description
-            })]
-          }), /*#__PURE__*/_jsxs("div", {
-            className: "hub-preview-grid",
-            children: [/*#__PURE__*/_jsxs("div", {
-              className: "hub-preview-stat",
-              children: [/*#__PURE__*/_jsx("div", {
-                className: "hub-preview-stat-label",
-                children: "Pipeline Stage"
-              }), /*#__PURE__*/_jsx("div", {
-                className: "hub-preview-stat-value",
-                style: {
-                  fontSize: "1rem"
-                },
-                children: missionData.stage
-              })]
-            }), /*#__PURE__*/_jsxs("div", {
-              className: "hub-preview-stat",
-              children: [/*#__PURE__*/_jsx("div", {
-                className: "hub-preview-stat-label",
-                children: "Tokens Burned"
-              }), /*#__PURE__*/_jsx("div", {
-                className: "hub-preview-stat-value",
-                children: Number(missionData.tokens?.total || 0).toLocaleString()
-              })]
-            }), /*#__PURE__*/_jsxs("div", {
-              className: "hub-preview-stat",
-              children: [/*#__PURE__*/_jsx("div", {
-                className: "hub-preview-stat-label",
-                children: "Circuit Breaker"
-              }), /*#__PURE__*/_jsx("div", {
-                className: "hub-preview-stat-value",
-                style: {
-                  color: "var(--accent-green)"
-                },
-                children: missionData.circuitBreaker?.healthy !== false ? "HEALTHY" : "TRIPPED"
-              })]
-            }), /*#__PURE__*/_jsxs("div", {
-              className: "hub-preview-stat",
-              children: [/*#__PURE__*/_jsx("div", {
-                className: "hub-preview-stat-label",
-                children: "Artifacts Produced"
-              }), /*#__PURE__*/_jsx("div", {
-                className: "hub-preview-stat-value",
-                children: missionData.artifacts?.length || 0
-              })]
-            })]
-          }), /*#__PURE__*/_jsxs("div", {
-            style: {
-              marginTop: "1.25rem",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              paddingTop: "1rem",
-              borderTop: "1px solid var(--border-color)"
-            },
-            children: [/*#__PURE__*/_jsxs("div", {
-              style: {
-                display: "flex",
-                alignItems: "center",
-                gap: "0.5rem",
-                fontSize: "0.82rem",
-                color: "var(--text-secondary)"
-              },
-              children: [/*#__PURE__*/_jsx("span", {
-                style: {
-                  color: "var(--accent-cyan)"
-                },
-                children: "⚙️ Active Execution:"
-              }), /*#__PURE__*/_jsx("span", {
-                children: Object.values(missionData.pods || {})[0]?.action || "ReAct Multi-Turn Verification Engine Ready"
-              })]
-            }), /*#__PURE__*/_jsx("button", {
-              className: "btn btn-sm btn-primary",
-              onClick: () => setViewMode("cockpit"),
-              children: "Jump to Live Cockpit →"
-            })]
-          })]
-        })]
-      }), /*#__PURE__*/_jsx("section", {
-        className: "hub-metrics-section",
-        children: /*#__PURE__*/_jsxs("div", {
-          className: "hub-metrics-grid",
-          children: [/*#__PURE__*/_jsxs("div", {
-            className: "hub-metric-tile",
-            children: [/*#__PURE__*/_jsx("div", {
-              className: "hub-metric-tile-number",
-              children: "70K+"
-            }), /*#__PURE__*/_jsx("div", {
-              className: "hub-metric-tile-label",
-              children: "Cognitive Tokens Burned & Verified"
-            })]
-          }), /*#__PURE__*/_jsxs("div", {
-            className: "hub-metric-tile",
-            children: [/*#__PURE__*/_jsx("div", {
-              className: "hub-metric-tile-number",
-              children: "14"
-            }), /*#__PURE__*/_jsx("div", {
-              className: "hub-metric-tile-label",
-              children: "Specialized Autonomous Agents"
-            })]
-          }), /*#__PURE__*/_jsxs("div", {
-            className: "hub-metric-tile",
-            children: [/*#__PURE__*/_jsx("div", {
-              className: "hub-metric-tile-number",
-              children: "5"
-            }), /*#__PURE__*/_jsx("div", {
-              className: "hub-metric-tile-label",
-              children: "Parallel Engineering Pods"
-            })]
-          }), /*#__PURE__*/_jsxs("div", {
-            className: "hub-metric-tile",
-            children: [/*#__PURE__*/_jsx("div", {
-              className: "hub-metric-tile-number",
-              children: "100%"
-            }), /*#__PURE__*/_jsx("div", {
-              className: "hub-metric-tile-label",
-              children: "AST & Domain Invariant Pass Rate"
-            })]
-          })]
-        })
-      }), /*#__PURE__*/_jsxs("section", {
-        id: "missions",
-        className: "hub-section",
-        children: [/*#__PURE__*/_jsxs("div", {
-          className: "hub-section-header",
-          children: [/*#__PURE__*/_jsx("div", {
-            className: "hub-section-tag",
-            children: "DURABLE PERSISTENCE"
-          }), /*#__PURE__*/_jsx("h2", {
-            className: "hub-section-title",
-            children: "Active & Stored Missions"
-          }), /*#__PURE__*/_jsx("p", {
-            className: "hub-section-subtitle",
-            children: "SQLite WAL event-sourced mission registry with cold-start session hydration."
-          })]
-        }), missionsList && missionsList.length > 0 ? /*#__PURE__*/_jsx("div", {
-          className: "hub-missions-grid",
-          children: missionsList.map(m => {
-            const isActive = m.mission_id === activeMissionId;
-            return /*#__PURE__*/_jsxs("div", {
-              className: "hub-mission-card",
-              onClick: () => handleOpenMissionInCockpit(m.mission_id),
-              style: isActive ? {
-                borderColor: "var(--accent-cyan)",
-                boxShadow: "0 0 15px rgba(56, 189, 248, 0.2)"
-              } : {},
-              children: [/*#__PURE__*/_jsxs("div", {
-                className: "hub-mission-card-header",
-                children: [/*#__PURE__*/_jsx("span", {
-                  className: "hub-mission-id",
-                  children: m.mission_id
-                }), /*#__PURE__*/_jsx("span", {
-                  className: `status-pill ${m.status?.toLowerCase() || "idle"}`,
-                  children: m.status
-                })]
-              }), /*#__PURE__*/_jsx("div", {
-                className: "hub-mission-title",
-                children: m.title
-              }), /*#__PURE__*/_jsxs("div", {
-                style: {
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  fontSize: "0.78rem",
-                  color: "var(--text-secondary)",
-                  marginTop: "0.75rem",
-                  paddingTop: "0.75rem",
-                  borderTop: "1px solid var(--border-color)"
-                },
-                children: [/*#__PURE__*/_jsxs("span", {
-                  children: ["Stage: ", /*#__PURE__*/_jsx("strong", {
-                    children: m.stage
-                  })]
-                }), /*#__PURE__*/_jsx("span", {
-                  style: {
-                    color: "var(--accent-cyan)",
-                    fontWeight: 600
-                  },
-                  children: "Inspect Cockpit →"
-                })]
-              })]
-            }, m.mission_id);
-          })
-        }) : /*#__PURE__*/_jsx("div", {
-          style: {
-            textAlign: "center",
-            padding: "2rem",
-            color: "var(--text-muted)"
-          },
-          children: "No missions currently stored. Launch your first mission below!"
-        })]
-      }), /*#__PURE__*/_jsxs("section", {
-        id: "capabilities",
-        className: "hub-section",
-        children: [/*#__PURE__*/_jsxs("div", {
-          className: "hub-section-header",
-          children: [/*#__PURE__*/_jsx("div", {
-            className: "hub-section-tag",
-            children: "ENGINEERING PODS"
-          }), /*#__PURE__*/_jsx("h2", {
-            className: "hub-section-title",
-            children: "Everything your team needs"
-          }), /*#__PURE__*/_jsx("p", {
-            className: "hub-section-subtitle",
-            children: "Built for modern software organizations: contract-first, parallel, and mathematically auditable."
-          })]
-        }), /*#__PURE__*/_jsxs("div", {
-          className: "hub-cards-grid",
-          children: [/*#__PURE__*/_jsxs("div", {
-            className: "hub-card",
-            children: [/*#__PURE__*/_jsx("div", {
-              className: "hub-card-icon",
-              children: "🧠"
-            }), /*#__PURE__*/_jsx("h3", {
-              className: "hub-card-title",
-              children: "Business & Leadership Pod"
-            }), /*#__PURE__*/_jsx("p", {
-              className: "hub-card-desc",
-              children: "Product Manager charters, Domain SME validation matrices, and Given/When/Then user stories with zero scope creep."
-            }), /*#__PURE__*/_jsx("button", {
-              className: "hub-card-link",
-              onClick: () => setViewMode("cockpit"),
-              children: "Inspect Pod Specs →"
-            })]
-          }), /*#__PURE__*/_jsxs("div", {
-            className: "hub-card",
-            children: [/*#__PURE__*/_jsx("div", {
-              className: "hub-card-icon",
-              children: "📐"
-            }), /*#__PURE__*/_jsx("h3", {
-              className: "hub-card-title",
-              children: "Architecture & Governance Pod"
-            }), /*#__PURE__*/_jsx("p", {
-              className: "hub-card-desc",
-              children: "System Architect ADRs with pre-mortem risk evaluation, OpenAPI 3.1 contracts, and Task DAG parallel orchestration."
-            }), /*#__PURE__*/_jsx("button", {
-              className: "hub-card-link",
-              onClick: () => setViewMode("cockpit"),
-              children: "Inspect Pod Specs →"
-            })]
-          }), /*#__PURE__*/_jsxs("div", {
-            className: "hub-card",
-            children: [/*#__PURE__*/_jsx("div", {
-              className: "hub-card-icon",
-              children: "🗄️"
-            }), /*#__PURE__*/_jsx("h3", {
-              className: "hub-card-title",
-              children: "Data & Storage Pod"
-            }), /*#__PURE__*/_jsx("p", {
-              className: "hub-card-desc",
-              children: "Automated PostgreSQL DDL, schema migrations, and high-concurrency non-locking indexing strategies."
-            }), /*#__PURE__*/_jsx("button", {
-              className: "hub-card-link",
-              onClick: () => setViewMode("cockpit"),
-              children: "Inspect Pod Specs →"
-            })]
-          }), /*#__PURE__*/_jsxs("div", {
-            className: "hub-card",
-            children: [/*#__PURE__*/_jsx("div", {
-              className: "hub-card-icon",
-              children: "⚙️"
-            }), /*#__PURE__*/_jsx("h3", {
-              className: "hub-card-title",
-              children: "Backend & AI Pod"
-            }), /*#__PURE__*/_jsx("p", {
-              className: "hub-card-desc",
-              children: "Production Python REST APIs, Pydantic v2 schemas, and autonomous ReAct tool calling within a sandboxed jail."
-            }), /*#__PURE__*/_jsx("button", {
-              className: "hub-card-link",
-              onClick: () => setViewMode("cockpit"),
-              children: "Inspect Pod Specs →"
-            })]
-          }), /*#__PURE__*/_jsxs("div", {
-            className: "hub-card",
-            children: [/*#__PURE__*/_jsx("div", {
-              className: "hub-card-icon",
-              children: "🎨"
-            }), /*#__PURE__*/_jsx("h3", {
-              className: "hub-card-title",
-              children: "Frontend & Experience Pod"
-            }), /*#__PURE__*/_jsx("p", {
-              className: "hub-card-desc",
-              children: "4-state accessible React components, responsive layouts, WCAG 2.1 AA keyboard navigation, and design tokens."
-            }), /*#__PURE__*/_jsx("button", {
-              className: "hub-card-link",
-              onClick: () => setViewMode("cockpit"),
-              children: "Inspect Pod Specs →"
-            })]
-          }), /*#__PURE__*/_jsxs("div", {
-            className: "hub-card",
-            children: [/*#__PURE__*/_jsx("div", {
-              className: "hub-card-icon",
-              children: "☁️"
-            }), /*#__PURE__*/_jsx("h3", {
-              className: "hub-card-title",
-              children: "Cloud, Platform & SRE Pod"
-            }), /*#__PURE__*/_jsx("p", {
-              className: "hub-card-desc",
-              children: "Dedicated KMS Terraform IaC, hardened multi-stage non-root Dockerfiles, and automated health check probes."
-            }), /*#__PURE__*/_jsx("button", {
-              className: "hub-card-link",
-              onClick: () => setViewMode("cockpit"),
-              children: "Inspect Pod Specs →"
-            })]
-          })]
-        })]
-      }), /*#__PURE__*/_jsxs("section", {
-        id: "presets",
-        className: "hub-section",
-        children: [/*#__PURE__*/_jsxs("div", {
-          className: "hub-section-header",
-          children: [/*#__PURE__*/_jsx("div", {
-            className: "hub-section-tag",
-            children: "INSTANT SCENARIOS"
-          }), /*#__PURE__*/_jsx("h2", {
-            className: "hub-section-title",
-            children: "Enterprise Mission Presets"
-          }), /*#__PURE__*/_jsx("p", {
-            className: "hub-section-subtitle",
-            children: "Launch complete enterprise services with contract-first parallel pod execution in 1 click."
-          })]
-        }), /*#__PURE__*/_jsx("div", {
-          className: "hub-presets-grid",
-          children: MISSION_PRESETS.map((preset, idx) => /*#__PURE__*/_jsxs("div", {
-            className: "hub-preset-tile",
-            onClick: () => handleSelectPreset(preset),
-            children: [/*#__PURE__*/_jsx("div", {
-              className: "hub-preset-badge",
-              children: preset.label
-            }), /*#__PURE__*/_jsx("div", {
-              className: "hub-preset-title",
-              children: preset.title
-            }), /*#__PURE__*/_jsxs("div", {
-              className: "hub-preset-desc",
-              children: [preset.description.slice(0, 110), "..."]
-            }), /*#__PURE__*/_jsx("div", {
-              style: {
-                marginTop: "1rem",
-                color: "var(--accent-cyan)",
-                fontSize: "0.8rem",
-                fontWeight: 600
-              },
-              children: "Launch Scenario →"
-            })]
-          }, idx))
-        })]
-      }), /*#__PURE__*/_jsx("section", {
-        className: "hub-section",
-        children: /*#__PURE__*/_jsxs("div", {
-          className: "hub-cta-banner",
-          children: [/*#__PURE__*/_jsx("h2", {
-            className: "hub-cta-title",
-            children: "Your team's best software starts here."
-          }), /*#__PURE__*/_jsx("p", {
-            className: "hub-cta-subtitle",
-            children: "Join modern software teams utilizing 14 autonomous agents working across contract-first parallel pods with zero black-box decisions."
-          }), /*#__PURE__*/_jsx("button", {
-            className: "btn-hero-primary",
-            style: {
-              background: "#ffffff",
-              color: "#080c14",
-              fontWeight: 700
-            },
-            onClick: () => setIsNewMissionOpen(true),
-            children: "Launch Autonomous Mission"
-          })]
-        })
-      }), /*#__PURE__*/_jsx("footer", {
-        className: "hub-footer",
-        children: /*#__PURE__*/_jsxs("div", {
-          className: "hub-footer-content",
-          children: [/*#__PURE__*/_jsxs("div", {
-            style: {
-              display: "flex",
-              alignItems: "center",
-              gap: "0.5rem"
-            },
-            children: [/*#__PURE__*/_jsx("div", {
-              className: "hub-brand-logo",
-              style: {
-                width: "24px",
-                height: "24px",
-                fontSize: "0.75rem"
-              },
-              children: "M"
-            }), /*#__PURE__*/_jsx("span", {
-              style: {
-                fontWeight: 600,
-                color: "var(--text-primary)"
-              },
-              children: "MAS OS"
-            }), /*#__PURE__*/_jsx("span", {
-              children: "• Multi-Agent Software Engineering Operating System"
-            })]
-          }), /*#__PURE__*/_jsxs("div", {
-            style: {
-              display: "flex",
-              gap: "1.5rem"
-            },
-            children: [/*#__PURE__*/_jsx("span", {
-              children: "SQLite WAL Persistence Active"
-            }), /*#__PURE__*/_jsx("span", {
-              children: "100% Deterministic Testing"
-            }), /*#__PURE__*/_jsx("span", {
-              children: "OpenTelemetry Lineage"
-            })]
-          })]
-        })
-      }), isNewMissionOpen && /*#__PURE__*/_jsx("div", {
-        className: "modal-backdrop",
-        role: "dialog",
-        "aria-modal": "true",
-        "aria-labelledby": "modal-title",
-        children: /*#__PURE__*/_jsxs("div", {
-          className: "modal-card",
-          children: [/*#__PURE__*/_jsxs("div", {
-            className: "modal-header",
-            children: [/*#__PURE__*/_jsx("h3", {
-              id: "modal-title",
-              children: "Launch New Multi-Agent Mission"
-            }), /*#__PURE__*/_jsx("button", {
-              className: "modal-close",
-              onClick: () => setIsNewMissionOpen(false),
-              "aria-label": "Close new mission dialog",
-              children: "×"
-            })]
-          }), /*#__PURE__*/_jsxs("div", {
-            className: "presets-container",
-            children: [/*#__PURE__*/_jsx("span", {
-              className: "presets-label",
-              children: "Enterprise Presets:"
-            }), /*#__PURE__*/_jsx("div", {
-              className: "presets-chips",
-              children: MISSION_PRESETS.map((p, idx) => /*#__PURE__*/_jsx("button", {
-                className: "preset-chip",
-                onClick: () => setNewMissionForm({
-                  title: p.title,
-                  description: p.description,
-                  targetDir: "",
-                  interactive: true,
-                  gitCommit: false
-                }),
-                children: p.label
-              }, idx))
-            })]
-          }), /*#__PURE__*/_jsxs("div", {
-            className: "form-group",
-            children: [/*#__PURE__*/_jsx("label", {
-              htmlFor: "mission-title",
-              children: "Mission Title"
-            }), /*#__PURE__*/_jsx("input", {
-              id: "mission-title",
-              type: "text",
-              value: newMissionForm.title,
-              onChange: e => setNewMissionForm({
-                ...newMissionForm,
-                title: e.target.value
-              }),
-              placeholder: "e.g. Stripe Webhook & Payment Reconciliation Service"
-            })]
-          }), /*#__PURE__*/_jsxs("div", {
-            className: "form-group",
-            children: [/*#__PURE__*/_jsx("label", {
-              htmlFor: "mission-desc",
-              children: "Architecture Specification / Goal"
-            }), /*#__PURE__*/_jsx("textarea", {
-              id: "mission-desc",
-              rows: "4",
-              value: newMissionForm.description,
-              onChange: e => setNewMissionForm({
-                ...newMissionForm,
-                description: e.target.value
-              }),
-              placeholder: "Describe your technical requirements, data models, and constraints..."
-            })]
-          }), /*#__PURE__*/_jsxs("div", {
-            className: "form-group",
-            children: [/*#__PURE__*/_jsx("label", {
-              htmlFor: "mission-dir",
-              children: "Target Workspace Directory (Optional)"
-            }), /*#__PURE__*/_jsx("input", {
-              id: "mission-dir",
-              type: "text",
-              value: newMissionForm.targetDir,
-              onChange: e => setNewMissionForm({
-                ...newMissionForm,
-                targetDir: e.target.value
-              }),
-              placeholder: "artifacts"
-            })]
-          }), /*#__PURE__*/_jsx("div", {
-            className: "form-group checkbox-group",
-            children: /*#__PURE__*/_jsxs("label", {
-              children: [/*#__PURE__*/_jsx("input", {
-                type: "checkbox",
-                checked: newMissionForm.interactive,
-                onChange: e => setNewMissionForm({
-                  ...newMissionForm,
-                  interactive: e.target.checked
-                })
-              }), /*#__PURE__*/_jsx("span", {
-                children: "Enable Human-in-the-Loop Governance Gates (Recommended)"
-              })]
-            })
-          }), /*#__PURE__*/_jsx("div", {
-            className: "form-group checkbox-group",
-            children: /*#__PURE__*/_jsxs("label", {
-              children: [/*#__PURE__*/_jsx("input", {
-                type: "checkbox",
-                checked: newMissionForm.gitCommit,
-                onChange: e => setNewMissionForm({
-                  ...newMissionForm,
-                  gitCommit: e.target.checked
-                })
-              }), /*#__PURE__*/_jsx("span", {
-                children: "Commit Generated Artifacts to Git Blackboard Ledger"
-              })]
-            })
-          }), /*#__PURE__*/_jsxs("div", {
-            className: "modal-actions",
-            children: [/*#__PURE__*/_jsx("button", {
-              className: "btn btn-outline",
-              onClick: () => setIsNewMissionOpen(false),
-              disabled: isSubmittingMission,
-              children: "Cancel"
-            }), /*#__PURE__*/_jsx("button", {
-              className: "btn btn-primary",
-              onClick: handleLaunchMission,
-              disabled: isSubmittingMission,
-              children: isSubmittingMission ? "Initializing Pods..." : "Deploy 14 Agents"
-            })]
-          })]
-        })
-      })]
-    });
+          justifyContent: "space-between",
+          fontSize: "0.78rem",
+          color: "var(--text-secondary)",
+          marginTop: "0.75rem",
+          paddingTop: "0.75rem",
+          borderTop: "1px solid var(--border-color)"
+        }
+      }, /*#__PURE__*/React.createElement("span", null, "Stage: ", /*#__PURE__*/React.createElement("strong", null, m.stage)), /*#__PURE__*/React.createElement("span", {
+        style: {
+          color: "var(--accent-cyan)",
+          fontWeight: 600
+        }
+      }, "Inspect Cockpit →")));
+    })) : /*#__PURE__*/React.createElement("div", {
+      style: {
+        textAlign: "center",
+        padding: "2rem",
+        color: "var(--text-muted)"
+      }
+    }, "No missions currently stored. Launch your first mission below!")), /*#__PURE__*/React.createElement("section", {
+      id: "capabilities",
+      className: "hub-section"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "hub-section-header"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "hub-section-tag"
+    }, "ENGINEERING PODS"), /*#__PURE__*/React.createElement("h2", {
+      className: "hub-section-title"
+    }, "Everything your team needs"), /*#__PURE__*/React.createElement("p", {
+      className: "hub-section-subtitle"
+    }, "Built for modern software organizations: contract-first, parallel, and mathematically auditable.")), /*#__PURE__*/React.createElement("div", {
+      className: "hub-cards-grid"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "hub-card"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "hub-card-icon"
+    }, "🧠"), /*#__PURE__*/React.createElement("h3", {
+      className: "hub-card-title"
+    }, "Business & Leadership Pod"), /*#__PURE__*/React.createElement("p", {
+      className: "hub-card-desc"
+    }, "Product Manager charters, Domain SME validation matrices, and Given/When/Then user stories with zero scope creep."), /*#__PURE__*/React.createElement("button", {
+      className: "hub-card-link",
+      onClick: () => setViewMode("cockpit")
+    }, "Inspect Pod Specs →")), /*#__PURE__*/React.createElement("div", {
+      className: "hub-card"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "hub-card-icon"
+    }, "📐"), /*#__PURE__*/React.createElement("h3", {
+      className: "hub-card-title"
+    }, "Architecture & Governance Pod"), /*#__PURE__*/React.createElement("p", {
+      className: "hub-card-desc"
+    }, "System Architect ADRs with pre-mortem risk evaluation, OpenAPI 3.1 contracts, and Task DAG parallel orchestration."), /*#__PURE__*/React.createElement("button", {
+      className: "hub-card-link",
+      onClick: () => setViewMode("cockpit")
+    }, "Inspect Pod Specs →")), /*#__PURE__*/React.createElement("div", {
+      className: "hub-card"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "hub-card-icon"
+    }, "🗄️"), /*#__PURE__*/React.createElement("h3", {
+      className: "hub-card-title"
+    }, "Data & Storage Pod"), /*#__PURE__*/React.createElement("p", {
+      className: "hub-card-desc"
+    }, "Automated PostgreSQL DDL, schema migrations, and high-concurrency non-locking indexing strategies."), /*#__PURE__*/React.createElement("button", {
+      className: "hub-card-link",
+      onClick: () => setViewMode("cockpit")
+    }, "Inspect Pod Specs →")), /*#__PURE__*/React.createElement("div", {
+      className: "hub-card"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "hub-card-icon"
+    }, "⚙️"), /*#__PURE__*/React.createElement("h3", {
+      className: "hub-card-title"
+    }, "Backend & AI Pod"), /*#__PURE__*/React.createElement("p", {
+      className: "hub-card-desc"
+    }, "Production Python REST APIs, Pydantic v2 schemas, and autonomous ReAct tool calling within a sandboxed jail."), /*#__PURE__*/React.createElement("button", {
+      className: "hub-card-link",
+      onClick: () => setViewMode("cockpit")
+    }, "Inspect Pod Specs →")), /*#__PURE__*/React.createElement("div", {
+      className: "hub-card"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "hub-card-icon"
+    }, "🎨"), /*#__PURE__*/React.createElement("h3", {
+      className: "hub-card-title"
+    }, "Frontend & Experience Pod"), /*#__PURE__*/React.createElement("p", {
+      className: "hub-card-desc"
+    }, "4-state accessible React components, responsive layouts, WCAG 2.1 AA keyboard navigation, and design tokens."), /*#__PURE__*/React.createElement("button", {
+      className: "hub-card-link",
+      onClick: () => setViewMode("cockpit")
+    }, "Inspect Pod Specs →")), /*#__PURE__*/React.createElement("div", {
+      className: "hub-card"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "hub-card-icon"
+    }, "☁️"), /*#__PURE__*/React.createElement("h3", {
+      className: "hub-card-title"
+    }, "Cloud, Platform & SRE Pod"), /*#__PURE__*/React.createElement("p", {
+      className: "hub-card-desc"
+    }, "Dedicated KMS Terraform IaC, hardened multi-stage non-root Dockerfiles, and automated health check probes."), /*#__PURE__*/React.createElement("button", {
+      className: "hub-card-link",
+      onClick: () => setViewMode("cockpit")
+    }, "Inspect Pod Specs →")))), /*#__PURE__*/React.createElement("section", {
+      id: "presets",
+      className: "hub-section"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "hub-section-header"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "hub-section-tag"
+    }, "INSTANT SCENARIOS"), /*#__PURE__*/React.createElement("h2", {
+      className: "hub-section-title"
+    }, "Enterprise Mission Presets"), /*#__PURE__*/React.createElement("p", {
+      className: "hub-section-subtitle"
+    }, "Launch complete enterprise services with contract-first parallel pod execution in 1 click.")), /*#__PURE__*/React.createElement("div", {
+      className: "hub-presets-grid"
+    }, MISSION_PRESETS.map((preset, idx) => /*#__PURE__*/React.createElement("div", {
+      key: idx,
+      className: "hub-preset-tile",
+      onClick: () => handleSelectPreset(preset)
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "hub-preset-badge"
+    }, preset.label), /*#__PURE__*/React.createElement("div", {
+      className: "hub-preset-title"
+    }, preset.title), /*#__PURE__*/React.createElement("div", {
+      className: "hub-preset-desc"
+    }, preset.description.slice(0, 110), "..."), /*#__PURE__*/React.createElement("div", {
+      style: {
+        marginTop: "1rem",
+        color: "var(--accent-cyan)",
+        fontSize: "0.8rem",
+        fontWeight: 600
+      }
+    }, "Launch Scenario →"))))), /*#__PURE__*/React.createElement("section", {
+      className: "hub-section"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "hub-cta-banner"
+    }, /*#__PURE__*/React.createElement("h2", {
+      className: "hub-cta-title"
+    }, "Your team's best software starts here."), /*#__PURE__*/React.createElement("p", {
+      className: "hub-cta-subtitle"
+    }, "Join modern software teams utilizing 14 autonomous agents working across contract-first parallel pods with zero black-box decisions."), /*#__PURE__*/React.createElement("button", {
+      className: "btn-hero-primary",
+      style: {
+        background: "#ffffff",
+        color: "#080c14",
+        fontWeight: 700
+      },
+      onClick: () => setIsNewMissionOpen(true)
+    }, "Launch Autonomous Mission"))), /*#__PURE__*/React.createElement("footer", {
+      className: "hub-footer"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "hub-footer-content"
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        alignItems: "center",
+        gap: "0.5rem"
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "hub-brand-logo",
+      style: {
+        width: "24px",
+        height: "24px",
+        fontSize: "0.75rem"
+      }
+    }, "M"), /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontWeight: 600,
+        color: "var(--text-primary)"
+      }
+    }, "MAS OS"), /*#__PURE__*/React.createElement("span", null, "• Multi-Agent Software Engineering Operating System")), /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        gap: "1.5rem"
+      }
+    }, /*#__PURE__*/React.createElement("span", null, "SQLite WAL Persistence Active"), /*#__PURE__*/React.createElement("span", null, "100% Deterministic Testing"), /*#__PURE__*/React.createElement("span", null, "OpenTelemetry Lineage")))), isNewMissionOpen && /*#__PURE__*/React.createElement("div", {
+      className: "modal-backdrop",
+      role: "dialog",
+      "aria-modal": "true",
+      "aria-labelledby": "modal-title"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "modal-card"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "modal-header"
+    }, /*#__PURE__*/React.createElement("h3", {
+      id: "modal-title"
+    }, "Launch New Multi-Agent Mission"), /*#__PURE__*/React.createElement("button", {
+      className: "modal-close",
+      onClick: () => setIsNewMissionOpen(false),
+      "aria-label": "Close new mission dialog"
+    }, "×")), /*#__PURE__*/React.createElement("div", {
+      className: "presets-container"
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "presets-label"
+    }, "Enterprise Presets:"), /*#__PURE__*/React.createElement("div", {
+      className: "presets-chips"
+    }, MISSION_PRESETS.map((p, idx) => /*#__PURE__*/React.createElement("button", {
+      key: idx,
+      className: "preset-chip",
+      onClick: () => setNewMissionForm({
+        title: p.title,
+        description: p.description,
+        targetDir: "",
+        interactive: true,
+        gitCommit: false
+      })
+    }, p.label)))), /*#__PURE__*/React.createElement("div", {
+      className: "form-group"
+    }, /*#__PURE__*/React.createElement("label", {
+      htmlFor: "mission-title"
+    }, "Mission Title"), /*#__PURE__*/React.createElement("input", {
+      id: "mission-title",
+      type: "text",
+      value: newMissionForm.title,
+      onChange: e => setNewMissionForm({
+        ...newMissionForm,
+        title: e.target.value
+      }),
+      placeholder: "e.g. Stripe Webhook & Payment Reconciliation Service"
+    })), /*#__PURE__*/React.createElement("div", {
+      className: "form-group"
+    }, /*#__PURE__*/React.createElement("label", {
+      htmlFor: "mission-desc"
+    }, "Architecture Specification / Goal"), /*#__PURE__*/React.createElement("textarea", {
+      id: "mission-desc",
+      rows: "4",
+      value: newMissionForm.description,
+      onChange: e => setNewMissionForm({
+        ...newMissionForm,
+        description: e.target.value
+      }),
+      placeholder: "Describe your technical requirements, data models, and constraints..."
+    })), /*#__PURE__*/React.createElement("div", {
+      className: "form-group"
+    }, /*#__PURE__*/React.createElement("label", {
+      htmlFor: "mission-dir"
+    }, "Target Workspace Directory (Optional)"), /*#__PURE__*/React.createElement("input", {
+      id: "mission-dir",
+      type: "text",
+      value: newMissionForm.targetDir,
+      onChange: e => setNewMissionForm({
+        ...newMissionForm,
+        targetDir: e.target.value
+      }),
+      placeholder: "artifacts"
+    })), /*#__PURE__*/React.createElement("div", {
+      className: "form-group checkbox-group"
+    }, /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("input", {
+      type: "checkbox",
+      checked: newMissionForm.interactive,
+      onChange: e => setNewMissionForm({
+        ...newMissionForm,
+        interactive: e.target.checked
+      })
+    }), /*#__PURE__*/React.createElement("span", null, "Enable Human-in-the-Loop Governance Gates (Recommended)"))), /*#__PURE__*/React.createElement("div", {
+      className: "form-group checkbox-group"
+    }, /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("input", {
+      type: "checkbox",
+      checked: newMissionForm.gitCommit,
+      onChange: e => setNewMissionForm({
+        ...newMissionForm,
+        gitCommit: e.target.checked
+      })
+    }), /*#__PURE__*/React.createElement("span", null, "Commit Generated Artifacts to Git Blackboard Ledger"))), /*#__PURE__*/React.createElement("div", {
+      className: "modal-actions"
+    }, /*#__PURE__*/React.createElement("button", {
+      className: "btn btn-outline",
+      onClick: () => setIsNewMissionOpen(false),
+      disabled: isSubmittingMission
+    }, "Cancel"), /*#__PURE__*/React.createElement("button", {
+      className: "btn btn-primary",
+      onClick: handleLaunchMission,
+      disabled: isSubmittingMission
+    }, isSubmittingMission ? "Initializing Pods..." : "Deploy 14 Agents")))));
   }
-  return /*#__PURE__*/_jsxs("div", {
+  return /*#__PURE__*/React.createElement("div", {
     className: "cockpit-container",
     style: {
       display: "flex",
       flexDirection: "column",
       height: "100vh"
+    }
+  }, /*#__PURE__*/React.createElement("header", {
+    className: "top-bar",
+    role: "banner"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "brand-group"
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-outline btn-sm",
+    onClick: () => setViewMode("hub"),
+    title: "Switch to Overview Hub (Ctrl+H)",
+    style: {
+      fontSize: "0.72rem",
+      padding: "0.2rem 0.5rem"
+    }
+  }, "← Hub"), /*#__PURE__*/React.createElement("div", {
+    className: "logo-badge",
+    title: "Multi-Agent Software Engineering System"
+  }, "MAS"), /*#__PURE__*/React.createElement("div", {
+    className: "mission-meta",
+    title: missionData.title
+  }, /*#__PURE__*/React.createElement("h1", null, missionData.title), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: "0.35rem"
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    className: `live-indicator ${connectionStatus === "STREAMING" ? "" : connectionStatus === "IDLE" ? "idle" : "disconnected"}`
+  }), /*#__PURE__*/React.createElement("span", {
+    className: "mission-id-badge"
+  }, activeMissionId || "IDLE")))), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "header-omnibar-btn",
+    onClick: () => {
+      setIsCommandPaletteOpen(true);
+      setCommandPaletteQuery("");
+      setCommandPaletteSelectedIndex(0);
     },
-    children: [/*#__PURE__*/_jsxs("header", {
-      className: "top-bar",
-      role: "banner",
-      children: [/*#__PURE__*/_jsxs("div", {
-        className: "brand-group",
-        children: [/*#__PURE__*/_jsx("button", {
-          className: "btn btn-outline btn-sm",
-          onClick: () => setViewMode("hub"),
-          title: "Switch to Overview Hub (Ctrl+H)",
-          style: {
-            fontSize: "0.72rem",
-            padding: "0.2rem 0.5rem"
-          },
-          children: "← Hub"
-        }), /*#__PURE__*/_jsx("div", {
-          className: "logo-badge",
-          title: "Multi-Agent Software Engineering System",
-          children: "MAS"
-        }), /*#__PURE__*/_jsxs("div", {
-          className: "mission-meta",
-          title: missionData.title,
-          children: [/*#__PURE__*/_jsx("h1", {
-            children: missionData.title
-          }), /*#__PURE__*/_jsxs("div", {
-            style: {
-              display: "flex",
-              alignItems: "center",
-              gap: "0.35rem"
-            },
-            children: [/*#__PURE__*/_jsx("span", {
-              className: `live-indicator ${connectionStatus === "STREAMING" ? "" : connectionStatus === "IDLE" ? "idle" : "disconnected"}`
-            }), /*#__PURE__*/_jsx("span", {
-              className: "mission-id-badge",
-              children: activeMissionId || "IDLE"
-            })]
-          })]
-        })]
-      }), /*#__PURE__*/_jsxs("button", {
-        type: "button",
-        className: "header-omnibar-btn",
-        onClick: () => {
-          setIsCommandPaletteOpen(true);
-          setCommandPaletteQuery("");
-          setCommandPaletteSelectedIndex(0);
-        },
-        title: "Open Command Palette (Ctrl+K)",
-        children: [/*#__PURE__*/_jsx("span", {
-          className: "omnibar-icon",
-          children: "🔍"
-        }), /*#__PURE__*/_jsx("span", {
-          className: "omnibar-placeholder",
-          children: "Search files, actions, or type a command..."
-        }), /*#__PURE__*/_jsx("span", {
-          className: "omnibar-shortcut",
-          children: "Ctrl K"
-        })]
-      }), /*#__PURE__*/_jsx("nav", {
-        className: "pipeline-progress",
-        "aria-label": "Pipeline Stages",
-        children: PIPELINE_STAGES.map(stg => {
-          const isCompleted = missionData.stageIndex > stg.index || missionData.status === "COMPLETED";
-          const isActive = missionData.stageIndex === stg.index && missionData.status !== "COMPLETED";
-          const isFiltered = selectedStageFilter === stg.id;
-          return /*#__PURE__*/_jsxs(React.Fragment, {
-            children: [/*#__PURE__*/_jsxs("div", {
-              className: `stage-node ${isActive ? "active" : ""} ${isCompleted ? "completed" : ""} ${isFiltered ? "selected-filter" : ""}`,
-              title: `${stg.label}: ${stg.desc} (Click to filter workspace files)`,
-              onClick: () => setSelectedStageFilter(prev => prev === stg.id ? null : stg.id),
-              role: "button",
-              tabIndex: 0,
-              onKeyDown: e => {
-                if (e.key === "Enter" || e.key === " ") {
-                  setSelectedStageFilter(prev => prev === stg.id ? null : stg.id);
-                }
-              },
-              children: [/*#__PURE__*/_jsx("span", {
-                className: "node-circle",
-                children: isCompleted ? "✓" : stg.index
-              }), /*#__PURE__*/_jsx("span", {
-                className: "node-label",
-                children: stg.label
-              })]
-            }), stg.index < 5 && /*#__PURE__*/_jsx("div", {
-              className: `stage-connector ${isCompleted ? "completed" : ""}`
-            })]
-          }, stg.id);
-        })
-      }), /*#__PURE__*/_jsxs("div", {
-        className: "metrics-controls",
-        children: [/*#__PURE__*/_jsxs("div", {
-          className: "header-telemetry-chip",
-          onClick: () => setIsCostModalOpen(true),
-          style: {
-            cursor: "pointer"
-          },
-          title: "Total Tokens Burned & Circuit Breaker Health. Click to inspect real-time costs and pod burn.",
-          children: [/*#__PURE__*/_jsxs("span", {
-            children: ["⚡ ", Number(costTelemetry?.total_tokens || missionData.tokens.total || 0).toLocaleString(), " tok"]
-          }), /*#__PURE__*/_jsxs("span", {
-            style: {
-              color: "#34d399",
-              fontWeight: 700
-            },
-            children: ["($", Number(costTelemetry?.net_cost_usd || 0.007).toFixed(4), ")"]
-          }), /*#__PURE__*/_jsx("span", {
-            style: {
-              color: "#64748b"
-            },
-            children: "•"
-          }), /*#__PURE__*/_jsx("span", {
-            className: missionData.circuitBreaker.healthy ? "chip-status-healthy" : "chip-status-tripped",
-            children: missionData.circuitBreaker.healthy ? "Healthy" : "Tripped"
-          })]
-        }), /*#__PURE__*/_jsx("button", {
-          className: "btn btn-primary btn-sm",
-          onClick: () => setIsNewMissionOpen(true),
-          "aria-label": "Launch a new multi-agent mission",
-          style: {
-            fontSize: "0.72rem",
-            padding: "0.22rem 0.55rem"
-          },
-          children: "+ New Mission"
-        }), /*#__PURE__*/_jsx("button", {
-          className: "btn btn-outline btn-sm",
-          onClick: toggleTheme,
-          "aria-label": "Toggle dark/light theme",
-          title: "Toggle theme",
-          style: {
-            fontSize: "0.75rem",
-            padding: "0.22rem 0.45rem"
-          },
-          children: theme === "dark" ? "☀️" : "🌙"
-        })]
-      })]
-    }), /*#__PURE__*/_jsxs("main", {
-      className: `workspace-grid ${isLeftCollapsed ? "left-collapsed" : ""} ${isRightCollapsed ? "right-collapsed" : ""}`,
-      role: "main",
+    title: "Open Command Palette (Ctrl+K)"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "omnibar-icon"
+  }, "🔍"), /*#__PURE__*/React.createElement("span", {
+    className: "omnibar-placeholder"
+  }, "Search files, actions, or type a command..."), /*#__PURE__*/React.createElement("span", {
+    className: "omnibar-shortcut"
+  }, "Ctrl K")), /*#__PURE__*/React.createElement("nav", {
+    className: "pipeline-progress",
+    "aria-label": "Pipeline Stages"
+  }, PIPELINE_STAGES.map(stg => {
+    const isCompleted = missionData.stageIndex > stg.index || missionData.status === "COMPLETED";
+    const isActive = missionData.stageIndex === stg.index && missionData.status !== "COMPLETED";
+    const isFiltered = selectedStageFilter === stg.id;
+    return /*#__PURE__*/React.createElement(React.Fragment, {
+      key: stg.id
+    }, /*#__PURE__*/React.createElement("div", {
+      className: `stage-node ${isActive ? "active" : ""} ${isCompleted ? "completed" : ""} ${isFiltered ? "selected-filter" : ""}`,
+      title: `${stg.label}: ${stg.desc} (Click to filter workspace files)`,
+      onClick: () => setSelectedStageFilter(prev => prev === stg.id ? null : stg.id),
+      role: "button",
+      tabIndex: 0,
+      onKeyDown: e => {
+        if (e.key === "Enter" || e.key === " ") {
+          setSelectedStageFilter(prev => prev === stg.id ? null : stg.id);
+        }
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "node-circle"
+    }, isCompleted ? "✓" : stg.index), /*#__PURE__*/React.createElement("span", {
+      className: "node-label"
+    }, stg.label)), stg.index < 5 && /*#__PURE__*/React.createElement("div", {
+      className: `stage-connector ${isCompleted ? "completed" : ""}`
+    }));
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "metrics-controls"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "header-telemetry-chip",
+    onClick: () => setIsCostModalOpen(true),
+    style: {
+      cursor: "pointer"
+    },
+    title: "Total Tokens Burned & Circuit Breaker Health. Click to inspect real-time costs and pod burn."
+  }, /*#__PURE__*/React.createElement("span", null, "⚡ ", Number(costTelemetry?.total_tokens || missionData.tokens.total || 0).toLocaleString(), " tok"), /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: "#34d399",
+      fontWeight: 700
+    }
+  }, "($", Number(costTelemetry?.net_cost_usd || 0.007).toFixed(4), ")"), /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: "#64748b"
+    }
+  }, "•"), /*#__PURE__*/React.createElement("span", {
+    className: missionData.circuitBreaker.healthy ? "chip-status-healthy" : "chip-status-tripped"
+  }, missionData.circuitBreaker.healthy ? "Healthy" : "Tripped")), /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-primary btn-sm",
+    onClick: () => setIsNewMissionOpen(true),
+    "aria-label": "Launch a new multi-agent mission",
+    style: {
+      fontSize: "0.72rem",
+      padding: "0.22rem 0.55rem"
+    }
+  }, "+ New Mission"), /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-outline btn-sm",
+    onClick: toggleTheme,
+    "aria-label": "Toggle dark/light theme",
+    title: "Toggle theme",
+    style: {
+      fontSize: "0.75rem",
+      padding: "0.22rem 0.45rem"
+    }
+  }, theme === "dark" ? "☀️" : "🌙"))), /*#__PURE__*/React.createElement("main", {
+    className: `workspace-grid ${isLeftCollapsed ? "left-collapsed" : ""} ${isRightCollapsed ? "right-collapsed" : ""}`,
+    role: "main",
+    style: {
+      flex: 1,
+      minHeight: 0
+    }
+  }, /*#__PURE__*/React.createElement("aside", {
+    className: "panel left-panel",
+    "aria-label": "File Explorer and Pod Matrix"
+  }, isLeftCollapsed ? /*#__PURE__*/React.createElement("div", {
+    className: "panel-collapsed-rail"
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "rail-btn",
+    onClick: () => setIsLeftCollapsed(false),
+    title: "Expand Sidebar (Ctrl+B)"
+  }, "❯"), /*#__PURE__*/React.createElement("button", {
+    className: `rail-btn ${sidebarTab === "explorer" ? "active" : ""}`,
+    onClick: () => {
+      setIsLeftCollapsed(false);
+      setSidebarTab("explorer");
+    },
+    title: `Workspace Files (${missionData.artifacts.length})`
+  }, "📁", missionData.artifacts.length > 0 && /*#__PURE__*/React.createElement("span", {
+    className: "rail-badge"
+  }, missionData.artifacts.length)), /*#__PURE__*/React.createElement("button", {
+    className: `rail-btn ${sidebarTab === "pods" ? "active" : ""}`,
+    onClick: () => {
+      setIsLeftCollapsed(false);
+      setSidebarTab("pods");
+    },
+    title: "Parallel Pods (5)"
+  }, "⚡", /*#__PURE__*/React.createElement("span", {
+    className: "rail-badge"
+  }, "5"))) : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: "0.25rem",
+      marginBottom: "0.75rem",
+      borderBottom: "1px solid var(--border-color)",
+      paddingBottom: "0.4rem"
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    className: `btn btn-sm ${sidebarTab === "explorer" ? "btn-primary" : "btn-outline"}`,
+    style: {
+      flex: 1,
+      fontSize: "0.75rem"
+    },
+    onClick: () => setSidebarTab("explorer")
+  }, "📁 Explorer (", missionData.artifacts.length, ")"), /*#__PURE__*/React.createElement("button", {
+    className: `btn btn-sm ${sidebarTab === "pods" ? "btn-primary" : "btn-outline"}`,
+    style: {
+      flex: 1,
+      fontSize: "0.75rem"
+    },
+    onClick: () => setSidebarTab("pods")
+  }, "⚡ Pods (5)"), /*#__PURE__*/React.createElement("button", {
+    className: "panel-collapse-toggle",
+    onClick: () => setIsLeftCollapsed(true),
+    title: "Collapse Sidebar (Ctrl+B)"
+  }, "❮")), sidebarTab === "explorer" && /*#__PURE__*/React.createElement("div", {
+    className: "ide-explorer-panel",
+    style: {
+      display: "flex",
+      flexDirection: "column",
+      height: "calc(100% - 45px)"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between",
+      marginBottom: "0.4rem"
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: "0.75rem",
+      fontWeight: 700,
+      textTransform: "uppercase",
+      letterSpacing: "0.05em",
+      color: "var(--text-secondary)"
+    }
+  }, "Workspace Files"), /*#__PURE__*/React.createElement("span", {
+    className: "badge",
+    title: "Total synthesized files on disk"
+  }, missionData.artifacts.length, " files")), /*#__PURE__*/React.createElement("input", {
+    type: "text",
+    className: "search-input",
+    placeholder: "Search files (e.g. service.py)...",
+    value: fileSearchQuery,
+    onChange: e => setFileSearchQuery(e.target.value)
+  }), selectedStageFilter && /*#__PURE__*/React.createElement("div", {
+    className: "stage-filter-indicator"
+  }, /*#__PURE__*/React.createElement("span", null, "Stage: ", /*#__PURE__*/React.createElement("strong", null, PIPELINE_STAGES.find(s => s.id === selectedStageFilter)?.label)), /*#__PURE__*/React.createElement("button", {
+    className: "stage-filter-clear-btn",
+    onClick: () => setSelectedStageFilter(null),
+    title: "Clear stage filter"
+  }, "✕ Clear")), /*#__PURE__*/React.createElement("div", {
+    className: "ide-explorer",
+    style: {
+      flex: 1,
+      overflowY: "auto"
+    }
+  }, Object.entries(directoryTree).map(([fKey, folder]) => {
+    if (folder.items.length === 0) return null;
+    const isExpanded = expandedFolders[fKey] !== false;
+    return /*#__PURE__*/React.createElement("div", {
+      key: fKey,
+      className: "ide-tree-folder"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "ide-folder-header",
+      onClick: () => toggleFolder(fKey)
+    }, /*#__PURE__*/React.createElement("span", {
+      className: `ide-chevron ${isExpanded ? "expanded" : ""}`
+    }, "▶"), /*#__PURE__*/React.createElement("span", null, folder.icon), /*#__PURE__*/React.createElement("span", null, folder.name), /*#__PURE__*/React.createElement("span", {
       style: {
-        flex: 1,
-        minHeight: 0
+        marginLeft: "auto",
+        fontSize: "0.68rem",
+        color: "var(--text-muted)"
+      }
+    }, "(", folder.items.length, ")")), isExpanded && /*#__PURE__*/React.createElement("div", {
+      className: "ide-folder-children"
+    }, folder.items.map(file => {
+      const isActive = selectedArtifact?.id === file.id;
+      return /*#__PURE__*/React.createElement("div", {
+        key: file.id,
+        className: `ide-file-item ${isActive ? "active" : ""}`,
+        onClick: () => openArtifactInEditor(file.id),
+        title: `Path: ${file.path}\nAuthor: ${file.created_by}`
+      }, /*#__PURE__*/React.createElement("div", {
+        className: "ide-file-label"
+      }, /*#__PURE__*/React.createElement("span", {
+        className: "ide-file-icon"
+      }, getFileIcon(file.name)), /*#__PURE__*/React.createElement("span", null, file.name)), /*#__PURE__*/React.createElement("span", {
+        className: "ide-git-badge",
+        title: "Synthesized by MAS agent"
+      }, "+A"));
+    })));
+  }), missionData.artifacts.length === 0 && /*#__PURE__*/React.createElement("div", {
+    className: "empty-state",
+    style: {
+      padding: "1.5rem 0.5rem",
+      textAlign: "center"
+    }
+  }, "No files synthesized yet. Click ", /*#__PURE__*/React.createElement("strong", null, "+ New Mission"), " to generate code."))), sidebarTab === "pods" && /*#__PURE__*/React.createElement("div", {
+    className: "pod-matrix",
+    style: {
+      overflowY: "auto",
+      height: "calc(100% - 45px)"
+    }
+  }, POD_CONFIGS.map(podCfg => {
+    const livePod = missionData.pods[podCfg.key] || {
+      status: "IDLE",
+      action: "Standby",
+      artifact: podCfg.defaultArtifact
+    };
+    const status = livePod.status || "IDLE";
+    const isRunning = status === "RUNNING";
+    const isDone = status === "DONE";
+    let statusClass = "status-idle";
+    if (isRunning) statusClass = "status-running";else if (isDone) statusClass = "status-done";else if (status === "FAILED") statusClass = "status-tripped";
+    return /*#__PURE__*/React.createElement("div", {
+      key: podCfg.key,
+      className: `pod-card ${isRunning ? "running" : ""}`,
+      onClick: () => setInspectedPod({
+        podCfg,
+        livePod
+      }),
+      title: "Click to inspect real-time telemetry & execution state"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "pod-header"
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "pod-icon"
+    }, podCfg.icon), /*#__PURE__*/React.createElement("div", {
+      className: "pod-info"
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        alignItems: "center",
+        gap: "0.35rem"
+      }
+    }, /*#__PURE__*/React.createElement("h3", {
+      style: {
+        margin: 0
+      }
+    }, podCfg.name), /*#__PURE__*/React.createElement("span", {
+      className: "pod-inspect-badge"
+    }, "🔍 Telemetry")), /*#__PURE__*/React.createElement("p", {
+      className: "pod-sub"
+    }, podCfg.desc)), /*#__PURE__*/React.createElement("span", {
+      className: `status-pill ${statusClass}`
+    }, status)), /*#__PURE__*/React.createElement("div", {
+      className: "pod-action-text"
+    }, livePod.action), livePod.artifact && /*#__PURE__*/React.createElement("div", {
+      style: {
+        marginTop: "0.35rem",
+        display: "flex",
+        justifyContent: "flex-end"
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "preset-chip",
+      style: {
+        fontSize: "0.68rem"
       },
-      children: [/*#__PURE__*/_jsx("aside", {
-        className: "panel left-panel",
-        "aria-label": "File Explorer and Pod Matrix",
-        children: isLeftCollapsed ? /*#__PURE__*/_jsxs("div", {
-          className: "panel-collapsed-rail",
-          children: [/*#__PURE__*/_jsx("button", {
-            className: "rail-btn",
-            onClick: () => setIsLeftCollapsed(false),
-            title: "Expand Sidebar (Ctrl+B)",
-            children: "❯"
-          }), /*#__PURE__*/_jsxs("button", {
-            className: `rail-btn ${sidebarTab === "explorer" ? "active" : ""}`,
-            onClick: () => {
-              setIsLeftCollapsed(false);
-              setSidebarTab("explorer");
-            },
-            title: `Workspace Files (${missionData.artifacts.length})`,
-            children: ["📁", missionData.artifacts.length > 0 && /*#__PURE__*/_jsx("span", {
-              className: "rail-badge",
-              children: missionData.artifacts.length
-            })]
-          }), /*#__PURE__*/_jsxs("button", {
-            className: `rail-btn ${sidebarTab === "pods" ? "active" : ""}`,
-            onClick: () => {
-              setIsLeftCollapsed(false);
-              setSidebarTab("pods");
-            },
-            title: "Parallel Pods (5)",
-            children: ["⚡", /*#__PURE__*/_jsx("span", {
-              className: "rail-badge",
-              children: "5"
-            })]
-          })]
-        }) : /*#__PURE__*/_jsxs(_Fragment, {
-          children: [/*#__PURE__*/_jsxs("div", {
-            style: {
-              display: "flex",
-              alignItems: "center",
-              gap: "0.25rem",
-              marginBottom: "0.75rem",
-              borderBottom: "1px solid var(--border-color)",
-              paddingBottom: "0.4rem"
-            },
-            children: [/*#__PURE__*/_jsxs("button", {
-              className: `btn btn-sm ${sidebarTab === "explorer" ? "btn-primary" : "btn-outline"}`,
-              style: {
-                flex: 1,
-                fontSize: "0.75rem"
-              },
-              onClick: () => setSidebarTab("explorer"),
-              children: ["📁 Explorer (", missionData.artifacts.length, ")"]
-            }), /*#__PURE__*/_jsx("button", {
-              className: `btn btn-sm ${sidebarTab === "pods" ? "btn-primary" : "btn-outline"}`,
-              style: {
-                flex: 1,
-                fontSize: "0.75rem"
-              },
-              onClick: () => setSidebarTab("pods"),
-              children: "⚡ Pods (5)"
-            }), /*#__PURE__*/_jsx("button", {
-              className: "panel-collapse-toggle",
-              onClick: () => setIsLeftCollapsed(true),
-              title: "Collapse Sidebar (Ctrl+B)",
-              children: "❮"
-            })]
-          }), sidebarTab === "explorer" && /*#__PURE__*/_jsxs("div", {
-            className: "ide-explorer-panel",
-            style: {
-              display: "flex",
-              flexDirection: "column",
-              height: "calc(100% - 45px)"
-            },
-            children: [/*#__PURE__*/_jsxs("div", {
-              style: {
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                marginBottom: "0.4rem"
-              },
-              children: [/*#__PURE__*/_jsx("span", {
-                style: {
-                  fontSize: "0.75rem",
-                  fontWeight: 700,
-                  textTransform: "uppercase",
-                  letterSpacing: "0.05em",
-                  color: "var(--text-secondary)"
-                },
-                children: "Workspace Files"
-              }), /*#__PURE__*/_jsxs("span", {
-                className: "badge",
-                title: "Total synthesized files on disk",
-                children: [missionData.artifacts.length, " files"]
-              })]
-            }), /*#__PURE__*/_jsx("input", {
-              type: "text",
-              className: "search-input",
-              placeholder: "Search files (e.g. service.py)...",
-              value: fileSearchQuery,
-              onChange: e => setFileSearchQuery(e.target.value)
-            }), selectedStageFilter && /*#__PURE__*/_jsxs("div", {
-              className: "stage-filter-indicator",
-              children: [/*#__PURE__*/_jsxs("span", {
-                children: ["Stage: ", /*#__PURE__*/_jsx("strong", {
-                  children: PIPELINE_STAGES.find(s => s.id === selectedStageFilter)?.label
-                })]
-              }), /*#__PURE__*/_jsx("button", {
-                className: "stage-filter-clear-btn",
-                onClick: () => setSelectedStageFilter(null),
-                title: "Clear stage filter",
-                children: "✕ Clear"
-              })]
-            }), /*#__PURE__*/_jsxs("div", {
-              className: "ide-explorer",
-              style: {
-                flex: 1,
-                overflowY: "auto"
-              },
-              children: [Object.entries(directoryTree).map(([fKey, folder]) => {
-                if (folder.items.length === 0) return null;
-                const isExpanded = expandedFolders[fKey] !== false;
-                return /*#__PURE__*/_jsxs("div", {
-                  className: "ide-tree-folder",
-                  children: [/*#__PURE__*/_jsxs("div", {
-                    className: "ide-folder-header",
-                    onClick: () => toggleFolder(fKey),
-                    children: [/*#__PURE__*/_jsx("span", {
-                      className: `ide-chevron ${isExpanded ? "expanded" : ""}`,
-                      children: "▶"
-                    }), /*#__PURE__*/_jsx("span", {
-                      children: folder.icon
-                    }), /*#__PURE__*/_jsx("span", {
-                      children: folder.name
-                    }), /*#__PURE__*/_jsxs("span", {
-                      style: {
-                        marginLeft: "auto",
-                        fontSize: "0.68rem",
-                        color: "var(--text-muted)"
-                      },
-                      children: ["(", folder.items.length, ")"]
-                    })]
-                  }), isExpanded && /*#__PURE__*/_jsx("div", {
-                    className: "ide-folder-children",
-                    children: folder.items.map(file => {
-                      const isActive = selectedArtifact?.id === file.id;
-                      return /*#__PURE__*/_jsxs("div", {
-                        className: `ide-file-item ${isActive ? "active" : ""}`,
-                        onClick: () => openArtifactInEditor(file.id),
-                        title: `Path: ${file.path}\nAuthor: ${file.created_by}`,
-                        children: [/*#__PURE__*/_jsxs("div", {
-                          className: "ide-file-label",
-                          children: [/*#__PURE__*/_jsx("span", {
-                            className: "ide-file-icon",
-                            children: getFileIcon(file.name)
-                          }), /*#__PURE__*/_jsx("span", {
-                            children: file.name
-                          })]
-                        }), /*#__PURE__*/_jsx("span", {
-                          className: "ide-git-badge",
-                          title: "Synthesized by MAS agent",
-                          children: "+A"
-                        })]
-                      }, file.id);
-                    })
-                  })]
-                }, fKey);
-              }), missionData.artifacts.length === 0 && /*#__PURE__*/_jsxs("div", {
-                className: "empty-state",
-                style: {
-                  padding: "1.5rem 0.5rem",
-                  textAlign: "center"
-                },
-                children: ["No files synthesized yet. Click ", /*#__PURE__*/_jsx("strong", {
-                  children: "+ New Mission"
-                }), " to generate code."]
-              })]
-            })]
-          }), sidebarTab === "pods" && /*#__PURE__*/_jsx("div", {
-            className: "pod-matrix",
-            style: {
-              overflowY: "auto",
-              height: "calc(100% - 45px)"
-            },
-            children: POD_CONFIGS.map(podCfg => {
-              const livePod = missionData.pods[podCfg.key] || {
-                status: "IDLE",
-                action: "Standby",
-                artifact: podCfg.defaultArtifact
-              };
-              const status = livePod.status || "IDLE";
-              const isRunning = status === "RUNNING";
-              const isDone = status === "DONE";
-              let statusClass = "status-idle";
-              if (isRunning) statusClass = "status-running";else if (isDone) statusClass = "status-done";else if (status === "FAILED") statusClass = "status-tripped";
-              return /*#__PURE__*/_jsxs("div", {
-                className: `pod-card ${isRunning ? "running" : ""}`,
-                onClick: () => setInspectedPod({
-                  podCfg,
-                  livePod
-                }),
-                title: "Click to inspect real-time telemetry & execution state",
-                children: [/*#__PURE__*/_jsxs("div", {
-                  className: "pod-header",
-                  children: [/*#__PURE__*/_jsx("span", {
-                    className: "pod-icon",
-                    children: podCfg.icon
-                  }), /*#__PURE__*/_jsxs("div", {
-                    className: "pod-info",
-                    children: [/*#__PURE__*/_jsxs("div", {
-                      style: {
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "0.35rem"
-                      },
-                      children: [/*#__PURE__*/_jsx("h3", {
-                        style: {
-                          margin: 0
-                        },
-                        children: podCfg.name
-                      }), /*#__PURE__*/_jsx("span", {
-                        className: "pod-inspect-badge",
-                        children: "🔍 Telemetry"
-                      })]
-                    }), /*#__PURE__*/_jsx("p", {
-                      className: "pod-sub",
-                      children: podCfg.desc
-                    })]
-                  }), /*#__PURE__*/_jsx("span", {
-                    className: `status-pill ${statusClass}`,
-                    children: status
-                  })]
-                }), /*#__PURE__*/_jsx("div", {
-                  className: "pod-action-text",
-                  children: livePod.action
-                }), livePod.artifact && /*#__PURE__*/_jsx("div", {
-                  style: {
-                    marginTop: "0.35rem",
-                    display: "flex",
-                    justifyContent: "flex-end"
-                  },
-                  children: /*#__PURE__*/_jsxs("span", {
-                    className: "preset-chip",
-                    style: {
-                      fontSize: "0.68rem"
-                    },
-                    title: "Open artifact in editor",
-                    onClick: e => {
-                      e.stopPropagation();
-                      const art = missionData.artifacts.find(a => a.name.includes(livePod.artifact));
-                      if (art) openArtifactInEditor(art.id);
-                    },
-                    children: ["📄 ", livePod.artifact]
-                  })
-                })]
-              }, podCfg.key);
-            })
-          })]
-        })
-      }), /*#__PURE__*/_jsxs("section", {
-        className: "panel center-panel",
-        "aria-label": "IDE Code Editor Canvas",
-        style: {
-          display: "flex",
-          flexDirection: "column"
-        },
-        children: [/*#__PURE__*/_jsx("div", {
-          className: "ide-tabs-bar",
-          role: "tablist",
-          children: openTabs.length === 0 ? /*#__PURE__*/_jsxs("div", {
-            style: {
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              width: "100%",
-              padding: "0.2rem 0.6rem"
-            },
-            children: [/*#__PURE__*/_jsx("span", {
-              style: {
-                fontSize: "0.75rem",
-                color: "var(--text-muted)",
-                fontStyle: "italic"
-              },
-              children: "No open files. Select from Explorer, press Ctrl+P for Quick Open, or explore DAG."
-            }), /*#__PURE__*/_jsxs("div", {
-              style: {
-                display: "flex",
-                alignItems: "center",
-                gap: "0.4rem"
-              },
-              children: [/*#__PURE__*/_jsx("button", {
-                className: "btn btn-sm btn-outline",
-                style: {
-                  fontSize: "0.65rem",
-                  padding: "0.15rem 0.45rem",
-                  color: "var(--accent-cyan)",
-                  borderColor: "rgba(56, 189, 248, 0.4)"
-                },
-                onClick: () => {
-                  setQuickOpenQuery("");
-                  setQuickOpenFilterKind("all");
-                  setQuickOpenSelectedIndex(0);
-                  setIsQuickOpenVisible(true);
-                },
-                title: "Quick-Open Symbol or File (Ctrl+P / Cmd+P)",
-                children: "🔍 Quick Open"
-              }), /*#__PURE__*/_jsx("div", {
-                className: "view-switcher-pill",
-                children: /*#__PURE__*/_jsx("button", {
-                  className: `view-switcher-btn ${editorViewMode === "dag" ? "active" : ""}`,
-                  onClick: () => setEditorViewMode("dag"),
-                  style: {
-                    fontSize: "0.65rem",
-                    padding: "0.15rem 0.45rem"
-                  },
-                  children: "🕸️ Architecture DAG"
-                })
-              })]
-            })]
-          }) : openTabs.map(tab => {
-            const isActive = activeTabId === tab.id;
-            return /*#__PURE__*/_jsxs("div", {
-              className: `ide-tab ${isActive ? "active" : ""}`,
-              onClick: () => {
-                setActiveTabId(tab.id);
-                setSelectedArtifact(tab);
-              },
-              children: [/*#__PURE__*/_jsx("span", {
-                children: getFileIcon(tab.name)
-              }), /*#__PURE__*/_jsx("span", {
-                children: tab.name
-              }), /*#__PURE__*/_jsx("span", {
-                className: "ide-tab-close",
-                title: "Close file tab",
-                onClick: e => handleCloseTab(e, tab.id),
-                children: "✕"
-              })]
-            }, tab.id);
-          })
-        }), selectedArtifact && /*#__PURE__*/_jsxs("div", {
-          className: "disk-location-banner",
-          children: [/*#__PURE__*/_jsxs("div", {
-            className: "disk-path-text",
-            title: localDiskPath,
-            children: ["📁 ", /*#__PURE__*/_jsx("strong", {
-              children: "Disk Location:"
-            }), " ", localDiskPath]
-          }), /*#__PURE__*/_jsxs("div", {
-            style: {
-              display: "flex",
-              gap: "0.4rem",
-              alignItems: "center"
-            },
-            children: [/*#__PURE__*/_jsxs("div", {
-              className: "view-switcher-pill",
-              style: {
-                marginRight: "0.25rem"
-              },
-              children: [/*#__PURE__*/_jsx("button", {
-                className: `view-switcher-btn ${editorViewMode === "code" ? "active" : ""}`,
-                onClick: () => setEditorViewMode("code"),
-                style: {
-                  fontSize: "0.65rem",
-                  padding: "0.15rem 0.45rem"
-                },
-                children: "📄 Code"
-              }), /*#__PURE__*/_jsx("button", {
-                className: `view-switcher-btn ${editorViewMode === "diff" ? "active" : ""}`,
-                onClick: () => setEditorViewMode("diff"),
-                style: {
-                  fontSize: "0.65rem",
-                  padding: "0.15rem 0.45rem"
-                },
-                children: "🔍 Diff"
-              }), /*#__PURE__*/_jsx("button", {
-                className: `view-switcher-btn ${editorViewMode === "dag" ? "active" : ""}`,
-                onClick: () => setEditorViewMode("dag"),
-                style: {
-                  fontSize: "0.65rem",
-                  padding: "0.15rem 0.45rem"
-                },
-                children: "🕸️ DAG"
-              })]
-            }), /*#__PURE__*/_jsx("button", {
-              className: "btn btn-sm btn-outline",
-              style: {
-                fontSize: "0.65rem",
-                padding: "0.15rem 0.45rem",
-                color: "var(--accent-cyan)",
-                borderColor: "rgba(56, 189, 248, 0.4)"
-              },
-              onClick: () => {
-                setQuickOpenQuery("");
-                setQuickOpenFilterKind("all");
-                setQuickOpenSelectedIndex(0);
-                setIsQuickOpenVisible(true);
-              },
-              title: "Quick-Open Symbol or File (Ctrl+P / Cmd+P)",
-              children: "🔍 Quick Open"
-            }), /*#__PURE__*/_jsx("button", {
-              className: "btn btn-sm btn-outline",
-              style: {
-                fontSize: "0.65rem",
-                padding: "0.15rem 0.45rem",
-                color: "var(--accent-green)",
-                borderColor: "rgba(16, 185, 129, 0.4)"
-              },
-              onClick: handleRunSandboxedTests,
-              disabled: isRunningTests || !activeMissionId,
-              title: "Run pytest verification suite in SubprocessSandbox",
-              children: isRunningTests ? "⏳ Running..." : "▶ Run Tests"
-            }), selectedArtifact && !isEditingFile && /*#__PURE__*/_jsx("button", {
-              className: "btn btn-sm btn-outline",
-              style: {
-                fontSize: "0.65rem",
-                padding: "0.15rem 0.45rem",
-                color: "var(--accent-cyan)",
-                borderColor: "rgba(56, 189, 248, 0.4)"
-              },
-              onClick: () => {
-                setEditedCodeContent(selectedArtifact.content || "");
-                setIsEditingFile(true);
-                setEditorViewMode("code");
-                setSaveFeedback(null);
-              },
-              title: "Directly edit this file in the Cockpit (Ctrl+S to save)",
-              children: "✏️ Edit"
-            }), selectedArtifact && isEditingFile && /*#__PURE__*/_jsxs("div", {
-              style: {
-                display: "flex",
-                gap: "0.25rem",
-                alignItems: "center"
-              },
-              children: [/*#__PURE__*/_jsx("button", {
-                className: "btn btn-sm btn-success",
-                style: {
-                  fontSize: "0.65rem",
-                  padding: "0.15rem 0.55rem",
-                  fontWeight: 600,
-                  backgroundColor: "#10b981",
-                  borderColor: "#10b981"
-                },
-                onClick: handleSaveEditedFile,
-                disabled: isSavingFile,
-                title: "Save changes with AST verification (Ctrl+S)",
-                children: isSavingFile ? "Saving..." : "💾 Save"
-              }), /*#__PURE__*/_jsx("button", {
-                className: "btn btn-sm btn-outline",
-                style: {
-                  fontSize: "0.65rem",
-                  padding: "0.15rem 0.4rem"
-                },
-                onClick: () => {
-                  setIsEditingFile(false);
-                  setEditedCodeContent(selectedArtifact.content || "");
-                  setSaveFeedback(null);
-                },
-                children: "✖ Cancel"
-              })]
-            }), saveFeedback === "SAVED" && /*#__PURE__*/_jsxs("span", {
-              style: {
-                fontSize: "0.65rem",
-                color: "#34d399",
-                fontWeight: 600
-              },
-              children: ["Saved v", selectedArtifact?.version, " ✓"]
-            }), saveFeedback && saveFeedback !== "SAVED" && /*#__PURE__*/_jsxs("span", {
-              style: {
-                fontSize: "0.65rem",
-                color: "#f87171",
-                maxWidth: "160px",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap"
-              },
-              title: saveFeedback,
-              children: ["⚠️ ", saveFeedback]
-            }), selectedArtifact && /*#__PURE__*/_jsxs("button", {
-              className: "btn btn-sm btn-outline",
-              style: {
-                fontSize: "0.65rem",
-                padding: "0.15rem 0.5rem",
-                color: "#fbbf24",
-                borderColor: "rgba(251, 191, 36, 0.4)",
-                display: "flex",
-                alignItems: "center",
-                gap: "0.3rem"
-              },
-              onClick: () => handleOpenVersionHistory(selectedArtifact.id),
-              title: "View version snapshots & instant rollback",
-              children: ["⏱️ v", selectedArtifact.version || 1, " History"]
-            }), /*#__PURE__*/_jsx("button", {
-              className: "btn btn-sm btn-outline",
-              style: {
-                fontSize: "0.65rem",
-                padding: "0.15rem 0.45rem"
-              },
-              onClick: handleCopyPath,
-              children: pathCopyFeedback ? "Path Copied! ✓" : "Copy Path"
-            }), /*#__PURE__*/_jsx("button", {
-              className: "btn btn-sm btn-outline",
-              style: {
-                fontSize: "0.65rem",
-                padding: "0.15rem 0.45rem"
-              },
-              onClick: handleCopyCode,
-              children: copyFeedback ? "Code Copied! ✓" : "Copy Code"
-            })]
-          })]
-        }), selectedArtifact && /*#__PURE__*/_jsxs("div", {
-          className: "ide-breadcrumbs",
-          children: [/*#__PURE__*/_jsx("span", {
-            children: "MAS Workspace"
-          }), /*#__PURE__*/_jsx("span", {
-            className: "ide-crumb-sep",
-            children: ">"
-          }), /*#__PURE__*/_jsx("span", {
-            children: selectedArtifact.path?.split("/")[0] || "artifacts"
-          }), /*#__PURE__*/_jsx("span", {
-            className: "ide-crumb-sep",
-            children: ">"
-          }), /*#__PURE__*/_jsx("span", {
-            className: "ide-crumb-active",
-            children: selectedArtifact.name
-          }), /*#__PURE__*/_jsxs("span", {
-            style: {
-              marginLeft: "auto",
-              fontSize: "0.68rem",
-              color: "var(--accent-green)"
-            },
-            children: ["Author: ", selectedArtifact.created_by || "Agent", " (v", selectedArtifact.version || 1, ")"]
-          })]
-        }), /*#__PURE__*/_jsx("div", {
-          className: "ide-editor-container",
-          style: {
-            flex: 1,
-            minHeight: 0
-          },
-          children: artifactLoading ?
-          /*#__PURE__*/
-          // Loading Skeleton State
-          _jsxs("div", {
-            className: "skeleton-container",
-            style: {
-              width: "100%"
-            },
-            "aria-busy": "true",
-            children: [/*#__PURE__*/_jsx("div", {
-              className: "skeleton-line short"
-            }), /*#__PURE__*/_jsx("div", {
-              className: "skeleton-line long"
-            }), /*#__PURE__*/_jsx("div", {
-              className: "skeleton-line medium"
-            }), /*#__PURE__*/_jsx("div", {
-              className: "skeleton-line long"
-            }), /*#__PURE__*/_jsx("div", {
-              className: "skeleton-line short"
-            }), /*#__PURE__*/_jsx("div", {
-              className: "skeleton-line medium"
-            }), /*#__PURE__*/_jsx("div", {
-              className: "skeleton-line long"
-            })]
-          }) : artifactError ?
-          /*#__PURE__*/
-          // Error State
-          _jsxs("div", {
-            className: "empty-canvas",
-            style: {
-              width: "100%"
-            },
-            children: [/*#__PURE__*/_jsx("div", {
-              className: "empty-canvas-icon",
-              children: "⚠️"
-            }), /*#__PURE__*/_jsx("h3", {
-              children: "Failed to load file"
-            }), /*#__PURE__*/_jsx("p", {
-              children: artifactError
-            }), /*#__PURE__*/_jsx("button", {
-              className: "btn btn-primary",
-              onClick: () => selectedArtifact && openArtifactInEditor(selectedArtifact.id),
-              children: "Retry Loading"
-            })]
-          }) : editorViewMode === "dag" ?
-          /*#__PURE__*/
-          // Micro-Step 8: Interactive Visual Code & Task Dependency DAG
-          _jsx(DAGWorkbenchView, {
-            dagData: dagData,
-            isLoading: isLoadingDag,
-            onRefresh: fetchMissionDag,
-            onOpenArtifact: artId => {
-              openArtifactInEditor(artId);
-              setEditorViewMode("code");
-            },
-            onViewDiff: artId => {
-              openArtifactInEditor(artId);
-              setEditorViewMode("diff");
-            },
-            dagFilterTier: dagFilterTier,
-            setDagFilterTier: setDagFilterTier,
-            dagSearchQuery: dagSearchQuery,
-            setDagSearchQuery: setDagSearchQuery,
-            selectedDagNode: selectedDagNode,
-            setSelectedDagNode: setSelectedDagNode
-          }) : selectedArtifact && editorViewMode === "diff" ?
-          /*#__PURE__*/
-          // Live Git-Style Diff Viewer (Unified & Side-by-Side Split Views)
-          _jsxs("div", {
-            className: "diff-container",
-            children: [/*#__PURE__*/_jsxs("div", {
-              className: "diff-header-bar",
-              children: [/*#__PURE__*/_jsxs("div", {
-                style: {
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "0.6rem"
-                },
-                children: [/*#__PURE__*/_jsxs("span", {
-                  children: [/*#__PURE__*/_jsx("strong", {
-                    children: "Target:"
-                  }), " ", selectedArtifact.name]
-                }), /*#__PURE__*/_jsx("span", {
-                  style: {
-                    color: "var(--text-muted)"
-                  },
-                  children: "|"
-                }), /*#__PURE__*/_jsxs("span", {
-                  children: [/*#__PURE__*/_jsx("strong", {
-                    children: "Baseline:"
-                  }), " ", artifactDiff?.baseline_path || "Initial file synthesis (/dev/null)"]
-                })]
-              }), /*#__PURE__*/_jsxs("div", {
-                style: {
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "0.8rem"
-                },
-                children: [/*#__PURE__*/_jsxs("div", {
-                  className: "view-switcher-pill",
-                  children: [/*#__PURE__*/_jsx("button", {
-                    className: `view-switcher-btn ${diffLayoutMode === "split" ? "active" : ""}`,
-                    onClick: () => setDiffLayoutMode("split"),
-                    style: {
-                      fontSize: "0.65rem",
-                      padding: "0.15rem 0.45rem"
-                    },
-                    title: "Side-by-side dual pane view",
-                    children: "◫ Split"
-                  }), /*#__PURE__*/_jsx("button", {
-                    className: `view-switcher-btn ${diffLayoutMode === "unified" ? "active" : ""}`,
-                    onClick: () => setDiffLayoutMode("unified"),
-                    style: {
-                      fontSize: "0.65rem",
-                      padding: "0.15rem 0.45rem"
-                    },
-                    title: "Single column unified view",
-                    children: "☰ Unified"
-                  })]
-                }), /*#__PURE__*/_jsxs("div", {
-                  style: {
-                    display: "flex",
-                    gap: "0.4rem"
-                  },
-                  children: [/*#__PURE__*/_jsxs("span", {
-                    className: "diff-badge-add",
-                    children: ["+", artifactDiff?.additions_count || 0]
-                  }), /*#__PURE__*/_jsxs("span", {
-                    className: "diff-badge-del",
-                    children: ["-", artifactDiff?.deletions_count || 0]
-                  })]
-                })]
-              })]
-            }), isLoadingDiff ? /*#__PURE__*/_jsx("div", {
-              style: {
-                padding: "1.5rem",
-                textAlign: "center",
-                color: "var(--text-muted)"
-              },
-              children: "Computing unified diff against repository baseline..."
-            }) : !artifactDiff?.diff ? /*#__PURE__*/_jsx("div", {
-              style: {
-                padding: "1.5rem",
-                textAlign: "center",
-                color: "var(--text-muted)"
-              },
-              children: "No diff detected. Synthesized content is identical to workspace baseline."
-            }) : diffLayoutMode === "split" ?
-            /*#__PURE__*/
-            // Side-by-Side Dual Pane Diff
-            _jsxs("div", {
-              className: "diff-split-container",
-              children: [/*#__PURE__*/_jsxs("div", {
-                className: "diff-split-subheaders",
-                children: [/*#__PURE__*/_jsxs("div", {
-                  className: "diff-split-subcol",
-                  children: [/*#__PURE__*/_jsxs("span", {
-                    children: ["Original: ", artifactDiff?.baseline_path || "Baseline (/dev/null)"]
-                  }), /*#__PURE__*/_jsxs("span", {
-                    style: {
-                      color: "#f87171"
-                    },
-                    children: ["-", artifactDiff?.deletions_count || 0]
-                  })]
-                }), /*#__PURE__*/_jsxs("div", {
-                  className: "diff-split-subcol",
-                  children: [/*#__PURE__*/_jsxs("span", {
-                    children: ["Modified: ", selectedArtifact.name]
-                  }), /*#__PURE__*/_jsxs("span", {
-                    style: {
-                      color: "#34d399"
-                    },
-                    children: ["+", artifactDiff?.additions_count || 0]
-                  })]
-                })]
-              }), splitDiffRows.map((row, idx) => {
-                if (row.isHunk) {
-                  return /*#__PURE__*/_jsx("div", {
-                    className: "diff-split-hunk-row",
-                    children: row.text
-                  }, idx);
-                }
-                return /*#__PURE__*/_jsxs("div", {
-                  className: "diff-split-row",
-                  children: [/*#__PURE__*/_jsxs("div", {
-                    className: `diff-split-cell ${row.left ? row.left.type === "del" ? "diff-split-del" : "diff-split-ctx" : "diff-split-empty"}`,
-                    children: [/*#__PURE__*/_jsx("div", {
-                      className: "diff-split-gutter",
-                      children: row.left ? row.left.lineNum : ""
-                    }), /*#__PURE__*/_jsx("div", {
-                      className: "diff-split-text",
-                      children: row.left ? row.left.text : " "
-                    })]
-                  }), /*#__PURE__*/_jsxs("div", {
-                    className: `diff-split-cell ${row.right ? row.right.type === "add" ? "diff-split-add" : "diff-split-ctx" : "diff-split-empty"}`,
-                    children: [/*#__PURE__*/_jsx("div", {
-                      className: "diff-split-gutter",
-                      children: row.right ? row.right.lineNum : ""
-                    }), /*#__PURE__*/_jsx("div", {
-                      className: "diff-split-text",
-                      children: row.right ? row.right.text : " "
-                    })]
-                  })]
-                }, idx);
-              })]
-            }) :
-            /*#__PURE__*/
-            // Unified Single Column Diff
-            _jsx("div", {
-              className: "diff-lines-wrapper",
-              children: artifactDiff.diff.split("\n").map((line, idx) => {
-                let lineClass = "diff-line-ctx";
-                if (line.startsWith("+") && !line.startsWith("+++")) lineClass = "diff-line-add";else if (line.startsWith("-") && !line.startsWith("---")) lineClass = "diff-line-del";else if (line.startsWith("@@")) lineClass = "diff-line-hunk";
-                return /*#__PURE__*/_jsx("div", {
-                  className: `diff-line ${lineClass}`,
-                  children: line || " "
-                }, idx);
-              })
-            })]
-          }) : selectedArtifact ?
-          /*#__PURE__*/
-          // Populated IDE Code Editor with Interactive Line Gutter & Revision Support
-          _jsxs("div", {
-            style: {
-              display: "flex",
-              flexDirection: "column",
-              width: "100%",
-              height: "100%"
-            },
-            children: [activeFileRevisions.length > 0 && /*#__PURE__*/_jsxs("div", {
-              className: "revisions-banner",
-              children: [/*#__PURE__*/_jsxs("span", {
-                className: "revisions-banner-badge",
-                children: ["💬 ", activeFileRevisions.length, " Revision Request", activeFileRevisions.length > 1 ? "s" : "", " Active"]
-              }), /*#__PURE__*/_jsx("div", {
-                className: "revisions-banner-list",
-                children: activeFileRevisions.map((rev, idx) => /*#__PURE__*/_jsxs("span", {
-                  className: "revision-pill",
-                  onClick: () => {
-                    setCommentingLine(rev.line);
-                    setLineCommentText(rev.comment);
-                  },
-                  title: rev.comment,
-                  children: ["Line ", rev.line, ": “", rev.comment, "”"]
-                }, idx))
-              })]
-            }), commentingLine !== null && /*#__PURE__*/_jsx("div", {
-              className: "inline-revision-overlay",
-              children: /*#__PURE__*/_jsxs("div", {
-                className: "inline-revision-card",
-                children: [/*#__PURE__*/_jsxs("div", {
-                  className: "inline-revision-header",
-                  children: [/*#__PURE__*/_jsxs("span", {
-                    className: "inline-revision-title",
-                    children: ["💬 Request Agent Revision on Line ", /*#__PURE__*/_jsxs("code", {
-                      children: [selectedArtifact.name, ":", commentingLine]
-                    })]
-                  }), /*#__PURE__*/_jsx("button", {
-                    type: "button",
-                    className: "close-btn-xs",
-                    onClick: () => setCommentingLine(null),
-                    "aria-label": "Close",
-                    children: "×"
-                  })]
-                }), /*#__PURE__*/_jsxs("div", {
-                  className: "inline-revision-body",
-                  children: [/*#__PURE__*/_jsx("input", {
-                    type: "text",
-                    className: "inline-revision-input",
-                    placeholder: "Instruct agent to revise this line (e.g., validate boundary condition, handle nulls)...",
-                    value: lineCommentText,
-                    onChange: e => setLineCommentText(e.target.value),
-                    onKeyDown: e => {
-                      if (e.key === "Enter" && lineCommentText.trim()) {
-                        handleSendLineComment(commentingLine);
-                      } else if (e.key === "Escape") {
-                        setCommentingLine(null);
-                      }
-                    },
-                    autoFocus: true
-                  }), /*#__PURE__*/_jsxs("div", {
-                    className: "inline-revision-actions",
-                    children: [/*#__PURE__*/_jsx("button", {
-                      type: "button",
-                      className: "btn btn-xs btn-outline",
-                      onClick: () => setCommentingLine(null),
-                      children: "Cancel"
-                    }), /*#__PURE__*/_jsx("button", {
-                      type: "button",
-                      className: "btn btn-xs btn-primary",
-                      onClick: () => handleSendLineComment(commentingLine),
-                      disabled: !lineCommentText.trim() || isSubmittingComment,
-                      children: isSubmittingComment ? "Submitting..." : "Submit Revision ↵"
-                    })]
-                  })]
-                })]
-              })
-            }), /*#__PURE__*/_jsxs("div", {
-              style: {
-                display: "flex",
-                flex: 1,
-                minHeight: 0
-              },
-              children: [/*#__PURE__*/_jsx("div", {
-                className: "ide-gutter",
-                children: lineNumbers.map(n => {
-                  const hasComment = activeFileRevisions.some(r => r.line === n);
-                  return /*#__PURE__*/_jsxs("div", {
-                    className: `gutter-line-item ${hasComment ? "has-comment" : ""} ${commentingLine === n ? "active-comment" : ""}`,
-                    onClick: () => {
-                      if (commentingLine === n) {
-                        setCommentingLine(null);
-                      } else {
-                        setCommentingLine(n);
-                        setLineCommentText("");
-                      }
-                    },
-                    title: `Line ${n}: Click to request agent revision`,
-                    children: [/*#__PURE__*/_jsx("span", {
-                      className: "gutter-line-num",
-                      children: n
-                    }), hasComment && /*#__PURE__*/_jsx("span", {
-                      className: "gutter-comment-icon",
-                      children: "💬"
-                    })]
-                  }, n);
-                })
-              }), isEditingFile ? /*#__PURE__*/_jsx("div", {
-                className: "ide-code-pane",
-                style: {
-                  padding: 0
-                },
-                children: /*#__PURE__*/_jsx("textarea", {
-                  className: "ide-textarea-editor",
-                  value: editedCodeContent,
-                  onChange: e => setEditedCodeContent(e.target.value),
-                  onKeyDown: e => {
-                    if ((e.ctrlKey || e.metaKey) && e.key === "s") {
-                      e.preventDefault();
-                      handleSaveEditedFile();
-                    } else if (e.key === "Tab") {
-                      e.preventDefault();
-                      const start = e.target.selectionStart;
-                      const end = e.target.selectionEnd;
-                      const val = e.target.value;
-                      setEditedCodeContent(val.substring(0, start) + "    " + val.substring(end));
-                      setTimeout(() => {
-                        e.target.selectionStart = e.target.selectionEnd = start + 4;
-                      }, 0);
-                    } else if (e.key === "Escape") {
-                      setIsEditingFile(false);
-                      setEditedCodeContent(selectedArtifact.content || "");
-                      setSaveFeedback(null);
-                    }
-                  },
-                  spellCheck: "false",
-                  autoCapitalize: "off",
-                  autoComplete: "off",
-                  autoCorrect: "off",
-                  autoFocus: true
-                })
-              }) : /*#__PURE__*/_jsx("div", {
-                className: "ide-code-pane",
-                children: /*#__PURE__*/_jsx("pre", {
-                  children: /*#__PURE__*/_jsx("code", {
-                    ref: codeViewerRef,
-                    className: `language-${currentLanguage}`,
-                    children: selectedArtifact.content || "// File content is empty."
-                  })
-                })
-              })]
-            })]
-          }) :
-          /*#__PURE__*/
-          // Empty State with CTA
-          _jsxs("div", {
-            className: "empty-canvas",
-            style: {
-              width: "100%"
-            },
-            children: [/*#__PURE__*/_jsx("div", {
-              className: "empty-canvas-icon",
-              children: "💻"
-            }), /*#__PURE__*/_jsx("h3", {
-              children: "MAS IDE Workspace Ready"
-            }), /*#__PURE__*/_jsxs("p", {
-              children: ["Click any file in the ", /*#__PURE__*/_jsx("strong", {
-                children: "Explorer"
-              }), " on the left, or explore the end-to-end task and code dependency DAG."]
-            }), /*#__PURE__*/_jsxs("div", {
-              style: {
-                display: "flex",
-                gap: "0.5rem",
-                marginTop: "0.5rem"
-              },
-              children: [/*#__PURE__*/_jsx("button", {
-                className: "btn btn-outline",
-                onClick: () => setEditorViewMode("dag"),
-                style: {
-                  color: "#38bdf8",
-                  borderColor: "rgba(56, 189, 248, 0.4)",
-                  fontSize: "0.8rem",
-                  padding: "0.45rem 1rem"
-                },
-                children: "🕸️ Explore Architecture DAG"
-              }), /*#__PURE__*/_jsx("button", {
-                className: "btn btn-primary",
-                onClick: () => setIsNewMissionOpen(true),
-                style: {
-                  fontSize: "0.8rem",
-                  padding: "0.45rem 1rem"
-                },
-                children: "+ Launch New Mission"
-              })]
-            })]
-          })
-        }), /*#__PURE__*/_jsxs("footer", {
-          className: "ide-status-bar dark-status",
-          children: [/*#__PURE__*/_jsxs("div", {
-            className: "ide-status-left",
-            children: [/*#__PURE__*/_jsx("span", {
-              className: "ide-status-item",
-              children: /*#__PURE__*/_jsxs("span", {
-                children: ["Ln ", lineCount, ", Col 1"]
-              })
-            }), /*#__PURE__*/_jsx("span", {
-              className: "ide-status-item",
-              children: "Spaces: 4"
-            }), /*#__PURE__*/_jsx("span", {
-              className: "ide-status-item",
-              children: "UTF-8"
-            }), /*#__PURE__*/_jsx("span", {
-              className: "ide-status-item",
-              children: "LF"
-            }), /*#__PURE__*/_jsxs("span", {
-              className: "ide-status-item ide-status-clickable",
-              onClick: () => setIsCostModalOpen(true),
-              title: "Click to inspect real-time token burn, model costs, and Gemini context caching savings",
-              style: {
-                cursor: "pointer",
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "0.25rem"
-              },
-              children: [/*#__PURE__*/_jsxs("span", {
-                children: ["⚡ ", ((costTelemetry?.total_tokens || missionData.tokens?.total || 12800) / 1000).toFixed(1), "k tok"]
-              }), /*#__PURE__*/_jsxs("span", {
-                style: {
-                  color: "#34d399",
-                  fontWeight: 700
-                },
-                children: ["($", Number(costTelemetry?.net_cost_usd || 0.007).toFixed(4), ")"]
-              }), /*#__PURE__*/_jsx("span", {
-                className: "telemetry-savings-tag",
-                style: {
-                  marginLeft: "0.15rem"
-                },
-                children: costTelemetry?.cache_hit_rate_pct ? `${Math.round(costTelemetry.cache_hit_rate_pct)}% cached` : "Cached"
-              })]
-            }), liveTokenStream && /*#__PURE__*/_jsxs("span", {
-              className: "live-token-pill",
-              title: "Live streamed cognitive token buffer",
-              children: ["⚡ Stream: ", liveTokenStream]
-            })]
-          }), /*#__PURE__*/_jsxs("div", {
-            className: "ide-status-right",
-            children: [/*#__PURE__*/_jsx("span", {
-              className: "ide-status-item",
-              style: {
-                color: "var(--accent-green)"
-              },
-              children: "AST Linter: Verified ✓"
-            }), /*#__PURE__*/_jsx("button", {
-              className: "btn btn-sm btn-outline",
-              style: {
-                fontSize: "0.65rem",
-                padding: "0.15rem 0.45rem",
-                color: "var(--accent-cyan)",
-                borderColor: "rgba(56, 189, 248, 0.4)",
-                display: "flex",
-                alignItems: "center",
-                gap: "0.3rem"
-              },
-              onClick: handleLocalGitCommit,
-              disabled: isCommittingGit || !activeMissionId,
-              title: "Create local Git commit checkpoint (Strictly local on disk, zero remote push)",
-              children: isCommittingGit ? "⏳ Committing..." : "📦 Local Git Commit"
-            }), gitCommitFeedback && /*#__PURE__*/_jsx("span", {
-              style: {
-                fontSize: "0.65rem",
-                fontWeight: 600,
-                color: gitCommitFeedback.status === "COMMITTED" ? "#34d399" : "var(--accent-cyan)",
-                padding: "0.1rem 0.35rem",
-                borderRadius: "4px",
-                background: gitCommitFeedback.status === "COMMITTED" ? "rgba(16, 185, 129, 0.15)" : "rgba(56, 189, 248, 0.12)"
-              },
-              children: gitCommitFeedback.status === "COMMITTED" ? `Committed (${gitCommitFeedback.hash}) ✓` : `Clean (${gitCommitFeedback.hash})`
-            }), /*#__PURE__*/_jsx("span", {
-              className: "ide-status-item",
-              style: {
-                textTransform: "capitalize"
-              },
-              children: currentLanguage
-            }), /*#__PURE__*/_jsx("button", {
-              className: "btn btn-sm btn-outline",
-              style: {
-                fontSize: "0.65rem",
-                padding: "0.1rem 0.4rem"
-              },
-              onClick: () => handleGeneratePR(false, false),
-              children: "🚀 GitHub PR"
-            })]
-          })]
-        })]
-      }), /*#__PURE__*/_jsx("aside", {
-        className: "panel right-panel",
-        "aria-label": "HITL Strategic Decisions and Activity Feed",
-        children: isRightCollapsed ? /*#__PURE__*/_jsxs("div", {
-          className: "panel-collapsed-rail",
-          children: [/*#__PURE__*/_jsx("button", {
-            className: "rail-btn",
-            onClick: () => setIsRightCollapsed(false),
-            title: "Expand Decision & Event Panel (Ctrl+J)",
-            children: "❮"
-          }), pendingGate && /*#__PURE__*/_jsxs("button", {
-            className: "rail-btn active",
-            onClick: () => setIsRightCollapsed(false),
-            title: "⚠️ Strategic Decision Required!",
-            style: {
-              borderColor: "#f59e0b"
-            },
-            children: ["⚠️", /*#__PURE__*/_jsx("span", {
-              className: "rail-badge rail-badge-gate",
-              children: "!"
-            })]
-          }), /*#__PURE__*/_jsxs("button", {
-            className: "rail-btn",
-            onClick: () => setIsRightCollapsed(false),
-            title: `Live Event Stream (${feedLogs.length} events)`,
-            children: ["📋", /*#__PURE__*/_jsx("span", {
-              className: "rail-badge",
-              children: feedLogs.length
-            })]
-          })]
-        }) : /*#__PURE__*/_jsxs(_Fragment, {
-          children: [pendingGate && /*#__PURE__*/_jsx("div", {
-            className: "gate-card-wrapper",
-            role: "alert",
-            "aria-live": "assertive",
-            children: /*#__PURE__*/_jsxs("div", {
-              className: "gate-card",
-              children: [/*#__PURE__*/_jsx("div", {
-                className: "gate-badge",
-                children: "⚠️ HUMAN DECISION REQUIRED"
-              }), /*#__PURE__*/_jsx("h3", {
-                children: pendingGate.gate || pendingGate.level || "Gate: Strategic Review"
-              }), /*#__PURE__*/_jsx("p", {
-                className: "gate-premise",
-                children: pendingGate.pre_mortem || pendingGate.premise || pendingGate.context?.blast_radius_summary || "A strategic boundary gate has been reached. Inspect blast radius and approve next phase."
-              }), /*#__PURE__*/_jsxs("div", {
-                className: "gate-mitigation-box",
-                children: [/*#__PURE__*/_jsx("strong", {
-                  children: "Pre-Mortem Mitigation:"
-                }), " Non-locking index verification and contract compliance locked."]
-              }), /*#__PURE__*/_jsx("div", {
-                style: {
-                  marginTop: "0.5rem"
-                },
-                children: /*#__PURE__*/_jsx("input", {
-                  type: "text",
-                  className: "search-input",
-                  placeholder: "Optional feedback or redirection note for agents...",
-                  value: gateFeedback,
-                  onChange: e => setGateFeedback(e.target.value)
-                })
-              }), /*#__PURE__*/_jsxs("div", {
-                className: "gate-actions",
-                children: [/*#__PURE__*/_jsxs("button", {
-                  className: "btn btn-success",
-                  onClick: () => handleGateDecision("APPROVED"),
-                  disabled: isResolvingGate,
-                  children: ["Approve ", /*#__PURE__*/_jsx("span", {
-                    className: "kbd-hint",
-                    children: "A"
-                  })]
-                }), /*#__PURE__*/_jsxs("button", {
-                  className: "btn btn-warning",
-                  onClick: () => handleGateDecision("MODIFIED"),
-                  disabled: isResolvingGate,
-                  children: ["Modify ", /*#__PURE__*/_jsx("span", {
-                    className: "kbd-hint",
-                    children: "M"
-                  })]
-                }), /*#__PURE__*/_jsxs("button", {
-                  className: "btn btn-danger",
-                  onClick: () => handleGateDecision("REJECTED"),
-                  disabled: isResolvingGate,
-                  children: ["Reject ", /*#__PURE__*/_jsx("span", {
-                    className: "kbd-hint",
-                    children: "R"
-                  })]
-                })]
-              })]
-            })
-          }), /*#__PURE__*/_jsxs("div", {
-            className: "panel-header",
-            children: [/*#__PURE__*/_jsx("h2", {
-              children: "Live Event Stream"
-            }), /*#__PURE__*/_jsxs("div", {
-              style: {
-                display: "flex",
-                alignItems: "center",
-                gap: "0.25rem"
-              },
-              children: [["ALL", "POD", "GATE", "ARTIFACT"].map(f => /*#__PURE__*/_jsx("button", {
-                className: `btn btn-sm ${feedFilter === f ? "btn-primary" : "btn-outline"}`,
-                style: {
-                  fontSize: "0.65rem",
-                  padding: "0.15rem 0.4rem"
-                },
-                onClick: () => setFeedFilter(f),
-                children: f
-              }, f)), /*#__PURE__*/_jsx("button", {
-                className: "panel-collapse-toggle",
-                onClick: () => setIsRightCollapsed(true),
-                title: "Collapse Panel (Ctrl+J)",
-                style: {
-                  marginLeft: "0.25rem"
-                },
-                children: "❯"
-              })]
-            })]
-          }), /*#__PURE__*/_jsxs("div", {
-            style: {
-              padding: "0.35rem 0.65rem",
-              borderBottom: "1px solid var(--border-color)",
-              display: "flex",
-              alignItems: "center",
-              gap: "0.4rem",
-              background: "rgba(0, 0, 0, 0.18)"
-            },
-            children: [/*#__PURE__*/_jsxs("div", {
-              style: {
-                position: "relative",
-                flex: 1,
-                display: "flex",
-                alignItems: "center"
-              },
-              children: [/*#__PURE__*/_jsx("input", {
-                type: "text",
-                className: "search-input",
-                style: {
-                  width: "100%",
-                  paddingRight: feedSearchQuery ? "1.6rem" : "0.5rem",
-                  fontSize: "0.72rem",
-                  height: "26px",
-                  margin: 0
-                },
-                placeholder: "Search events (e.g. error, pod, artifact)...",
-                value: feedSearchQuery,
-                onChange: e => setFeedSearchQuery(e.target.value)
-              }), feedSearchQuery && /*#__PURE__*/_jsx("button", {
-                type: "button",
-                onClick: () => setFeedSearchQuery(""),
-                style: {
-                  position: "absolute",
-                  right: "6px",
-                  background: "none",
-                  border: "none",
-                  color: "#94a3b8",
-                  cursor: "pointer",
-                  fontSize: "0.75rem",
-                  padding: "2px",
-                  lineHeight: 1
-                },
-                title: "Clear search",
-                children: "✕"
-              })]
-            }), /*#__PURE__*/_jsxs("span", {
-              style: {
-                fontSize: "0.68rem",
-                color: "var(--text-muted)",
-                whiteSpace: "nowrap",
-                fontFamily: "var(--font-mono)"
-              },
-              title: "Matching / Total events",
-              children: [filteredFeedLogs.length, "/", feedLogs.length]
-            })]
-          }), /*#__PURE__*/_jsxs("div", {
-            className: "activity-feed",
-            role: "log",
-            "aria-live": "polite",
-            children: [filteredFeedLogs.length === 0 ? /*#__PURE__*/_jsxs("div", {
-              style: {
-                padding: "2rem 1rem",
-                textAlign: "center",
-                color: "var(--text-muted)",
-                fontSize: "0.75rem"
-              },
-              children: [/*#__PURE__*/_jsx("div", {
-                style: {
-                  fontSize: "1.4rem",
-                  marginBottom: "0.4rem"
-                },
-                children: "🔍"
-              }), /*#__PURE__*/_jsx("div", {
-                style: {
-                  color: "var(--text-secondary)",
-                  fontWeight: 600
-                },
-                children: "No matching events"
-              }), /*#__PURE__*/_jsxs("div", {
-                style: {
-                  fontSize: "0.7rem",
-                  marginTop: "0.2rem"
-                },
-                children: ["No events match “", feedSearchQuery, "” ", feedFilter !== "ALL" ? `in category [${feedFilter}]` : ""]
-              }), /*#__PURE__*/_jsx("button", {
-                className: "btn btn-sm btn-outline",
-                style: {
-                  marginTop: "0.75rem",
-                  fontSize: "0.7rem",
-                  padding: "0.2rem 0.6rem"
-                },
-                onClick: () => {
-                  setFeedSearchQuery("");
-                  setFeedFilter("ALL");
-                },
-                children: "Reset Filters"
-              })]
-            }) : filteredFeedLogs.map((entry, idx) => {
-              let tagClass = "system-msg";
-              if (entry.type === "POD") tagClass = "pod-msg";else if (entry.type === "GATE") tagClass = "gate-msg";else if (entry.type === "SUCCESS") tagClass = "success-msg";else if (entry.type === "ERROR") tagClass = "error-msg";
-              return /*#__PURE__*/_jsxs("div", {
-                className: `feed-entry ${tagClass}`,
-                children: [/*#__PURE__*/_jsx("span", {
-                  className: "feed-time",
-                  children: entry.time
-                }), /*#__PURE__*/_jsx("span", {
-                  className: "feed-text",
-                  children: renderHighlightedFeedText(entry.text, feedSearchQuery)
-                })]
-              }, idx);
-            }), /*#__PURE__*/_jsx("div", {
-              ref: feedEndRef
-            })]
-          })]
-        })
-      })]
-    }), /*#__PURE__*/_jsxs("footer", {
-      className: `bottom-drawer ${isTerminalExpanded ? "expanded" : ""}`,
-      role: "contentinfo",
-      children: [/*#__PURE__*/_jsxs("div", {
-        className: "drawer-header",
-        onClick: () => setIsTerminalExpanded(prev => !prev),
-        tabIndex: 0,
-        onKeyDown: e => {
-          if (e.key === "Enter" || e.key === " ") setIsTerminalExpanded(prev => !prev);
-        },
-        role: "button",
-        "aria-expanded": isTerminalExpanded,
-        children: [/*#__PURE__*/_jsxs("div", {
-          className: "drawer-title",
-          children: [/*#__PURE__*/_jsx("span", {
-            children: "⚡ Subprocess Sandbox & Deterministic Linter Terminal"
-          }), lastTestFailure ? /*#__PURE__*/_jsxs("span", {
-            className: "drawer-tag",
-            style: {
-              background: "rgba(239, 68, 68, 0.15)",
-              color: "#f87171",
-              borderColor: "rgba(239, 68, 68, 0.35)"
-            },
-            children: ["Failed (", lastTestFailure.assigned_pod, ")"]
-          }) : /*#__PURE__*/_jsx("span", {
-            className: "drawer-tag",
-            children: "Exit Code: 0 (AST Verified)"
-          }), /*#__PURE__*/_jsx("span", {
-            className: "kbd-hint",
-            children: "T to toggle"
-          })]
-        }), /*#__PURE__*/_jsxs("div", {
-          style: {
-            display: "flex",
-            alignItems: "center",
-            gap: "0.5rem"
-          },
-          children: [/*#__PURE__*/_jsx("button", {
-            type: "button",
-            className: "run-tests-btn",
-            onClick: e => {
-              e.stopPropagation();
-              handleRunSandboxedTests();
-            },
-            disabled: isRunningTests || !activeMissionId,
-            title: "Run pytest inside isolated SubprocessSandbox",
-            children: isRunningTests ? "⏳ Running Pytest..." : "▶ Run Sandboxed Tests"
-          }), /*#__PURE__*/_jsx("button", {
-            className: "drawer-btn",
-            children: isTerminalExpanded ? "▼ Collapse" : "▲ Expand"
-          })]
-        })]
-      }), /*#__PURE__*/_jsxs("div", {
-        className: "drawer-body",
-        children: [lastTestFailure && /*#__PURE__*/_jsxs("div", {
-          className: "terminal-diagnostic-bar",
-          children: [/*#__PURE__*/_jsxs("div", {
-            className: "terminal-diagnostic-info",
-            children: [/*#__PURE__*/_jsx("span", {
-              className: "diagnostic-badge",
-              children: "🚨 Failure"
-            }), /*#__PURE__*/_jsx("span", {
-              className: "diagnostic-target",
-              children: /*#__PURE__*/_jsxs("strong", {
-                children: [lastTestFailure.target_file, lastTestFailure.line_number ? `:${lastTestFailure.line_number}` : ""]
-              })
-            }), /*#__PURE__*/_jsx("span", {
-              className: "diagnostic-pill",
-              children: lastTestFailure.assigned_pod
-            }), /*#__PURE__*/_jsx("span", {
-              className: "diagnostic-summary",
-              title: lastTestFailure.failure_summary,
-              children: lastTestFailure.failure_summary
-            })]
-          }), /*#__PURE__*/_jsxs("div", {
-            className: "terminal-diagnostic-actions",
-            children: [/*#__PURE__*/_jsx("button", {
-              type: "button",
-              className: "btn-autofix",
-              onClick: handleAutoFixTestFailure,
-              disabled: isAutoFixing,
-              title: `Dispatch autonomous ReAct self-healing loop with ${lastTestFailure.assigned_pod}`,
-              children: isAutoFixing ? "⏳ Auto-Fixing..." : `🔧 Auto-Fix with ${lastTestFailure.assigned_pod}`
-            }), /*#__PURE__*/_jsx("button", {
-              type: "button",
-              className: "btn-dismiss-diagnostic",
-              onClick: () => setLastTestFailure(null),
-              title: "Dismiss diagnostic callout",
-              children: "✕"
-            })]
-          })]
-        }), /*#__PURE__*/_jsxs("div", {
-          className: "terminal-output",
-          children: [terminalLogs, /*#__PURE__*/_jsx("div", {
-            ref: terminalEndRef
-          })]
-        })]
-      })]
-    }), isNewMissionOpen && /*#__PURE__*/_jsx("div", {
-      className: "modal-backdrop",
-      role: "dialog",
-      "aria-modal": "true",
-      "aria-labelledby": "modal-title",
-      children: /*#__PURE__*/_jsxs("div", {
-        className: "modal-card",
-        children: [/*#__PURE__*/_jsxs("div", {
-          className: "modal-header",
-          children: [/*#__PURE__*/_jsx("h2", {
-            id: "modal-title",
-            children: "Launch Multi-Agent Engineering Mission"
-          }), /*#__PURE__*/_jsx("button", {
-            className: "close-btn",
-            onClick: () => setIsNewMissionOpen(false),
-            "aria-label": "Close modal",
-            children: "×"
-          })]
-        }), /*#__PURE__*/_jsxs("div", {
-          style: {
-            marginBottom: "0.75rem"
-          },
-          children: [/*#__PURE__*/_jsx("label", {
-            style: {
-              fontSize: "0.75rem",
-              fontWeight: 600,
-              color: "var(--text-secondary)"
-            },
-            children: "Quick Presets:"
-          }), /*#__PURE__*/_jsx("div", {
-            className: "presets-container",
-            children: MISSION_PRESETS.map((p, i) => /*#__PURE__*/_jsxs("button", {
-              type: "button",
-              className: "preset-chip",
-              onClick: () => setNewMissionForm(prev => ({
-                ...prev,
-                title: p.title,
-                description: p.description
-              })),
-              children: ["⚡ ", p.label]
-            }, i))
-          })]
-        }), /*#__PURE__*/_jsxs("form", {
-          onSubmit: handleLaunchMission,
-          children: [/*#__PURE__*/_jsxs("div", {
-            className: "form-group",
-            children: [/*#__PURE__*/_jsx("label", {
-              htmlFor: "task-title",
-              children: "Task Title"
-            }), /*#__PURE__*/_jsx("input", {
-              id: "task-title",
-              type: "text",
-              required: true,
-              value: newMissionForm.title,
-              onChange: e => setNewMissionForm(prev => ({
-                ...prev,
-                title: e.target.value
-              })),
-              placeholder: "e.g. Stripe Webhook Verification Service"
-            })]
-          }), /*#__PURE__*/_jsxs("div", {
-            className: "form-group",
-            children: [/*#__PURE__*/_jsx("label", {
-              htmlFor: "task-desc",
-              children: "Task Requirements & Domain Specification"
-            }), /*#__PURE__*/_jsx("textarea", {
-              id: "task-desc",
-              rows: 4,
-              required: true,
-              value: newMissionForm.description,
-              onChange: e => setNewMissionForm(prev => ({
-                ...prev,
-                description: e.target.value
-              })),
-              placeholder: "Describe APIs, database tables, validation rules, and UI expectations..."
-            })]
-          }), /*#__PURE__*/_jsxs("div", {
-            className: "form-group",
-            children: [/*#__PURE__*/_jsx("label", {
-              htmlFor: "target-dir",
-              children: "Target Workspace Directory (In-Place Mapping)"
-            }), /*#__PURE__*/_jsx("input", {
-              id: "target-dir",
-              type: "text",
-              value: newMissionForm.targetDir,
-              onChange: e => setNewMissionForm(prev => ({
-                ...prev,
-                targetDir: e.target.value
-              })),
-              placeholder: "Optional: C:/projects/my-app (leave blank for default blackboard)"
-            })]
-          }), /*#__PURE__*/_jsxs("div", {
-            className: "form-group checkbox-group",
-            children: [/*#__PURE__*/_jsx("input", {
-              id: "chk-interactive",
-              type: "checkbox",
-              checked: newMissionForm.interactive,
-              onChange: e => setNewMissionForm(prev => ({
-                ...prev,
-                interactive: e.target.checked
-              }))
-            }), /*#__PURE__*/_jsx("label", {
-              htmlFor: "chk-interactive",
-              children: "Enable Interactive Human-in-the-Loop (HITL) Approval Gates"
-            })]
-          }), /*#__PURE__*/_jsxs("div", {
-            className: "form-group checkbox-group",
-            children: [/*#__PURE__*/_jsx("input", {
-              id: "chk-git-commit",
-              type: "checkbox",
-              checked: newMissionForm.gitCommit,
-              onChange: e => setNewMissionForm(prev => ({
-                ...prev,
-                gitCommit: e.target.checked
-              }))
-            }), /*#__PURE__*/_jsx("label", {
-              htmlFor: "chk-git-commit",
-              children: "Auto-commit synthesized code to git branch"
-            })]
-          }), /*#__PURE__*/_jsxs("div", {
-            className: "modal-actions",
-            children: [/*#__PURE__*/_jsx("button", {
-              type: "button",
-              className: "btn btn-outline",
-              onClick: () => setIsNewMissionOpen(false),
-              children: "Cancel"
-            }), /*#__PURE__*/_jsx("button", {
-              type: "submit",
-              className: "btn btn-primary",
-              disabled: isSubmittingMission,
-              children: isSubmittingMission ? "Initializing..." : "Start Autonomous Mission"
-            })]
-          })]
-        })]
-      })
-    }), isPROpen && prResult && /*#__PURE__*/_jsx("div", {
-      className: "modal-backdrop",
-      role: "dialog",
-      "aria-modal": "true",
-      children: /*#__PURE__*/_jsxs("div", {
-        className: "modal-card pr-modal-card",
-        children: [/*#__PURE__*/_jsxs("div", {
-          className: "modal-header",
-          children: [/*#__PURE__*/_jsx("h2", {
-            children: "GitHub Pull Request Dossier"
-          }), /*#__PURE__*/_jsx("button", {
-            className: "close-btn",
-            onClick: () => setIsPROpen(false),
-            children: "×"
-          })]
-        }), /*#__PURE__*/_jsxs("div", {
-          style: {
-            marginBottom: "0.75rem",
-            display: "flex",
-            gap: "0.5rem",
-            alignItems: "center"
-          },
-          children: [/*#__PURE__*/_jsx("span", {
-            className: "file-path-badge",
-            children: prResult.pr_id || "PR-001"
-          }), /*#__PURE__*/_jsx("span", {
-            style: {
-              fontSize: "0.85rem",
-              fontWeight: 600
-            },
-            children: prResult.title
-          })]
-        }), /*#__PURE__*/_jsx("div", {
-          className: "pr-content-view",
-          children: prResult.markdown
-        }), /*#__PURE__*/_jsxs("div", {
-          className: "modal-actions",
-          style: {
-            marginTop: "1rem"
-          },
-          children: [/*#__PURE__*/_jsx("button", {
-            type: "button",
-            className: "btn btn-outline",
-            onClick: () => {
-              navigator.clipboard.writeText(prResult.markdown);
-              alert("PR Markdown copied to clipboard!");
-            },
-            children: "📋 Copy Markdown"
-          }), /*#__PURE__*/_jsx("button", {
-            type: "button",
-            className: "btn btn-primary",
-            onClick: () => handleGeneratePR(true, true),
-            disabled: isGeneratingPR,
-            children: isGeneratingPR ? "Pushing & Submitting..." : "🚀 Push to Remote & Create PR"
-          })]
-        })]
-      })
-    }), inspectedPod && /*#__PURE__*/_jsx("div", {
-      className: "modal-backdrop",
-      onClick: () => setInspectedPod(null),
-      role: "dialog",
-      "aria-modal": "true",
-      children: /*#__PURE__*/_jsxs("div", {
-        className: "modal-card",
-        style: {
-          width: "560px"
-        },
-        onClick: e => e.stopPropagation(),
-        children: [/*#__PURE__*/_jsxs("div", {
-          className: "modal-header",
-          children: [/*#__PURE__*/_jsxs("div", {
-            style: {
-              display: "flex",
-              alignItems: "center",
-              gap: "0.6rem"
-            },
-            children: [/*#__PURE__*/_jsx("span", {
-              style: {
-                fontSize: "1.5rem"
-              },
-              children: inspectedPod.podCfg.icon
-            }), /*#__PURE__*/_jsxs("div", {
-              children: [/*#__PURE__*/_jsx("h2", {
-                style: {
-                  margin: 0,
-                  fontSize: "1.05rem"
-                },
-                children: inspectedPod.podCfg.name
-              }), /*#__PURE__*/_jsx("div", {
-                style: {
-                  fontSize: "0.72rem",
-                  color: "var(--text-muted)",
-                  marginTop: "0.15rem"
-                },
-                children: inspectedPod.podCfg.desc
-              })]
-            })]
-          }), /*#__PURE__*/_jsxs("div", {
-            style: {
-              display: "flex",
-              alignItems: "center",
-              gap: "0.5rem"
-            },
-            children: [/*#__PURE__*/_jsx("span", {
-              className: `status-pill status-${(inspectedPod.livePod.status || "IDLE").toLowerCase()}`,
-              children: inspectedPod.livePod.status || "IDLE"
-            }), /*#__PURE__*/_jsx("button", {
-              type: "button",
-              className: "close-btn",
-              onClick: () => setInspectedPod(null),
-              title: "Close inspector (Esc)",
-              children: "✕"
-            })]
-          })]
-        }), /*#__PURE__*/_jsxs("div", {
-          style: {
-            display: "flex",
-            alignItems: "center",
-            gap: "0.5rem",
-            marginBottom: "0.85rem",
-            flexWrap: "wrap"
-          },
-          children: [/*#__PURE__*/_jsx("span", {
-            className: "badge",
-            style: {
-              background: "rgba(56, 189, 248, 0.15)",
-              color: "var(--accent-cyan)",
-              border: "1px solid rgba(56, 189, 248, 0.3)"
-            },
-            children: "⚡ Model: Gemini 3.8 Flash"
-          }), /*#__PURE__*/_jsx("span", {
-            className: "badge",
-            style: {
-              background: "rgba(16, 185, 129, 0.15)",
-              color: "#34d399",
-              border: "1px solid rgba(16, 185, 129, 0.3)"
-            },
-            children: "🛡️ SubprocessSandbox Isolated"
-          }), /*#__PURE__*/_jsx("span", {
-            className: "badge",
-            style: {
-              background: "rgba(168, 85, 247, 0.15)",
-              color: "#c084fc",
-              border: "1px solid rgba(168, 85, 247, 0.3)"
-            },
-            children: "🔄 Autonomous ReAct Engine"
-          })]
-        }), /*#__PURE__*/_jsxs("div", {
-          className: "pod-telemetry-grid",
-          children: [/*#__PURE__*/_jsxs("div", {
-            className: "pod-telemetry-stat",
-            children: [/*#__PURE__*/_jsx("div", {
-              className: "stat-label",
-              children: "Prompt Tokens"
-            }), /*#__PURE__*/_jsx("div", {
-              className: "stat-val",
-              style: {
-                color: "#38bdf8"
-              },
-              children: (inspectedPod.livePod.tokens?.prompt || 2840).toLocaleString()
-            })]
-          }), /*#__PURE__*/_jsxs("div", {
-            className: "pod-telemetry-stat",
-            children: [/*#__PURE__*/_jsx("div", {
-              className: "stat-label",
-              children: "Thinking Tokens"
-            }), /*#__PURE__*/_jsx("div", {
-              className: "stat-val",
-              style: {
-                color: "#c084fc"
-              },
-              children: (inspectedPod.livePod.tokens?.thinking || 1420).toLocaleString()
-            })]
-          }), /*#__PURE__*/_jsxs("div", {
-            className: "pod-telemetry-stat",
-            children: [/*#__PURE__*/_jsx("div", {
-              className: "stat-label",
-              children: "Candidate Tokens"
-            }), /*#__PURE__*/_jsx("div", {
-              className: "stat-val",
-              style: {
-                color: "#34d399"
-              },
-              children: (inspectedPod.livePod.tokens?.candidate || 960).toLocaleString()
-            })]
-          }), /*#__PURE__*/_jsxs("div", {
-            className: "pod-telemetry-stat",
-            children: [/*#__PURE__*/_jsx("div", {
-              className: "stat-label",
-              children: "Loop Turn Count"
-            }), /*#__PURE__*/_jsxs("div", {
-              className: "stat-val",
-              style: {
-                color: "#fbbf24"
-              },
-              children: [inspectedPod.livePod.turns || 3, " / 10 turns"]
-            })]
-          })]
-        }), /*#__PURE__*/_jsxs("div", {
-          style: {
-            marginBottom: "0.85rem"
-          },
-          children: [/*#__PURE__*/_jsx("div", {
-            style: {
-              fontSize: "0.72rem",
-              fontWeight: 600,
-              color: "var(--text-secondary)",
-              marginBottom: "0.3rem",
-              textTransform: "uppercase",
-              letterSpacing: "0.04em"
-            },
-            children: "Current Reasoning & Action"
-          }), /*#__PURE__*/_jsx("div", {
-            style: {
-              background: "rgba(0,0,0,0.3)",
-              border: "1px solid var(--border-color)",
-              borderRadius: "6px",
-              padding: "0.6rem 0.8rem",
-              fontSize: "0.78rem",
-              color: "#f1f5f9",
-              fontFamily: "var(--font-mono)"
-            },
-            children: inspectedPod.livePod.action || "Pod idle and waiting for stage transition trigger."
-          })]
-        }), /*#__PURE__*/_jsxs("div", {
-          style: {
-            marginBottom: "1.25rem"
-          },
-          children: [/*#__PURE__*/_jsx("div", {
-            style: {
-              fontSize: "0.72rem",
-              fontWeight: 600,
-              color: "var(--text-secondary)",
-              marginBottom: "0.3rem",
-              textTransform: "uppercase",
-              letterSpacing: "0.04em"
-            },
-            children: "Target Output Artifact"
-          }), /*#__PURE__*/_jsxs("div", {
-            style: {
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              background: "rgba(0,0,0,0.2)",
-              border: "1px solid var(--border-color)",
-              borderRadius: "6px",
-              padding: "0.5rem 0.8rem"
-            },
-            children: [/*#__PURE__*/_jsxs("span", {
-              style: {
-                fontSize: "0.8rem",
-                fontFamily: "var(--font-mono)",
-                color: "#93c5fd"
-              },
-              children: ["📄 ", inspectedPod.livePod.artifact || inspectedPod.podCfg.defaultArtifact]
-            }), /*#__PURE__*/_jsx("button", {
-              type: "button",
-              className: "btn btn-sm btn-primary",
-              style: {
-                fontSize: "0.72rem",
-                padding: "0.2rem 0.6rem"
-              },
-              onClick: () => {
-                const artName = inspectedPod.livePod.artifact || inspectedPod.podCfg.defaultArtifact;
-                const art = missionData.artifacts.find(a => a.name.includes(artName));
-                if (art) {
-                  openArtifactInEditor(art.id);
-                }
-                setInspectedPod(null);
-              },
-              children: "Open in Cockpit Editor ↗"
-            })]
-          })]
-        }), /*#__PURE__*/_jsx("div", {
-          style: {
-            display: "flex",
-            justifyContent: "flex-end",
-            gap: "0.5rem"
-          },
-          children: /*#__PURE__*/_jsx("button", {
-            type: "button",
-            className: "btn btn-outline",
-            onClick: () => setInspectedPod(null),
-            children: "Close"
-          })
-        })]
-      })
-    }), isCommandPaletteOpen && /*#__PURE__*/_jsx("div", {
-      className: "command-palette-backdrop",
-      onClick: () => setIsCommandPaletteOpen(false),
-      role: "dialog",
-      "aria-modal": "true",
-      children: /*#__PURE__*/_jsxs("div", {
-        className: "command-palette-card",
-        onClick: e => e.stopPropagation(),
-        children: [/*#__PURE__*/_jsxs("div", {
-          className: "command-palette-input-wrap",
-          children: [/*#__PURE__*/_jsx("span", {
-            className: "command-palette-icon",
-            children: "🔍"
-          }), /*#__PURE__*/_jsx("input", {
-            ref: commandInputRef,
-            type: "text",
-            className: "command-palette-input",
-            placeholder: "Type a command or search actions...",
-            value: commandPaletteQuery,
-            onChange: e => {
-              setCommandPaletteQuery(e.target.value);
-              setCommandPaletteSelectedIndex(0);
-            },
-            autoFocus: true
-          }), /*#__PURE__*/_jsx("span", {
-            className: "command-palette-badge",
-            children: "ESC to close"
-          })]
-        }), /*#__PURE__*/_jsx("div", {
-          className: "command-palette-list",
-          role: "listbox",
-          children: filteredCommands.length === 0 ? /*#__PURE__*/_jsxs("div", {
-            style: {
-              padding: "1.5rem",
-              textAlign: "center",
-              color: "var(--text-muted)",
-              fontSize: "0.8rem"
-            },
-            children: ["No commands match “", commandPaletteQuery, "”"]
-          }) : filteredCommands.map((cmd, idx) => {
-            const isSelected = idx === commandPaletteSelectedIndex;
-            return /*#__PURE__*/_jsxs("div", {
-              className: `command-palette-item ${isSelected ? "active" : ""}`,
-              onClick: () => {
-                cmd.action();
-                setIsCommandPaletteOpen(false);
-              },
-              onMouseEnter: () => setCommandPaletteSelectedIndex(idx),
-              role: "option",
-              "aria-selected": isSelected,
-              children: [/*#__PURE__*/_jsxs("div", {
-                className: "command-palette-item-left",
-                children: [/*#__PURE__*/_jsx("span", {
-                  className: "command-palette-item-icon",
-                  children: cmd.icon
-                }), /*#__PURE__*/_jsxs("div", {
-                  children: [/*#__PURE__*/_jsx("span", {
-                    className: "command-palette-item-title",
-                    children: cmd.title
-                  }), /*#__PURE__*/_jsx("span", {
-                    className: "command-palette-item-sub",
-                    children: cmd.sub
-                  })]
-                })]
-              }), cmd.hint && /*#__PURE__*/_jsx("span", {
-                className: "command-palette-item-hint",
-                children: cmd.hint
-              })]
-            }, cmd.id);
-          })
-        }), /*#__PURE__*/_jsxs("div", {
-          className: "command-palette-footer",
-          children: [/*#__PURE__*/_jsxs("span", {
-            children: ["Use ", /*#__PURE__*/_jsx("kbd", {
-              style: {
-                padding: "0.1rem 0.3rem",
-                background: "rgba(255,255,255,0.08)",
-                borderRadius: "3px"
-              },
-              children: "↑"
-            }), " ", /*#__PURE__*/_jsx("kbd", {
-              style: {
-                padding: "0.1rem 0.3rem",
-                background: "rgba(255,255,255,0.08)",
-                borderRadius: "3px"
-              },
-              children: "↓"
-            }), " to navigate, ", /*#__PURE__*/_jsx("kbd", {
-              style: {
-                padding: "0.1rem 0.3rem",
-                background: "rgba(255,255,255,0.08)",
-                borderRadius: "3px"
-              },
-              children: "↵"
-            }), " to select"]
-          }), /*#__PURE__*/_jsxs("span", {
-            children: [filteredCommands.length, " available actions"]
-          })]
-        })]
-      })
-    }), isVersionHistoryOpen && /*#__PURE__*/_jsx("div", {
-      className: "modal-backdrop",
-      onClick: () => setIsVersionHistoryOpen(false),
-      role: "dialog",
-      "aria-modal": "true",
-      children: /*#__PURE__*/_jsxs("div", {
-        className: "version-history-card",
-        onClick: e => e.stopPropagation(),
-        children: [/*#__PURE__*/_jsxs("div", {
-          className: "modal-header",
-          children: [/*#__PURE__*/_jsxs("div", {
-            style: {
-              display: "flex",
-              alignItems: "center",
-              gap: "0.5rem"
-            },
-            children: [/*#__PURE__*/_jsx("span", {
-              style: {
-                fontSize: "1.25rem"
-              },
-              children: "⏱️"
-            }), /*#__PURE__*/_jsxs("div", {
-              children: [/*#__PURE__*/_jsxs("h2", {
-                style: {
-                  margin: 0,
-                  fontSize: "1.05rem"
-                },
-                children: ["Version History: ", selectedArtifact?.name]
-              }), /*#__PURE__*/_jsx("div", {
-                style: {
-                  fontSize: "0.72rem",
-                  color: "var(--text-muted)",
-                  marginTop: "0.15rem"
-                },
-                children: "Deterministic snapshot timeline with AST-safe rollback"
-              })]
-            })]
-          }), /*#__PURE__*/_jsx("button", {
-            type: "button",
-            className: "close-btn",
-            onClick: () => setIsVersionHistoryOpen(false),
-            title: "Close version history (Esc)",
-            children: "✕"
-          })]
-        }), isLoadingVersions ? /*#__PURE__*/_jsx("div", {
-          style: {
-            padding: "2.5rem 1rem",
-            textAlign: "center",
-            color: "var(--text-muted)",
-            fontSize: "0.82rem"
-          },
-          children: "⏳ Loading artifact version snapshots..."
-        }) : !versionHistoryData?.versions || versionHistoryData.versions.length === 0 ? /*#__PURE__*/_jsx("div", {
-          style: {
-            padding: "2rem 1rem",
-            textAlign: "center",
-            color: "var(--text-muted)",
-            fontSize: "0.82rem"
-          },
-          children: "No version history recorded yet for this file."
-        }) : /*#__PURE__*/_jsx("div", {
-          className: "version-history-list",
-          children: versionHistoryData.versions.slice().reverse().map(ver => {
-            const isCurrent = ver.version === (selectedArtifact?.version || 1);
-            return /*#__PURE__*/_jsxs("div", {
-              className: `version-entry ${isCurrent ? "current-head" : ""}`,
-              children: [/*#__PURE__*/_jsxs("div", {
-                className: "version-entry-header",
-                children: [/*#__PURE__*/_jsxs("div", {
-                  style: {
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "0.5rem"
-                  },
-                  children: [/*#__PURE__*/_jsxs("span", {
-                    className: "version-pill-tag",
-                    children: ["v", ver.version]
-                  }), /*#__PURE__*/_jsx("span", {
-                    style: {
-                      fontSize: "0.78rem",
-                      fontWeight: 600,
-                      color: "#f1f5f9"
-                    },
-                    children: ver.created_by || "Agent Synthesizer"
-                  }), isCurrent && /*#__PURE__*/_jsx("span", {
-                    className: "badge",
-                    style: {
-                      background: "rgba(16, 185, 129, 0.15)",
-                      color: "#34d399",
-                      border: "1px solid rgba(16, 185, 129, 0.3)",
-                      fontSize: "0.62rem"
-                    },
-                    children: "Current Head"
-                  })]
-                }), /*#__PURE__*/_jsxs("div", {
-                  style: {
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "0.5rem"
-                  },
-                  children: [/*#__PURE__*/_jsx("span", {
-                    style: {
-                      fontSize: "0.68rem",
-                      color: "#64748b",
-                      fontFamily: "var(--font-mono)"
-                    },
-                    children: ver.timestamp ? new Date(ver.timestamp).toLocaleTimeString() : "Recent"
-                  }), !isCurrent && /*#__PURE__*/_jsx("button", {
-                    type: "button",
-                    className: "btn btn-sm btn-warning",
-                    style: {
-                      fontSize: "0.68rem",
-                      padding: "0.15rem 0.55rem"
-                    },
-                    onClick: () => handleRollbackToVersion(ver.version),
-                    disabled: isRollingBack,
-                    title: `Revert file back to v${ver.version}`,
-                    children: isRollingBack ? "Rolling back..." : `⏪ Rollback to v${ver.version}`
-                  })]
-                })]
-              }), ver.content && /*#__PURE__*/_jsx("div", {
-                className: "version-snippet-preview",
-                children: ver.content.split("\n").slice(0, 4).join("\n")
-              })]
-            }, ver.version);
-          })
-        }), /*#__PURE__*/_jsx("div", {
-          style: {
-            display: "flex",
-            justifyContent: "flex-end",
-            marginTop: "0.75rem"
-          },
-          children: /*#__PURE__*/_jsx("button", {
-            type: "button",
-            className: "btn btn-outline btn-sm",
-            onClick: () => setIsVersionHistoryOpen(false),
-            children: "Close"
-          })
-        })]
-      })
-    }), isQuickOpenVisible && /*#__PURE__*/_jsx("div", {
-      className: "quick-open-backdrop",
-      onClick: () => setIsQuickOpenVisible(false),
-      role: "dialog",
-      "aria-modal": "true",
-      "aria-label": "Quick Open Symbol or File",
-      children: /*#__PURE__*/_jsxs("div", {
-        className: "quick-open-card",
-        onClick: e => e.stopPropagation(),
-        children: [/*#__PURE__*/_jsxs("div", {
-          className: "quick-open-input-wrap",
-          children: [/*#__PURE__*/_jsx("span", {
-            className: "quick-open-icon",
-            children: "🔍"
-          }), /*#__PURE__*/_jsx("input", {
-            ref: quickOpenInputRef,
-            type: "text",
-            className: "quick-open-input",
-            placeholder: "Search files, classes, functions, endpoints... (Ctrl+P)",
-            value: quickOpenQuery,
-            onChange: e => {
-              setQuickOpenQuery(e.target.value);
-              setQuickOpenSelectedIndex(0);
-            }
-          }), /*#__PURE__*/_jsx("span", {
-            className: "command-palette-badge",
-            children: "Esc to close"
-          })]
-        }), /*#__PURE__*/_jsx("div", {
-          className: "quick-open-chips",
-          children: [{
-            id: "all",
-            label: "All Symbols"
-          }, {
-            id: "file",
-            label: "📄 Files"
-          }, {
-            id: "class",
-            label: "📦 Classes"
-          }, {
-            id: "function",
-            label: "⚡ Functions"
-          }, {
-            id: "endpoint",
-            label: "🌐 Endpoints"
-          }, {
-            id: "table",
-            label: "🗄️ Schemas"
-          }].map(chip => /*#__PURE__*/_jsx("button", {
-            type: "button",
-            className: `quick-open-chip ${quickOpenFilterKind === chip.id ? "active" : ""}`,
-            onClick: () => {
-              setQuickOpenFilterKind(chip.id);
-              setQuickOpenSelectedIndex(0);
-            },
-            children: chip.label
-          }, chip.id))
-        }), /*#__PURE__*/_jsx("div", {
-          className: "quick-open-list",
-          children: isLoadingSymbols ? /*#__PURE__*/_jsx("div", {
-            style: {
-              padding: "2rem",
-              textAlign: "center",
-              color: "#64748b",
-              fontSize: "0.8rem"
-            },
-            children: "⏳ Scanning workspace AST symbols..."
-          }) : workspaceSymbols.length === 0 ? /*#__PURE__*/_jsx("div", {
-            style: {
-              padding: "2rem",
-              textAlign: "center",
-              color: "#64748b",
-              fontSize: "0.8rem"
-            },
-            children: "No matching files or symbols found."
-          }) : workspaceSymbols.map((s, idx) => {
-            const isActive = idx === quickOpenSelectedIndex;
-            const kindClass = `badge-kind-${s.kind}`;
-            return /*#__PURE__*/_jsxs("div", {
-              className: `quick-open-item ${isActive ? "active" : ""}`,
-              onClick: () => handleSelectSymbol(s),
-              onMouseEnter: () => setQuickOpenSelectedIndex(idx),
-              children: [/*#__PURE__*/_jsxs("div", {
-                className: "quick-open-item-left",
-                children: [/*#__PURE__*/_jsx("span", {
-                  className: `quick-open-kind-badge ${kindClass}`,
-                  children: s.kind
-                }), /*#__PURE__*/_jsx("span", {
-                  className: "quick-open-name",
-                  children: s.name
-                }), s.container_name && /*#__PURE__*/_jsxs("span", {
-                  className: "quick-open-container",
-                  children: ["(", s.container_name, ")"]
-                }), /*#__PURE__*/_jsx("span", {
-                  className: "quick-open-path",
-                  children: s.file_path
-                })]
-              }), /*#__PURE__*/_jsxs("div", {
-                className: "quick-open-item-right",
-                children: [/*#__PURE__*/_jsx("span", {
-                  className: "quick-open-tier-tag",
-                  children: s.tier
-                }), /*#__PURE__*/_jsxs("span", {
-                  className: "quick-open-line-tag",
-                  children: [":", s.line_number]
-                })]
-              })]
-            }, `${s.file_path}-${s.name}-${idx}`);
-          })
-        }), /*#__PURE__*/_jsxs("div", {
-          className: "quick-open-footer",
-          children: [/*#__PURE__*/_jsxs("span", {
-            children: [workspaceSymbols.length, " symbols indexed"]
-          }), /*#__PURE__*/_jsxs("span", {
-            children: ["Navigate with ", /*#__PURE__*/_jsx("kbd", {
-              children: "↑"
-            }), " ", /*#__PURE__*/_jsx("kbd", {
-              children: "↓"
-            }), " • Jump with ", /*#__PURE__*/_jsx("kbd", {
-              children: "Enter"
-            })]
-          })]
-        })]
-      })
-    }), /*#__PURE__*/_jsx(TokenCostInspectorModal, {
-      isOpen: isCostModalOpen,
-      onClose: () => setIsCostModalOpen(false),
-      telemetry: costTelemetry,
-      missionId: activeMissionId
-    })]
-  });
+      title: "Open artifact in editor",
+      onClick: e => {
+        e.stopPropagation();
+        const art = missionData.artifacts.find(a => a.name.includes(livePod.artifact));
+        if (art) openArtifactInEditor(art.id);
+      }
+    }, "📄 ", livePod.artifact)));
+  })))), /*#__PURE__*/React.createElement("section", {
+    className: "panel center-panel",
+    "aria-label": "IDE Code Editor Canvas",
+    style: {
+      display: "flex",
+      flexDirection: "column"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "ide-tabs-bar",
+    role: "tablist"
+  }, openTabs.length === 0 ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between",
+      width: "100%",
+      padding: "0.2rem 0.6rem"
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: "0.75rem",
+      color: "var(--text-muted)",
+      fontStyle: "italic"
+    }
+  }, "No open files. Select from Explorer, press Ctrl+P for Quick Open, or explore DAG."), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: "0.4rem"
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-sm btn-outline",
+    style: {
+      fontSize: "0.65rem",
+      padding: "0.15rem 0.45rem",
+      color: "var(--accent-cyan)",
+      borderColor: "rgba(56, 189, 248, 0.4)"
+    },
+    onClick: () => {
+      setQuickOpenQuery("");
+      setQuickOpenFilterKind("all");
+      setQuickOpenSelectedIndex(0);
+      setIsQuickOpenVisible(true);
+    },
+    title: "Quick-Open Symbol or File (Ctrl+P / Cmd+P)"
+  }, "🔍 Quick Open"), /*#__PURE__*/React.createElement("div", {
+    className: "view-switcher-pill"
+  }, /*#__PURE__*/React.createElement("button", {
+    className: `view-switcher-btn ${editorViewMode === "dag" ? "active" : ""}`,
+    onClick: () => setEditorViewMode("dag"),
+    style: {
+      fontSize: "0.65rem",
+      padding: "0.15rem 0.45rem"
+    }
+  }, "🕸️ Architecture DAG")))) : openTabs.map(tab => {
+    const isActive = activeTabId === tab.id;
+    return /*#__PURE__*/React.createElement("div", {
+      key: tab.id,
+      className: `ide-tab ${isActive ? "active" : ""}`,
+      onClick: () => {
+        setActiveTabId(tab.id);
+        setSelectedArtifact(tab);
+      }
+    }, /*#__PURE__*/React.createElement("span", null, getFileIcon(tab.name)), /*#__PURE__*/React.createElement("span", null, tab.name), /*#__PURE__*/React.createElement("span", {
+      className: "ide-tab-close",
+      title: "Close file tab",
+      onClick: e => handleCloseTab(e, tab.id)
+    }, "✕"));
+  })), selectedArtifact && /*#__PURE__*/React.createElement("div", {
+    className: "disk-location-banner"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "disk-path-text",
+    title: localDiskPath
+  }, "📁 ", /*#__PURE__*/React.createElement("strong", null, "Disk Location:"), " ", localDiskPath), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: "0.4rem",
+      alignItems: "center"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "view-switcher-pill",
+    style: {
+      marginRight: "0.25rem"
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    className: `view-switcher-btn ${editorViewMode === "code" ? "active" : ""}`,
+    onClick: () => setEditorViewMode("code"),
+    style: {
+      fontSize: "0.65rem",
+      padding: "0.15rem 0.45rem"
+    }
+  }, "📄 Code"), /*#__PURE__*/React.createElement("button", {
+    className: `view-switcher-btn ${editorViewMode === "diff" ? "active" : ""}`,
+    onClick: () => setEditorViewMode("diff"),
+    style: {
+      fontSize: "0.65rem",
+      padding: "0.15rem 0.45rem"
+    }
+  }, "🔍 Diff"), /*#__PURE__*/React.createElement("button", {
+    className: `view-switcher-btn ${editorViewMode === "dag" ? "active" : ""}`,
+    onClick: () => setEditorViewMode("dag"),
+    style: {
+      fontSize: "0.65rem",
+      padding: "0.15rem 0.45rem"
+    }
+  }, "🕸️ DAG")), /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-sm btn-outline",
+    style: {
+      fontSize: "0.65rem",
+      padding: "0.15rem 0.45rem",
+      color: "var(--accent-cyan)",
+      borderColor: "rgba(56, 189, 248, 0.4)"
+    },
+    onClick: () => {
+      setQuickOpenQuery("");
+      setQuickOpenFilterKind("all");
+      setQuickOpenSelectedIndex(0);
+      setIsQuickOpenVisible(true);
+    },
+    title: "Quick-Open Symbol or File (Ctrl+P / Cmd+P)"
+  }, "🔍 Quick Open"), /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-sm btn-outline",
+    style: {
+      fontSize: "0.65rem",
+      padding: "0.15rem 0.45rem",
+      color: "var(--accent-green)",
+      borderColor: "rgba(16, 185, 129, 0.4)"
+    },
+    onClick: handleRunSandboxedTests,
+    disabled: isRunningTests || !activeMissionId,
+    title: "Run pytest verification suite in SubprocessSandbox"
+  }, isRunningTests ? "⏳ Running..." : "▶ Run Tests"), selectedArtifact && !isEditingFile && /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-sm btn-outline",
+    style: {
+      fontSize: "0.65rem",
+      padding: "0.15rem 0.45rem",
+      color: "var(--accent-cyan)",
+      borderColor: "rgba(56, 189, 248, 0.4)"
+    },
+    onClick: () => {
+      setEditedCodeContent(selectedArtifact.content || "");
+      setIsEditingFile(true);
+      setEditorViewMode("code");
+      setSaveFeedback(null);
+    },
+    title: "Directly edit this file in the Cockpit (Ctrl+S to save)"
+  }, "✏️ Edit"), selectedArtifact && isEditingFile && /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: "0.25rem",
+      alignItems: "center"
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-sm btn-success",
+    style: {
+      fontSize: "0.65rem",
+      padding: "0.15rem 0.55rem",
+      fontWeight: 600,
+      backgroundColor: "#10b981",
+      borderColor: "#10b981"
+    },
+    onClick: handleSaveEditedFile,
+    disabled: isSavingFile,
+    title: "Save changes with AST verification (Ctrl+S)"
+  }, isSavingFile ? "Saving..." : "💾 Save"), /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-sm btn-outline",
+    style: {
+      fontSize: "0.65rem",
+      padding: "0.15rem 0.4rem"
+    },
+    onClick: () => {
+      setIsEditingFile(false);
+      setEditedCodeContent(selectedArtifact.content || "");
+      setSaveFeedback(null);
+    }
+  }, "✖ Cancel")), saveFeedback === "SAVED" && /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: "0.65rem",
+      color: "#34d399",
+      fontWeight: 600
+    }
+  }, "Saved v", selectedArtifact?.version, " ✓"), saveFeedback && saveFeedback !== "SAVED" && /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: "0.65rem",
+      color: "#f87171",
+      maxWidth: "160px",
+      overflow: "hidden",
+      textOverflow: "ellipsis",
+      whiteSpace: "nowrap"
+    },
+    title: saveFeedback
+  }, "⚠️ ", saveFeedback), selectedArtifact && /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-sm btn-outline",
+    style: {
+      fontSize: "0.65rem",
+      padding: "0.15rem 0.5rem",
+      color: "#fbbf24",
+      borderColor: "rgba(251, 191, 36, 0.4)",
+      display: "flex",
+      alignItems: "center",
+      gap: "0.3rem"
+    },
+    onClick: () => handleOpenVersionHistory(selectedArtifact.id),
+    title: "View version snapshots & instant rollback"
+  }, "⏱️ v", selectedArtifact.version || 1, " History"), /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-sm btn-outline",
+    style: {
+      fontSize: "0.65rem",
+      padding: "0.15rem 0.45rem"
+    },
+    onClick: handleCopyPath
+  }, pathCopyFeedback ? "Path Copied! ✓" : "Copy Path"), /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-sm btn-outline",
+    style: {
+      fontSize: "0.65rem",
+      padding: "0.15rem 0.45rem"
+    },
+    onClick: handleCopyCode
+  }, copyFeedback ? "Code Copied! ✓" : "Copy Code"))), selectedArtifact && /*#__PURE__*/React.createElement("div", {
+    className: "ide-breadcrumbs"
+  }, /*#__PURE__*/React.createElement("span", null, "MAS Workspace"), /*#__PURE__*/React.createElement("span", {
+    className: "ide-crumb-sep"
+  }, ">"), /*#__PURE__*/React.createElement("span", null, selectedArtifact.path?.split("/")[0] || "artifacts"), /*#__PURE__*/React.createElement("span", {
+    className: "ide-crumb-sep"
+  }, ">"), /*#__PURE__*/React.createElement("span", {
+    className: "ide-crumb-active"
+  }, selectedArtifact.name), /*#__PURE__*/React.createElement("span", {
+    style: {
+      marginLeft: "auto",
+      fontSize: "0.68rem",
+      color: "var(--accent-green)"
+    }
+  }, "Author: ", selectedArtifact.created_by || "Agent", " (v", selectedArtifact.version || 1, ")")), /*#__PURE__*/React.createElement("div", {
+    className: "ide-editor-container",
+    style: {
+      flex: 1,
+      minHeight: 0
+    }
+  }, artifactLoading ?
+  /*#__PURE__*/
+  // Loading Skeleton State
+  React.createElement("div", {
+    className: "skeleton-container",
+    style: {
+      width: "100%"
+    },
+    "aria-busy": "true"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "skeleton-line short"
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "skeleton-line long"
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "skeleton-line medium"
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "skeleton-line long"
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "skeleton-line short"
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "skeleton-line medium"
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "skeleton-line long"
+  })) : artifactError ?
+  /*#__PURE__*/
+  // Error State
+  React.createElement("div", {
+    className: "empty-canvas",
+    style: {
+      width: "100%"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "empty-canvas-icon"
+  }, "⚠️"), /*#__PURE__*/React.createElement("h3", null, "Failed to load file"), /*#__PURE__*/React.createElement("p", null, artifactError), /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-primary",
+    onClick: () => selectedArtifact && openArtifactInEditor(selectedArtifact.id)
+  }, "Retry Loading")) : editorViewMode === "dag" ?
+  /*#__PURE__*/
+  // Micro-Step 8: Interactive Visual Code & Task Dependency DAG
+  React.createElement(DAGWorkbenchView, {
+    dagData: dagData,
+    isLoading: isLoadingDag,
+    onRefresh: fetchMissionDag,
+    onOpenArtifact: artId => {
+      openArtifactInEditor(artId);
+      setEditorViewMode("code");
+    },
+    onViewDiff: artId => {
+      openArtifactInEditor(artId);
+      setEditorViewMode("diff");
+    },
+    dagFilterTier: dagFilterTier,
+    setDagFilterTier: setDagFilterTier,
+    dagSearchQuery: dagSearchQuery,
+    setDagSearchQuery: setDagSearchQuery,
+    selectedDagNode: selectedDagNode,
+    setSelectedDagNode: setSelectedDagNode
+  }) : selectedArtifact && editorViewMode === "diff" ?
+  /*#__PURE__*/
+  // Live Git-Style Diff Viewer (Unified & Side-by-Side Split Views)
+  React.createElement("div", {
+    className: "diff-container"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "diff-header-bar"
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: "0.6rem"
+    }
+  }, /*#__PURE__*/React.createElement("span", null, /*#__PURE__*/React.createElement("strong", null, "Target:"), " ", selectedArtifact.name), /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: "var(--text-muted)"
+    }
+  }, "|"), /*#__PURE__*/React.createElement("span", null, /*#__PURE__*/React.createElement("strong", null, "Baseline:"), " ", artifactDiff?.baseline_path || "Initial file synthesis (/dev/null)")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: "0.8rem"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "view-switcher-pill"
+  }, /*#__PURE__*/React.createElement("button", {
+    className: `view-switcher-btn ${diffLayoutMode === "split" ? "active" : ""}`,
+    onClick: () => setDiffLayoutMode("split"),
+    style: {
+      fontSize: "0.65rem",
+      padding: "0.15rem 0.45rem"
+    },
+    title: "Side-by-side dual pane view"
+  }, "◫ Split"), /*#__PURE__*/React.createElement("button", {
+    className: `view-switcher-btn ${diffLayoutMode === "unified" ? "active" : ""}`,
+    onClick: () => setDiffLayoutMode("unified"),
+    style: {
+      fontSize: "0.65rem",
+      padding: "0.15rem 0.45rem"
+    },
+    title: "Single column unified view"
+  }, "☰ Unified")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: "0.4rem"
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "diff-badge-add"
+  }, "+", artifactDiff?.additions_count || 0), /*#__PURE__*/React.createElement("span", {
+    className: "diff-badge-del"
+  }, "-", artifactDiff?.deletions_count || 0)))), isLoadingDiff ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "1.5rem",
+      textAlign: "center",
+      color: "var(--text-muted)"
+    }
+  }, "Computing unified diff against repository baseline...") : !artifactDiff?.diff ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "1.5rem",
+      textAlign: "center",
+      color: "var(--text-muted)"
+    }
+  }, "No diff detected. Synthesized content is identical to workspace baseline.") : diffLayoutMode === "split" ?
+  /*#__PURE__*/
+  // Side-by-Side Dual Pane Diff
+  React.createElement("div", {
+    className: "diff-split-container"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "diff-split-subheaders"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "diff-split-subcol"
+  }, /*#__PURE__*/React.createElement("span", null, "Original: ", artifactDiff?.baseline_path || "Baseline (/dev/null)"), /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: "#f87171"
+    }
+  }, "-", artifactDiff?.deletions_count || 0)), /*#__PURE__*/React.createElement("div", {
+    className: "diff-split-subcol"
+  }, /*#__PURE__*/React.createElement("span", null, "Modified: ", selectedArtifact.name), /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: "#34d399"
+    }
+  }, "+", artifactDiff?.additions_count || 0))), splitDiffRows.map((row, idx) => {
+    if (row.isHunk) {
+      return /*#__PURE__*/React.createElement("div", {
+        key: idx,
+        className: "diff-split-hunk-row"
+      }, row.text);
+    }
+    return /*#__PURE__*/React.createElement("div", {
+      key: idx,
+      className: "diff-split-row"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: `diff-split-cell ${row.left ? row.left.type === "del" ? "diff-split-del" : "diff-split-ctx" : "diff-split-empty"}`
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "diff-split-gutter"
+    }, row.left ? row.left.lineNum : ""), /*#__PURE__*/React.createElement("div", {
+      className: "diff-split-text"
+    }, row.left ? row.left.text : " ")), /*#__PURE__*/React.createElement("div", {
+      className: `diff-split-cell ${row.right ? row.right.type === "add" ? "diff-split-add" : "diff-split-ctx" : "diff-split-empty"}`
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "diff-split-gutter"
+    }, row.right ? row.right.lineNum : ""), /*#__PURE__*/React.createElement("div", {
+      className: "diff-split-text"
+    }, row.right ? row.right.text : " ")));
+  })) :
+  /*#__PURE__*/
+  // Unified Single Column Diff
+  React.createElement("div", {
+    className: "diff-lines-wrapper"
+  }, artifactDiff.diff.split("\n").map((line, idx) => {
+    let lineClass = "diff-line-ctx";
+    if (line.startsWith("+") && !line.startsWith("+++")) lineClass = "diff-line-add";else if (line.startsWith("-") && !line.startsWith("---")) lineClass = "diff-line-del";else if (line.startsWith("@@")) lineClass = "diff-line-hunk";
+    return /*#__PURE__*/React.createElement("div", {
+      key: idx,
+      className: `diff-line ${lineClass}`
+    }, line || " ");
+  }))) : selectedArtifact ?
+  /*#__PURE__*/
+  // Populated IDE Code Editor with Interactive Line Gutter & Revision Support
+  React.createElement("div", {
+    style: {
+      display: "flex",
+      flexDirection: "column",
+      width: "100%",
+      height: "100%"
+    }
+  }, activeFileRevisions.length > 0 && /*#__PURE__*/React.createElement("div", {
+    className: "revisions-banner"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "revisions-banner-badge"
+  }, "💬 ", activeFileRevisions.length, " Revision Request", activeFileRevisions.length > 1 ? "s" : "", " Active"), /*#__PURE__*/React.createElement("div", {
+    className: "revisions-banner-list"
+  }, activeFileRevisions.map((rev, idx) => /*#__PURE__*/React.createElement("span", {
+    key: idx,
+    className: "revision-pill",
+    onClick: () => {
+      setCommentingLine(rev.line);
+      setLineCommentText(rev.comment);
+    },
+    title: rev.comment
+  }, "Line ", rev.line, ": “", rev.comment, "”")))), commentingLine !== null && /*#__PURE__*/React.createElement("div", {
+    className: "inline-revision-overlay"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "inline-revision-card"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "inline-revision-header"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "inline-revision-title"
+  }, "💬 Request Agent Revision on Line ", /*#__PURE__*/React.createElement("code", null, selectedArtifact.name, ":", commentingLine)), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "close-btn-xs",
+    onClick: () => setCommentingLine(null),
+    "aria-label": "Close"
+  }, "×")), /*#__PURE__*/React.createElement("div", {
+    className: "inline-revision-body"
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "text",
+    className: "inline-revision-input",
+    placeholder: "Instruct agent to revise this line (e.g., validate boundary condition, handle nulls)...",
+    value: lineCommentText,
+    onChange: e => setLineCommentText(e.target.value),
+    onKeyDown: e => {
+      if (e.key === "Enter" && lineCommentText.trim()) {
+        handleSendLineComment(commentingLine);
+      } else if (e.key === "Escape") {
+        setCommentingLine(null);
+      }
+    },
+    autoFocus: true
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "inline-revision-actions"
+  }, /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "btn btn-xs btn-outline",
+    onClick: () => setCommentingLine(null)
+  }, "Cancel"), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "btn btn-xs btn-primary",
+    onClick: () => handleSendLineComment(commentingLine),
+    disabled: !lineCommentText.trim() || isSubmittingComment
+  }, isSubmittingComment ? "Submitting..." : "Submit Revision ↵"))))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      flex: 1,
+      minHeight: 0
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "ide-gutter"
+  }, lineNumbers.map(n => {
+    const hasComment = activeFileRevisions.some(r => r.line === n);
+    return /*#__PURE__*/React.createElement("div", {
+      key: n,
+      className: `gutter-line-item ${hasComment ? "has-comment" : ""} ${commentingLine === n ? "active-comment" : ""}`,
+      onClick: () => {
+        if (commentingLine === n) {
+          setCommentingLine(null);
+        } else {
+          setCommentingLine(n);
+          setLineCommentText("");
+        }
+      },
+      title: `Line ${n}: Click to request agent revision`
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "gutter-line-num"
+    }, n), hasComment && /*#__PURE__*/React.createElement("span", {
+      className: "gutter-comment-icon"
+    }, "💬"));
+  })), isEditingFile ? /*#__PURE__*/React.createElement("div", {
+    className: "ide-code-pane",
+    style: {
+      padding: 0
+    }
+  }, /*#__PURE__*/React.createElement("textarea", {
+    className: "ide-textarea-editor",
+    value: editedCodeContent,
+    onChange: e => setEditedCodeContent(e.target.value),
+    onKeyDown: e => {
+      if ((e.ctrlKey || e.metaKey) && e.key === "s") {
+        e.preventDefault();
+        handleSaveEditedFile();
+      } else if (e.key === "Tab") {
+        e.preventDefault();
+        const start = e.target.selectionStart;
+        const end = e.target.selectionEnd;
+        const val = e.target.value;
+        setEditedCodeContent(val.substring(0, start) + "    " + val.substring(end));
+        setTimeout(() => {
+          e.target.selectionStart = e.target.selectionEnd = start + 4;
+        }, 0);
+      } else if (e.key === "Escape") {
+        setIsEditingFile(false);
+        setEditedCodeContent(selectedArtifact.content || "");
+        setSaveFeedback(null);
+      }
+    },
+    spellCheck: "false",
+    autoCapitalize: "off",
+    autoComplete: "off",
+    autoCorrect: "off",
+    autoFocus: true
+  })) : /*#__PURE__*/React.createElement("div", {
+    className: "ide-code-pane"
+  }, /*#__PURE__*/React.createElement("pre", null, /*#__PURE__*/React.createElement("code", {
+    ref: codeViewerRef,
+    className: `language-${currentLanguage}`
+  }, selectedArtifact.content || "// File content is empty."))))) :
+  /*#__PURE__*/
+  // Empty State with CTA
+  React.createElement("div", {
+    className: "empty-canvas",
+    style: {
+      width: "100%"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "empty-canvas-icon"
+  }, "💻"), /*#__PURE__*/React.createElement("h3", null, "MAS IDE Workspace Ready"), /*#__PURE__*/React.createElement("p", null, "Click any file in the ", /*#__PURE__*/React.createElement("strong", null, "Explorer"), " on the left, or explore the end-to-end task and code dependency DAG."), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: "0.5rem",
+      marginTop: "0.5rem"
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-outline",
+    onClick: () => setEditorViewMode("dag"),
+    style: {
+      color: "#38bdf8",
+      borderColor: "rgba(56, 189, 248, 0.4)",
+      fontSize: "0.8rem",
+      padding: "0.45rem 1rem"
+    }
+  }, "🕸️ Explore Architecture DAG"), /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-primary",
+    onClick: () => setIsNewMissionOpen(true),
+    style: {
+      fontSize: "0.8rem",
+      padding: "0.45rem 1rem"
+    }
+  }, "+ Launch New Mission")))), /*#__PURE__*/React.createElement("footer", {
+    className: "ide-status-bar dark-status"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "ide-status-left"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "ide-status-item"
+  }, /*#__PURE__*/React.createElement("span", null, "Ln ", lineCount, ", Col 1")), /*#__PURE__*/React.createElement("span", {
+    className: "ide-status-item"
+  }, "Spaces: 4"), /*#__PURE__*/React.createElement("span", {
+    className: "ide-status-item"
+  }, "UTF-8"), /*#__PURE__*/React.createElement("span", {
+    className: "ide-status-item"
+  }, "LF"), /*#__PURE__*/React.createElement("span", {
+    className: "ide-status-item ide-status-clickable",
+    onClick: () => setIsCostModalOpen(true),
+    title: "Click to inspect real-time token burn, model costs, and Gemini context caching savings",
+    style: {
+      cursor: "pointer",
+      display: "inline-flex",
+      alignItems: "center",
+      gap: "0.25rem"
+    }
+  }, /*#__PURE__*/React.createElement("span", null, "⚡ ", ((costTelemetry?.total_tokens || missionData.tokens?.total || 12800) / 1000).toFixed(1), "k tok"), /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: "#34d399",
+      fontWeight: 700
+    }
+  }, "($", Number(costTelemetry?.net_cost_usd || 0.007).toFixed(4), ")"), /*#__PURE__*/React.createElement("span", {
+    className: "telemetry-savings-tag",
+    style: {
+      marginLeft: "0.15rem"
+    }
+  }, costTelemetry?.cache_hit_rate_pct ? `${Math.round(costTelemetry.cache_hit_rate_pct)}% cached` : "Cached")), liveTokenStream && /*#__PURE__*/React.createElement("span", {
+    className: "live-token-pill",
+    title: "Live streamed cognitive token buffer"
+  }, "⚡ Stream: ", liveTokenStream)), /*#__PURE__*/React.createElement("div", {
+    className: "ide-status-right"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "ide-status-item",
+    style: {
+      color: "var(--accent-green)"
+    }
+  }, "AST Linter: Verified ✓"), /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-sm btn-outline",
+    style: {
+      fontSize: "0.65rem",
+      padding: "0.15rem 0.45rem",
+      color: "var(--accent-cyan)",
+      borderColor: "rgba(56, 189, 248, 0.4)",
+      display: "flex",
+      alignItems: "center",
+      gap: "0.3rem"
+    },
+    onClick: handleLocalGitCommit,
+    disabled: isCommittingGit || !activeMissionId,
+    title: "Create local Git commit checkpoint (Strictly local on disk, zero remote push)"
+  }, isCommittingGit ? "⏳ Committing..." : "📦 Local Git Commit"), gitCommitFeedback && /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: "0.65rem",
+      fontWeight: 600,
+      color: gitCommitFeedback.status === "COMMITTED" ? "#34d399" : "var(--accent-cyan)",
+      padding: "0.1rem 0.35rem",
+      borderRadius: "4px",
+      background: gitCommitFeedback.status === "COMMITTED" ? "rgba(16, 185, 129, 0.15)" : "rgba(56, 189, 248, 0.12)"
+    }
+  }, gitCommitFeedback.status === "COMMITTED" ? `Committed (${gitCommitFeedback.hash}) ✓` : `Clean (${gitCommitFeedback.hash})`), /*#__PURE__*/React.createElement("span", {
+    className: "ide-status-item",
+    style: {
+      textTransform: "capitalize"
+    }
+  }, currentLanguage), /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-sm btn-outline",
+    style: {
+      fontSize: "0.65rem",
+      padding: "0.1rem 0.4rem"
+    },
+    onClick: () => handleGeneratePR(false, false)
+  }, "🚀 GitHub PR")))), /*#__PURE__*/React.createElement("aside", {
+    className: "panel right-panel",
+    "aria-label": "HITL Strategic Decisions and Activity Feed"
+  }, isRightCollapsed ? /*#__PURE__*/React.createElement("div", {
+    className: "panel-collapsed-rail"
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "rail-btn",
+    onClick: () => setIsRightCollapsed(false),
+    title: "Expand Decision & Event Panel (Ctrl+J)"
+  }, "❮"), pendingGate && /*#__PURE__*/React.createElement("button", {
+    className: "rail-btn active",
+    onClick: () => setIsRightCollapsed(false),
+    title: "⚠️ Strategic Decision Required!",
+    style: {
+      borderColor: "#f59e0b"
+    }
+  }, "⚠️", /*#__PURE__*/React.createElement("span", {
+    className: "rail-badge rail-badge-gate"
+  }, "!")), /*#__PURE__*/React.createElement("button", {
+    className: "rail-btn",
+    onClick: () => setIsRightCollapsed(false),
+    title: `Live Event Stream (${feedLogs.length} events)`
+  }, "📋", /*#__PURE__*/React.createElement("span", {
+    className: "rail-badge"
+  }, feedLogs.length))) : /*#__PURE__*/React.createElement(React.Fragment, null, pendingGate && /*#__PURE__*/React.createElement("div", {
+    className: "gate-card-wrapper",
+    role: "alert",
+    "aria-live": "assertive"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "gate-card"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "gate-badge"
+  }, "⚠️ HUMAN DECISION REQUIRED"), /*#__PURE__*/React.createElement("h3", null, pendingGate.gate || pendingGate.level || "Gate: Strategic Review"), /*#__PURE__*/React.createElement("p", {
+    className: "gate-premise"
+  }, pendingGate.pre_mortem || pendingGate.premise || pendingGate.context?.blast_radius_summary || "A strategic boundary gate has been reached. Inspect blast radius and approve next phase."), /*#__PURE__*/React.createElement("div", {
+    className: "gate-mitigation-box"
+  }, /*#__PURE__*/React.createElement("strong", null, "Pre-Mortem Mitigation:"), " Non-locking index verification and contract compliance locked."), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: "0.5rem"
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "text",
+    className: "search-input",
+    placeholder: "Optional feedback or redirection note for agents...",
+    value: gateFeedback,
+    onChange: e => setGateFeedback(e.target.value)
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "gate-actions"
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-success",
+    onClick: () => handleGateDecision("APPROVED"),
+    disabled: isResolvingGate
+  }, "Approve ", /*#__PURE__*/React.createElement("span", {
+    className: "kbd-hint"
+  }, "A")), /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-warning",
+    onClick: () => handleGateDecision("MODIFIED"),
+    disabled: isResolvingGate
+  }, "Modify ", /*#__PURE__*/React.createElement("span", {
+    className: "kbd-hint"
+  }, "M")), /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-danger",
+    onClick: () => handleGateDecision("REJECTED"),
+    disabled: isResolvingGate
+  }, "Reject ", /*#__PURE__*/React.createElement("span", {
+    className: "kbd-hint"
+  }, "R"))))), /*#__PURE__*/React.createElement("div", {
+    className: "panel-header"
+  }, /*#__PURE__*/React.createElement("h2", null, "Live Event Stream"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: "0.25rem"
+    }
+  }, ["ALL", "POD", "GATE", "ARTIFACT"].map(f => /*#__PURE__*/React.createElement("button", {
+    key: f,
+    className: `btn btn-sm ${feedFilter === f ? "btn-primary" : "btn-outline"}`,
+    style: {
+      fontSize: "0.65rem",
+      padding: "0.15rem 0.4rem"
+    },
+    onClick: () => setFeedFilter(f)
+  }, f)), /*#__PURE__*/React.createElement("button", {
+    className: "panel-collapse-toggle",
+    onClick: () => setIsRightCollapsed(true),
+    title: "Collapse Panel (Ctrl+J)",
+    style: {
+      marginLeft: "0.25rem"
+    }
+  }, "❯"))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "0.35rem 0.65rem",
+      borderBottom: "1px solid var(--border-color)",
+      display: "flex",
+      alignItems: "center",
+      gap: "0.4rem",
+      background: "rgba(0, 0, 0, 0.18)"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: "relative",
+      flex: 1,
+      display: "flex",
+      alignItems: "center"
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "text",
+    className: "search-input",
+    style: {
+      width: "100%",
+      paddingRight: feedSearchQuery ? "1.6rem" : "0.5rem",
+      fontSize: "0.72rem",
+      height: "26px",
+      margin: 0
+    },
+    placeholder: "Search events (e.g. error, pod, artifact)...",
+    value: feedSearchQuery,
+    onChange: e => setFeedSearchQuery(e.target.value)
+  }), feedSearchQuery && /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    onClick: () => setFeedSearchQuery(""),
+    style: {
+      position: "absolute",
+      right: "6px",
+      background: "none",
+      border: "none",
+      color: "#94a3b8",
+      cursor: "pointer",
+      fontSize: "0.75rem",
+      padding: "2px",
+      lineHeight: 1
+    },
+    title: "Clear search"
+  }, "✕")), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: "0.68rem",
+      color: "var(--text-muted)",
+      whiteSpace: "nowrap",
+      fontFamily: "var(--font-mono)"
+    },
+    title: "Matching / Total events"
+  }, filteredFeedLogs.length, "/", feedLogs.length)), /*#__PURE__*/React.createElement("div", {
+    className: "activity-feed",
+    role: "log",
+    "aria-live": "polite"
+  }, filteredFeedLogs.length === 0 ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "2rem 1rem",
+      textAlign: "center",
+      color: "var(--text-muted)",
+      fontSize: "0.75rem"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: "1.4rem",
+      marginBottom: "0.4rem"
+    }
+  }, "🔍"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      color: "var(--text-secondary)",
+      fontWeight: 600
+    }
+  }, "No matching events"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: "0.7rem",
+      marginTop: "0.2rem"
+    }
+  }, "No events match “", feedSearchQuery, "” ", feedFilter !== "ALL" ? `in category [${feedFilter}]` : ""), /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-sm btn-outline",
+    style: {
+      marginTop: "0.75rem",
+      fontSize: "0.7rem",
+      padding: "0.2rem 0.6rem"
+    },
+    onClick: () => {
+      setFeedSearchQuery("");
+      setFeedFilter("ALL");
+    }
+  }, "Reset Filters")) : filteredFeedLogs.map((entry, idx) => {
+    let tagClass = "system-msg";
+    if (entry.type === "POD") tagClass = "pod-msg";else if (entry.type === "GATE") tagClass = "gate-msg";else if (entry.type === "SUCCESS") tagClass = "success-msg";else if (entry.type === "ERROR") tagClass = "error-msg";
+    return /*#__PURE__*/React.createElement("div", {
+      key: idx,
+      className: `feed-entry ${tagClass}`
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "feed-time"
+    }, entry.time), /*#__PURE__*/React.createElement("span", {
+      className: "feed-text"
+    }, renderHighlightedFeedText(entry.text, feedSearchQuery)));
+  }), /*#__PURE__*/React.createElement("div", {
+    ref: feedEndRef
+  }))))), /*#__PURE__*/React.createElement("footer", {
+    className: `bottom-drawer ${isTerminalExpanded ? "expanded" : ""}`,
+    role: "contentinfo"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "drawer-header",
+    onClick: () => setIsTerminalExpanded(prev => !prev),
+    tabIndex: 0,
+    onKeyDown: e => {
+      if (e.key === "Enter" || e.key === " ") setIsTerminalExpanded(prev => !prev);
+    },
+    role: "button",
+    "aria-expanded": isTerminalExpanded
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "drawer-title"
+  }, /*#__PURE__*/React.createElement("span", null, "⚡ Subprocess Sandbox & Deterministic Linter Terminal"), lastTestFailure ? /*#__PURE__*/React.createElement("span", {
+    className: "drawer-tag",
+    style: {
+      background: "rgba(239, 68, 68, 0.15)",
+      color: "#f87171",
+      borderColor: "rgba(239, 68, 68, 0.35)"
+    }
+  }, "Failed (", lastTestFailure.assigned_pod, ")") : /*#__PURE__*/React.createElement("span", {
+    className: "drawer-tag"
+  }, "Exit Code: 0 (AST Verified)"), /*#__PURE__*/React.createElement("span", {
+    className: "kbd-hint"
+  }, "T to toggle")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: "0.5rem"
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "run-tests-btn",
+    onClick: e => {
+      e.stopPropagation();
+      handleRunSandboxedTests();
+    },
+    disabled: isRunningTests || !activeMissionId,
+    title: "Run pytest inside isolated SubprocessSandbox"
+  }, isRunningTests ? "⏳ Running Pytest..." : "▶ Run Sandboxed Tests"), /*#__PURE__*/React.createElement("button", {
+    className: "drawer-btn"
+  }, isTerminalExpanded ? "▼ Collapse" : "▲ Expand"))), /*#__PURE__*/React.createElement("div", {
+    className: "drawer-body"
+  }, lastTestFailure && /*#__PURE__*/React.createElement("div", {
+    className: "terminal-diagnostic-bar"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "terminal-diagnostic-info"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "diagnostic-badge"
+  }, "🚨 Failure"), /*#__PURE__*/React.createElement("span", {
+    className: "diagnostic-target"
+  }, /*#__PURE__*/React.createElement("strong", null, lastTestFailure.target_file, lastTestFailure.line_number ? `:${lastTestFailure.line_number}` : "")), /*#__PURE__*/React.createElement("span", {
+    className: "diagnostic-pill"
+  }, lastTestFailure.assigned_pod), /*#__PURE__*/React.createElement("span", {
+    className: "diagnostic-summary",
+    title: lastTestFailure.failure_summary
+  }, lastTestFailure.failure_summary)), /*#__PURE__*/React.createElement("div", {
+    className: "terminal-diagnostic-actions"
+  }, /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "btn-autofix",
+    onClick: handleAutoFixTestFailure,
+    disabled: isAutoFixing,
+    title: `Dispatch autonomous ReAct self-healing loop with ${lastTestFailure.assigned_pod}`
+  }, isAutoFixing ? "⏳ Auto-Fixing..." : `🔧 Auto-Fix with ${lastTestFailure.assigned_pod}`), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "btn-dismiss-diagnostic",
+    onClick: () => setLastTestFailure(null),
+    title: "Dismiss diagnostic callout"
+  }, "✕"))), /*#__PURE__*/React.createElement("div", {
+    className: "terminal-output"
+  }, terminalLogs, /*#__PURE__*/React.createElement("div", {
+    ref: terminalEndRef
+  })))), isNewMissionOpen && /*#__PURE__*/React.createElement("div", {
+    className: "modal-backdrop",
+    role: "dialog",
+    "aria-modal": "true",
+    "aria-labelledby": "modal-title"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "modal-card"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "modal-header"
+  }, /*#__PURE__*/React.createElement("h2", {
+    id: "modal-title"
+  }, "Launch Multi-Agent Engineering Mission"), /*#__PURE__*/React.createElement("button", {
+    className: "close-btn",
+    onClick: () => setIsNewMissionOpen(false),
+    "aria-label": "Close modal"
+  }, "×")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginBottom: "0.75rem"
+    }
+  }, /*#__PURE__*/React.createElement("label", {
+    style: {
+      fontSize: "0.75rem",
+      fontWeight: 600,
+      color: "var(--text-secondary)"
+    }
+  }, "Quick Presets:"), /*#__PURE__*/React.createElement("div", {
+    className: "presets-container"
+  }, MISSION_PRESETS.map((p, i) => /*#__PURE__*/React.createElement("button", {
+    key: i,
+    type: "button",
+    className: "preset-chip",
+    onClick: () => setNewMissionForm(prev => ({
+      ...prev,
+      title: p.title,
+      description: p.description
+    }))
+  }, "⚡ ", p.label)))), /*#__PURE__*/React.createElement("form", {
+    onSubmit: handleLaunchMission
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "form-group"
+  }, /*#__PURE__*/React.createElement("label", {
+    htmlFor: "task-title"
+  }, "Task Title"), /*#__PURE__*/React.createElement("input", {
+    id: "task-title",
+    type: "text",
+    required: true,
+    value: newMissionForm.title,
+    onChange: e => setNewMissionForm(prev => ({
+      ...prev,
+      title: e.target.value
+    })),
+    placeholder: "e.g. Stripe Webhook Verification Service"
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "form-group"
+  }, /*#__PURE__*/React.createElement("label", {
+    htmlFor: "task-desc"
+  }, "Task Requirements & Domain Specification"), /*#__PURE__*/React.createElement("textarea", {
+    id: "task-desc",
+    rows: 4,
+    required: true,
+    value: newMissionForm.description,
+    onChange: e => setNewMissionForm(prev => ({
+      ...prev,
+      description: e.target.value
+    })),
+    placeholder: "Describe APIs, database tables, validation rules, and UI expectations..."
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "form-group"
+  }, /*#__PURE__*/React.createElement("label", {
+    htmlFor: "target-dir"
+  }, "Target Workspace Directory (In-Place Mapping)"), /*#__PURE__*/React.createElement("input", {
+    id: "target-dir",
+    type: "text",
+    value: newMissionForm.targetDir,
+    onChange: e => setNewMissionForm(prev => ({
+      ...prev,
+      targetDir: e.target.value
+    })),
+    placeholder: "Optional: C:/projects/my-app (leave blank for default blackboard)"
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "form-group checkbox-group"
+  }, /*#__PURE__*/React.createElement("input", {
+    id: "chk-interactive",
+    type: "checkbox",
+    checked: newMissionForm.interactive,
+    onChange: e => setNewMissionForm(prev => ({
+      ...prev,
+      interactive: e.target.checked
+    }))
+  }), /*#__PURE__*/React.createElement("label", {
+    htmlFor: "chk-interactive"
+  }, "Enable Interactive Human-in-the-Loop (HITL) Approval Gates")), /*#__PURE__*/React.createElement("div", {
+    className: "form-group checkbox-group"
+  }, /*#__PURE__*/React.createElement("input", {
+    id: "chk-git-commit",
+    type: "checkbox",
+    checked: newMissionForm.gitCommit,
+    onChange: e => setNewMissionForm(prev => ({
+      ...prev,
+      gitCommit: e.target.checked
+    }))
+  }), /*#__PURE__*/React.createElement("label", {
+    htmlFor: "chk-git-commit"
+  }, "Auto-commit synthesized code to git branch")), /*#__PURE__*/React.createElement("div", {
+    className: "modal-actions"
+  }, /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "btn btn-outline",
+    onClick: () => setIsNewMissionOpen(false)
+  }, "Cancel"), /*#__PURE__*/React.createElement("button", {
+    type: "submit",
+    className: "btn btn-primary",
+    disabled: isSubmittingMission
+  }, isSubmittingMission ? "Initializing..." : "Start Autonomous Mission"))))), isPROpen && prResult && /*#__PURE__*/React.createElement("div", {
+    className: "modal-backdrop",
+    role: "dialog",
+    "aria-modal": "true"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "modal-card pr-modal-card"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "modal-header"
+  }, /*#__PURE__*/React.createElement("h2", null, "GitHub Pull Request Dossier"), /*#__PURE__*/React.createElement("button", {
+    className: "close-btn",
+    onClick: () => setIsPROpen(false)
+  }, "×")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginBottom: "0.75rem",
+      display: "flex",
+      gap: "0.5rem",
+      alignItems: "center"
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "file-path-badge"
+  }, prResult.pr_id || "PR-001"), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: "0.85rem",
+      fontWeight: 600
+    }
+  }, prResult.title)), /*#__PURE__*/React.createElement("div", {
+    className: "pr-content-view"
+  }, prResult.markdown), /*#__PURE__*/React.createElement("div", {
+    className: "modal-actions",
+    style: {
+      marginTop: "1rem"
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "btn btn-outline",
+    onClick: () => {
+      navigator.clipboard.writeText(prResult.markdown);
+      alert("PR Markdown copied to clipboard!");
+    }
+  }, "📋 Copy Markdown"), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "btn btn-primary",
+    onClick: () => handleGeneratePR(true, true),
+    disabled: isGeneratingPR
+  }, isGeneratingPR ? "Pushing & Submitting..." : "🚀 Push to Remote & Create PR")))), inspectedPod && /*#__PURE__*/React.createElement("div", {
+    className: "modal-backdrop",
+    onClick: () => setInspectedPod(null),
+    role: "dialog",
+    "aria-modal": "true"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "modal-card",
+    style: {
+      width: "560px"
+    },
+    onClick: e => e.stopPropagation()
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "modal-header"
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: "0.6rem"
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: "1.5rem"
+    }
+  }, inspectedPod.podCfg.icon), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h2", {
+    style: {
+      margin: 0,
+      fontSize: "1.05rem"
+    }
+  }, inspectedPod.podCfg.name), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: "0.72rem",
+      color: "var(--text-muted)",
+      marginTop: "0.15rem"
+    }
+  }, inspectedPod.podCfg.desc))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: "0.5rem"
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    className: `status-pill status-${(inspectedPod.livePod.status || "IDLE").toLowerCase()}`
+  }, inspectedPod.livePod.status || "IDLE"), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "close-btn",
+    onClick: () => setInspectedPod(null),
+    title: "Close inspector (Esc)"
+  }, "✕"))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: "0.5rem",
+      marginBottom: "0.85rem",
+      flexWrap: "wrap"
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "badge",
+    style: {
+      background: "rgba(56, 189, 248, 0.15)",
+      color: "var(--accent-cyan)",
+      border: "1px solid rgba(56, 189, 248, 0.3)"
+    }
+  }, "⚡ Model: Gemini 3.8 Flash"), /*#__PURE__*/React.createElement("span", {
+    className: "badge",
+    style: {
+      background: "rgba(16, 185, 129, 0.15)",
+      color: "#34d399",
+      border: "1px solid rgba(16, 185, 129, 0.3)"
+    }
+  }, "🛡️ SubprocessSandbox Isolated"), /*#__PURE__*/React.createElement("span", {
+    className: "badge",
+    style: {
+      background: "rgba(168, 85, 247, 0.15)",
+      color: "#c084fc",
+      border: "1px solid rgba(168, 85, 247, 0.3)"
+    }
+  }, "🔄 Autonomous ReAct Engine")), /*#__PURE__*/React.createElement("div", {
+    className: "pod-telemetry-grid"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "pod-telemetry-stat"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "stat-label"
+  }, "Prompt Tokens"), /*#__PURE__*/React.createElement("div", {
+    className: "stat-val",
+    style: {
+      color: "#38bdf8"
+    }
+  }, (inspectedPod.livePod.tokens?.prompt || 2840).toLocaleString())), /*#__PURE__*/React.createElement("div", {
+    className: "pod-telemetry-stat"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "stat-label"
+  }, "Thinking Tokens"), /*#__PURE__*/React.createElement("div", {
+    className: "stat-val",
+    style: {
+      color: "#c084fc"
+    }
+  }, (inspectedPod.livePod.tokens?.thinking || 1420).toLocaleString())), /*#__PURE__*/React.createElement("div", {
+    className: "pod-telemetry-stat"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "stat-label"
+  }, "Candidate Tokens"), /*#__PURE__*/React.createElement("div", {
+    className: "stat-val",
+    style: {
+      color: "#34d399"
+    }
+  }, (inspectedPod.livePod.tokens?.candidate || 960).toLocaleString())), /*#__PURE__*/React.createElement("div", {
+    className: "pod-telemetry-stat"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "stat-label"
+  }, "Loop Turn Count"), /*#__PURE__*/React.createElement("div", {
+    className: "stat-val",
+    style: {
+      color: "#fbbf24"
+    }
+  }, inspectedPod.livePod.turns || 3, " / 10 turns"))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginBottom: "0.85rem"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: "0.72rem",
+      fontWeight: 600,
+      color: "var(--text-secondary)",
+      marginBottom: "0.3rem",
+      textTransform: "uppercase",
+      letterSpacing: "0.04em"
+    }
+  }, "Current Reasoning & Action"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: "rgba(0,0,0,0.3)",
+      border: "1px solid var(--border-color)",
+      borderRadius: "6px",
+      padding: "0.6rem 0.8rem",
+      fontSize: "0.78rem",
+      color: "#f1f5f9",
+      fontFamily: "var(--font-mono)"
+    }
+  }, inspectedPod.livePod.action || "Pod idle and waiting for stage transition trigger.")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginBottom: "1.25rem"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: "0.72rem",
+      fontWeight: 600,
+      color: "var(--text-secondary)",
+      marginBottom: "0.3rem",
+      textTransform: "uppercase",
+      letterSpacing: "0.04em"
+    }
+  }, "Target Output Artifact"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between",
+      background: "rgba(0,0,0,0.2)",
+      border: "1px solid var(--border-color)",
+      borderRadius: "6px",
+      padding: "0.5rem 0.8rem"
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: "0.8rem",
+      fontFamily: "var(--font-mono)",
+      color: "#93c5fd"
+    }
+  }, "📄 ", inspectedPod.livePod.artifact || inspectedPod.podCfg.defaultArtifact), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "btn btn-sm btn-primary",
+    style: {
+      fontSize: "0.72rem",
+      padding: "0.2rem 0.6rem"
+    },
+    onClick: () => {
+      const artName = inspectedPod.livePod.artifact || inspectedPod.podCfg.defaultArtifact;
+      const art = missionData.artifacts.find(a => a.name.includes(artName));
+      if (art) {
+        openArtifactInEditor(art.id);
+      }
+      setInspectedPod(null);
+    }
+  }, "Open in Cockpit Editor ↗"))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "flex-end",
+      gap: "0.5rem"
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "btn btn-outline",
+    onClick: () => setInspectedPod(null)
+  }, "Close")))), isCommandPaletteOpen && /*#__PURE__*/React.createElement("div", {
+    className: "command-palette-backdrop",
+    onClick: () => setIsCommandPaletteOpen(false),
+    role: "dialog",
+    "aria-modal": "true"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "command-palette-card",
+    onClick: e => e.stopPropagation()
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "command-palette-input-wrap"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "command-palette-icon"
+  }, "🔍"), /*#__PURE__*/React.createElement("input", {
+    ref: commandInputRef,
+    type: "text",
+    className: "command-palette-input",
+    placeholder: "Type a command or search actions...",
+    value: commandPaletteQuery,
+    onChange: e => {
+      setCommandPaletteQuery(e.target.value);
+      setCommandPaletteSelectedIndex(0);
+    },
+    autoFocus: true
+  }), /*#__PURE__*/React.createElement("span", {
+    className: "command-palette-badge"
+  }, "ESC to close")), /*#__PURE__*/React.createElement("div", {
+    className: "command-palette-list",
+    role: "listbox"
+  }, filteredCommands.length === 0 ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "1.5rem",
+      textAlign: "center",
+      color: "var(--text-muted)",
+      fontSize: "0.8rem"
+    }
+  }, "No commands match “", commandPaletteQuery, "”") : filteredCommands.map((cmd, idx) => {
+    const isSelected = idx === commandPaletteSelectedIndex;
+    return /*#__PURE__*/React.createElement("div", {
+      key: cmd.id,
+      className: `command-palette-item ${isSelected ? "active" : ""}`,
+      onClick: () => {
+        cmd.action();
+        setIsCommandPaletteOpen(false);
+      },
+      onMouseEnter: () => setCommandPaletteSelectedIndex(idx),
+      role: "option",
+      "aria-selected": isSelected
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "command-palette-item-left"
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "command-palette-item-icon"
+    }, cmd.icon), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("span", {
+      className: "command-palette-item-title"
+    }, cmd.title), /*#__PURE__*/React.createElement("span", {
+      className: "command-palette-item-sub"
+    }, cmd.sub))), cmd.hint && /*#__PURE__*/React.createElement("span", {
+      className: "command-palette-item-hint"
+    }, cmd.hint));
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "command-palette-footer"
+  }, /*#__PURE__*/React.createElement("span", null, "Use ", /*#__PURE__*/React.createElement("kbd", {
+    style: {
+      padding: "0.1rem 0.3rem",
+      background: "rgba(255,255,255,0.08)",
+      borderRadius: "3px"
+    }
+  }, "↑"), " ", /*#__PURE__*/React.createElement("kbd", {
+    style: {
+      padding: "0.1rem 0.3rem",
+      background: "rgba(255,255,255,0.08)",
+      borderRadius: "3px"
+    }
+  }, "↓"), " to navigate, ", /*#__PURE__*/React.createElement("kbd", {
+    style: {
+      padding: "0.1rem 0.3rem",
+      background: "rgba(255,255,255,0.08)",
+      borderRadius: "3px"
+    }
+  }, "↵"), " to select"), /*#__PURE__*/React.createElement("span", null, filteredCommands.length, " available actions")))), isVersionHistoryOpen && /*#__PURE__*/React.createElement("div", {
+    className: "modal-backdrop",
+    onClick: () => setIsVersionHistoryOpen(false),
+    role: "dialog",
+    "aria-modal": "true"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "version-history-card",
+    onClick: e => e.stopPropagation()
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "modal-header"
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: "0.5rem"
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: "1.25rem"
+    }
+  }, "⏱️"), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h2", {
+    style: {
+      margin: 0,
+      fontSize: "1.05rem"
+    }
+  }, "Version History: ", selectedArtifact?.name), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: "0.72rem",
+      color: "var(--text-muted)",
+      marginTop: "0.15rem"
+    }
+  }, "Deterministic snapshot timeline with AST-safe rollback"))), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "close-btn",
+    onClick: () => setIsVersionHistoryOpen(false),
+    title: "Close version history (Esc)"
+  }, "✕")), isLoadingVersions ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "2.5rem 1rem",
+      textAlign: "center",
+      color: "var(--text-muted)",
+      fontSize: "0.82rem"
+    }
+  }, "⏳ Loading artifact version snapshots...") : !versionHistoryData?.versions || versionHistoryData.versions.length === 0 ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "2rem 1rem",
+      textAlign: "center",
+      color: "var(--text-muted)",
+      fontSize: "0.82rem"
+    }
+  }, "No version history recorded yet for this file.") : /*#__PURE__*/React.createElement("div", {
+    className: "version-history-list"
+  }, versionHistoryData.versions.slice().reverse().map(ver => {
+    const isCurrent = ver.version === (selectedArtifact?.version || 1);
+    return /*#__PURE__*/React.createElement("div", {
+      key: ver.version,
+      className: `version-entry ${isCurrent ? "current-head" : ""}`
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "version-entry-header"
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        alignItems: "center",
+        gap: "0.5rem"
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "version-pill-tag"
+    }, "v", ver.version), /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: "0.78rem",
+        fontWeight: 600,
+        color: "#f1f5f9"
+      }
+    }, ver.created_by || "Agent Synthesizer"), isCurrent && /*#__PURE__*/React.createElement("span", {
+      className: "badge",
+      style: {
+        background: "rgba(16, 185, 129, 0.15)",
+        color: "#34d399",
+        border: "1px solid rgba(16, 185, 129, 0.3)",
+        fontSize: "0.62rem"
+      }
+    }, "Current Head")), /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        alignItems: "center",
+        gap: "0.5rem"
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: "0.68rem",
+        color: "#64748b",
+        fontFamily: "var(--font-mono)"
+      }
+    }, ver.timestamp ? new Date(ver.timestamp).toLocaleTimeString() : "Recent"), !isCurrent && /*#__PURE__*/React.createElement("button", {
+      type: "button",
+      className: "btn btn-sm btn-warning",
+      style: {
+        fontSize: "0.68rem",
+        padding: "0.15rem 0.55rem"
+      },
+      onClick: () => handleRollbackToVersion(ver.version),
+      disabled: isRollingBack,
+      title: `Revert file back to v${ver.version}`
+    }, isRollingBack ? "Rolling back..." : `⏪ Rollback to v${ver.version}`))), ver.content && /*#__PURE__*/React.createElement("div", {
+      className: "version-snippet-preview"
+    }, ver.content.split("\n").slice(0, 4).join("\n")));
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "flex-end",
+      marginTop: "0.75rem"
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "btn btn-outline btn-sm",
+    onClick: () => setIsVersionHistoryOpen(false)
+  }, "Close")))), isQuickOpenVisible && /*#__PURE__*/React.createElement("div", {
+    className: "quick-open-backdrop",
+    onClick: () => setIsQuickOpenVisible(false),
+    role: "dialog",
+    "aria-modal": "true",
+    "aria-label": "Quick Open Symbol or File"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "quick-open-card",
+    onClick: e => e.stopPropagation()
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "quick-open-input-wrap"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "quick-open-icon"
+  }, "🔍"), /*#__PURE__*/React.createElement("input", {
+    ref: quickOpenInputRef,
+    type: "text",
+    className: "quick-open-input",
+    placeholder: "Search files, classes, functions, endpoints... (Ctrl+P)",
+    value: quickOpenQuery,
+    onChange: e => {
+      setQuickOpenQuery(e.target.value);
+      setQuickOpenSelectedIndex(0);
+    }
+  }), /*#__PURE__*/React.createElement("span", {
+    className: "command-palette-badge"
+  }, "Esc to close")), /*#__PURE__*/React.createElement("div", {
+    className: "quick-open-chips"
+  }, [{
+    id: "all",
+    label: "All Symbols"
+  }, {
+    id: "file",
+    label: "📄 Files"
+  }, {
+    id: "class",
+    label: "📦 Classes"
+  }, {
+    id: "function",
+    label: "⚡ Functions"
+  }, {
+    id: "endpoint",
+    label: "🌐 Endpoints"
+  }, {
+    id: "table",
+    label: "🗄️ Schemas"
+  }].map(chip => /*#__PURE__*/React.createElement("button", {
+    key: chip.id,
+    type: "button",
+    className: `quick-open-chip ${quickOpenFilterKind === chip.id ? "active" : ""}`,
+    onClick: () => {
+      setQuickOpenFilterKind(chip.id);
+      setQuickOpenSelectedIndex(0);
+    }
+  }, chip.label))), /*#__PURE__*/React.createElement("div", {
+    className: "quick-open-list"
+  }, isLoadingSymbols ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "2rem",
+      textAlign: "center",
+      color: "#64748b",
+      fontSize: "0.8rem"
+    }
+  }, "⏳ Scanning workspace AST symbols...") : workspaceSymbols.length === 0 ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "2rem",
+      textAlign: "center",
+      color: "#64748b",
+      fontSize: "0.8rem"
+    }
+  }, "No matching files or symbols found.") : workspaceSymbols.map((s, idx) => {
+    const isActive = idx === quickOpenSelectedIndex;
+    const kindClass = `badge-kind-${s.kind}`;
+    return /*#__PURE__*/React.createElement("div", {
+      key: `${s.file_path}-${s.name}-${idx}`,
+      className: `quick-open-item ${isActive ? "active" : ""}`,
+      onClick: () => handleSelectSymbol(s),
+      onMouseEnter: () => setQuickOpenSelectedIndex(idx)
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "quick-open-item-left"
+    }, /*#__PURE__*/React.createElement("span", {
+      className: `quick-open-kind-badge ${kindClass}`
+    }, s.kind), /*#__PURE__*/React.createElement("span", {
+      className: "quick-open-name"
+    }, s.name), s.container_name && /*#__PURE__*/React.createElement("span", {
+      className: "quick-open-container"
+    }, "(", s.container_name, ")"), /*#__PURE__*/React.createElement("span", {
+      className: "quick-open-path"
+    }, s.file_path)), /*#__PURE__*/React.createElement("div", {
+      className: "quick-open-item-right"
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "quick-open-tier-tag"
+    }, s.tier), /*#__PURE__*/React.createElement("span", {
+      className: "quick-open-line-tag"
+    }, ":", s.line_number)));
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "quick-open-footer"
+  }, /*#__PURE__*/React.createElement("span", null, workspaceSymbols.length, " symbols indexed"), /*#__PURE__*/React.createElement("span", null, "Navigate with ", /*#__PURE__*/React.createElement("kbd", null, "↑"), " ", /*#__PURE__*/React.createElement("kbd", null, "↓"), " • Jump with ", /*#__PURE__*/React.createElement("kbd", null, "Enter"))))), /*#__PURE__*/React.createElement(TokenCostInspectorModal, {
+    isOpen: isCostModalOpen,
+    onClose: () => setIsCostModalOpen(false),
+    telemetry: costTelemetry,
+    missionId: activeMissionId
+  }));
 }
 
 // Error Boundary for UI resilience
@@ -5276,7 +4493,7 @@ class ErrorBoundary extends React.Component {
   }
   render() {
     if (this.state.hasError) {
-      return /*#__PURE__*/_jsxs("div", {
+      return /*#__PURE__*/React.createElement("div", {
         style: {
           minHeight: "100vh",
           background: "#080c14",
@@ -5288,56 +4505,50 @@ class ErrorBoundary extends React.Component {
           justifyContent: "center",
           fontFamily: "'Inter', sans-serif",
           textAlign: "center"
+        }
+      }, /*#__PURE__*/React.createElement("div", {
+        style: {
+          fontSize: "3rem",
+          marginBottom: "1rem"
+        }
+      }, "⚠️"), /*#__PURE__*/React.createElement("h2", {
+        style: {
+          color: "#f9fafb",
+          marginBottom: "0.5rem"
+        }
+      }, "Cockpit Runtime Resilience Active"), /*#__PURE__*/React.createElement("p", {
+        style: {
+          color: "#9ca3af",
+          maxWidth: "600px",
+          marginBottom: "1.5rem",
+          fontSize: "0.95rem"
+        }
+      }, "The UI encountered an unexpected error: ", String(this.state.error?.message || this.state.error)), /*#__PURE__*/React.createElement("pre", {
+        style: {
+          background: "#111827",
+          padding: "1rem 1.5rem",
+          borderRadius: "8px",
+          maxWidth: "800px",
+          overflow: "auto",
+          textAlign: "left",
+          fontSize: "0.8rem",
+          color: "#e2e8f0",
+          border: "1px solid rgba(255,255,255,0.1)"
+        }
+      }, this.state.error?.stack || this.state.error?.message || "Unknown render exception"), /*#__PURE__*/React.createElement("button", {
+        className: "btn btn-primary",
+        style: {
+          marginTop: "1.5rem",
+          padding: "0.6rem 1.5rem"
         },
-        children: [/*#__PURE__*/_jsx("div", {
-          style: {
-            fontSize: "3rem",
-            marginBottom: "1rem"
-          },
-          children: "⚠️"
-        }), /*#__PURE__*/_jsx("h2", {
-          style: {
-            color: "#f9fafb",
-            marginBottom: "0.5rem"
-          },
-          children: "Cockpit Runtime Resilience Active"
-        }), /*#__PURE__*/_jsxs("p", {
-          style: {
-            color: "#9ca3af",
-            maxWidth: "600px",
-            marginBottom: "1.5rem",
-            fontSize: "0.95rem"
-          },
-          children: ["The UI encountered an unexpected error: ", String(this.state.error?.message || this.state.error)]
-        }), /*#__PURE__*/_jsx("pre", {
-          style: {
-            background: "#111827",
-            padding: "1rem 1.5rem",
-            borderRadius: "8px",
-            maxWidth: "800px",
-            overflow: "auto",
-            textAlign: "left",
-            fontSize: "0.8rem",
-            color: "#e2e8f0",
-            border: "1px solid rgba(255,255,255,0.1)"
-          },
-          children: this.state.error?.stack || this.state.error?.message || "Unknown render exception"
-        }), /*#__PURE__*/_jsx("button", {
-          className: "btn btn-primary",
-          style: {
-            marginTop: "1.5rem",
-            padding: "0.6rem 1.5rem"
-          },
-          onClick: () => {
-            this.setState({
-              hasError: false,
-              error: null
-            });
-            window.location.reload();
-          },
-          children: "Restart & Reload Cockpit"
-        })]
-      });
+        onClick: () => {
+          this.setState({
+            hasError: false,
+            error: null
+          });
+          window.location.reload();
+        }
+      }, "Restart & Reload Cockpit"));
     }
     return this.props.children;
   }
@@ -5348,9 +4559,7 @@ function mountApp() {
   const rootElement = document.getElementById("root");
   if (rootElement) {
     const root = ReactDOM.createRoot(rootElement);
-    root.render(/*#__PURE__*/_jsx(ErrorBoundary, {
-      children: /*#__PURE__*/_jsx(App, {})
-    }));
+    root.render(/*#__PURE__*/React.createElement(ErrorBoundary, null, /*#__PURE__*/React.createElement(App, null)));
   }
 }
 if (document.readyState === "loading") {
