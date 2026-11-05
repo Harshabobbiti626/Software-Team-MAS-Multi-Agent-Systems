@@ -2597,94 +2597,101 @@ function App() {
     className: "top-bar",
     role: "banner"
   }, /*#__PURE__*/React.createElement("div", {
-    className: "brand-group"
-  }, /*#__PURE__*/React.createElement("button", {
-    className: "btn btn-outline btn-sm",
-    onClick: () => setViewMode("hub"),
-    title: "Switch to Overview Hub (Ctrl+H)",
-    style: {
-      fontSize: "0.72rem",
-      padding: "0.2rem 0.5rem"
-    }
-  }, "← Hub"), /*#__PURE__*/React.createElement("div", {
+    className: "header-left-zone"
+  }, /*#__PURE__*/React.createElement("div", {
     className: "logo-badge",
     title: "Multi-Agent Software Engineering System"
   }, "MAS"), /*#__PURE__*/React.createElement("div", {
-    className: "mission-meta",
-    title: missionData.title
-  }, /*#__PURE__*/React.createElement("h1", null, missionData.title), /*#__PURE__*/React.createElement("div", {
+    className: "header-view-segmented",
+    role: "navigation",
+    "aria-label": "View Switcher"
+  }, /*#__PURE__*/React.createElement("button", {
+    className: viewMode === "hub" ? "active" : "",
+    onClick: () => setViewMode("hub"),
+    title: "Overview Hub (Ctrl+H)"
+  }, "Hub"), /*#__PURE__*/React.createElement("button", {
+    className: viewMode === "cockpit" ? "active" : "",
+    onClick: () => setViewMode("cockpit"),
+    title: "IDE Cockpit"
+  }, "Cockpit")), /*#__PURE__*/React.createElement("div", {
+    className: "header-divider"
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "header-project-context",
+    title: `Active Mission: ${missionData.title} (${activeMissionId || "IDLE"})\nClick to view Architecture DAG`,
+    onClick: () => setEditorViewMode("dag"),
     style: {
-      display: "flex",
-      alignItems: "center",
-      gap: "0.35rem"
+      cursor: "pointer"
     }
   }, /*#__PURE__*/React.createElement("span", {
     className: `live-indicator ${connectionStatus === "STREAMING" ? "" : connectionStatus === "IDLE" ? "idle" : "disconnected"}`
   }), /*#__PURE__*/React.createElement("span", {
-    className: "mission-id-badge"
-  }, activeMissionId || "IDLE")))), /*#__PURE__*/React.createElement("button", {
+    className: "header-project-name"
+  }, missionData.title || "Workspace"), activeMissionId && /*#__PURE__*/React.createElement("span", {
+    className: "header-project-tag"
+  }, "Active"))), /*#__PURE__*/React.createElement("div", {
+    className: "header-center-zone"
+  }, /*#__PURE__*/React.createElement("button", {
     type: "button",
     className: "header-omnibar-btn",
     onClick: () => {
+      setQuickOpenQuery("");
+      setQuickOpenFilterKind("all");
+      setQuickOpenSelectedIndex(0);
+      setIsQuickOpenVisible(true);
+    },
+    title: "Quick-Open Symbol or File (Ctrl+P) / Command Palette (Ctrl+K)"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "omnibar-icon"
+  }, "🔍"), /*#__PURE__*/React.createElement("span", {
+    className: "omnibar-placeholder"
+  }, "Search files, symbols (Ctrl+P) or commands (Ctrl+K)..."), /*#__PURE__*/React.createElement("div", {
+    className: "omnibar-shortcuts"
+  }, /*#__PURE__*/React.createElement("kbd", {
+    className: "header-kbd"
+  }, "Ctrl P"), /*#__PURE__*/React.createElement("kbd", {
+    className: "header-kbd",
+    onClick: e => {
+      e.stopPropagation();
       setIsCommandPaletteOpen(true);
       setCommandPaletteQuery("");
       setCommandPaletteSelectedIndex(0);
     },
     title: "Open Command Palette (Ctrl+K)"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "omnibar-icon"
-  }, "🔍"), /*#__PURE__*/React.createElement("span", {
-    className: "omnibar-placeholder"
-  }, "Search files, actions, or type a command..."), /*#__PURE__*/React.createElement("span", {
-    className: "omnibar-shortcut"
-  }, "Ctrl K")), /*#__PURE__*/React.createElement("nav", {
-    className: "pipeline-progress",
-    "aria-label": "Pipeline Stages"
-  }, PIPELINE_STAGES.map(stg => {
-    const isCompleted = missionData.stageIndex > stg.index || missionData.status === "COMPLETED";
-    const isActive = missionData.stageIndex === stg.index && missionData.status !== "COMPLETED";
-    const isFiltered = selectedStageFilter === stg.id;
-    return /*#__PURE__*/React.createElement(React.Fragment, {
-      key: stg.id
-    }, /*#__PURE__*/React.createElement("div", {
-      className: `stage-node ${isActive ? "active" : ""} ${isCompleted ? "completed" : ""} ${isFiltered ? "selected-filter" : ""}`,
-      title: `${stg.label}: ${stg.desc} (Click to filter workspace files)`,
-      onClick: () => setSelectedStageFilter(prev => prev === stg.id ? null : stg.id),
-      role: "button",
-      tabIndex: 0,
-      onKeyDown: e => {
-        if (e.key === "Enter" || e.key === " ") {
-          setSelectedStageFilter(prev => prev === stg.id ? null : stg.id);
-        }
-      }
+  }, "Ctrl K")))), /*#__PURE__*/React.createElement("div", {
+    className: "header-right-zone"
+  }, (() => {
+    const currentStage = PIPELINE_STAGES.find(s => s.index === missionData.stageIndex) || PIPELINE_STAGES[2];
+    const isFiltered = selectedStageFilter === currentStage.id;
+    return /*#__PURE__*/React.createElement("div", {
+      className: `header-stage-pill ${isFiltered ? "filtered" : ""}`,
+      onClick: () => setSelectedStageFilter(prev => prev === currentStage.id ? null : currentStage.id),
+      title: `Pipeline Stage ${missionData.stageIndex}/5: ${currentStage.label} (${currentStage.desc})\nClick to ${isFiltered ? "clear filter" : "filter workspace files"}`
     }, /*#__PURE__*/React.createElement("span", {
-      className: "node-circle"
-    }, isCompleted ? "✓" : stg.index), /*#__PURE__*/React.createElement("span", {
-      className: "node-label"
-    }, stg.label)), stg.index < 5 && /*#__PURE__*/React.createElement("div", {
-      className: `stage-connector ${isCompleted ? "completed" : ""}`
-    }));
-  })), /*#__PURE__*/React.createElement("div", {
-    className: "metrics-controls"
-  }, /*#__PURE__*/React.createElement("div", {
+      className: "stage-pill-icon"
+    }, "⚡"), /*#__PURE__*/React.createElement("span", {
+      className: "stage-pill-phase"
+    }, "Phase ", missionData.stageIndex, "/5:"), /*#__PURE__*/React.createElement("span", {
+      className: "stage-pill-name"
+    }, currentStage.label), isFiltered && /*#__PURE__*/React.createElement("span", {
+      className: "stage-pill-clear",
+      onClick: e => {
+        e.stopPropagation();
+        setSelectedStageFilter(null);
+      },
+      title: "Clear stage filter"
+    }, "✕"));
+  })(), /*#__PURE__*/React.createElement("div", {
     className: "header-telemetry-chip",
     onClick: () => setIsCostModalOpen(true),
-    style: {
-      cursor: "pointer"
-    },
     title: "Total Tokens Burned & Circuit Breaker Health. Click to inspect real-time costs and pod burn."
-  }, /*#__PURE__*/React.createElement("span", null, "⚡ ", Number(costTelemetry?.total_tokens || missionData.tokens.total || 0).toLocaleString(), " tok"), /*#__PURE__*/React.createElement("span", {
-    style: {
-      color: "#34d399",
-      fontWeight: 700
-    }
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "telemetry-tok"
+  }, "⚡ ", Number(costTelemetry?.total_tokens || missionData.tokens.total || 0).toLocaleString(), " tok"), /*#__PURE__*/React.createElement("span", {
+    className: "telemetry-cost"
   }, "($", Number(costTelemetry?.net_cost_usd || 0.007).toFixed(4), ")"), /*#__PURE__*/React.createElement("span", {
-    style: {
-      color: "#64748b"
-    }
-  }, "•"), /*#__PURE__*/React.createElement("span", {
-    className: missionData.circuitBreaker.healthy ? "chip-status-healthy" : "chip-status-tripped"
-  }, missionData.circuitBreaker.healthy ? "Healthy" : "Tripped")), /*#__PURE__*/React.createElement("button", {
+    className: `telemetry-dot ${missionData.circuitBreaker.healthy ? "healthy" : "tripped"}`,
+    title: missionData.circuitBreaker.healthy ? "Circuit Breaker: Healthy" : "Circuit Breaker: Tripped"
+  })), /*#__PURE__*/React.createElement("button", {
     className: "btn btn-primary btn-sm",
     onClick: () => setIsNewMissionOpen(true),
     "aria-label": "Launch a new multi-agent mission",
@@ -2922,7 +2929,12 @@ function App() {
     }
   }, /*#__PURE__*/React.createElement("div", {
     className: "ide-tabs-bar",
-    role: "tablist"
+    role: "tablist",
+    onWheel: e => {
+      if (e.deltaY !== 0) {
+        e.currentTarget.scrollLeft += e.deltaY;
+      }
+    }
   }, openTabs.length === 0 ? /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",

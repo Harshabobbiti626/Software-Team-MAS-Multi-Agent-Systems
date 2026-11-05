@@ -2406,87 +2406,118 @@ function App() {
 
   return (
     <div className="cockpit-container" style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
-      {/* 1. REDESIGNED SLEEK TOP COMMAND BAR */}
+      {/* 1. REDESIGNED SLEEK TOP COMMAND BAR (3-ZONE BALANCED ARCHITECTURE) */}
       <header className="top-bar" role="banner">
-        {/* LEFT: BRAND & MISSION CONTEXT */}
-        <div className="brand-group">
-          <button
-            className="btn btn-outline btn-sm"
-            onClick={() => setViewMode("hub")}
-            title="Switch to Overview Hub (Ctrl+H)"
-            style={{ fontSize: "0.72rem", padding: "0.2rem 0.5rem" }}
-          >
-            ← Hub
-          </button>
+        {/* ZONE 1: BRAND, SEGMENTED VIEW SWITCHER & PROJECT CONTEXT */}
+        <div className="header-left-zone">
           <div className="logo-badge" title="Multi-Agent Software Engineering System">MAS</div>
-          <div className="mission-meta" title={missionData.title}>
-            <h1>{missionData.title}</h1>
-            <div style={{ display: "flex", alignItems: "center", gap: "0.35rem" }}>
-              <span className={`live-indicator ${connectionStatus === "STREAMING" ? "" : connectionStatus === "IDLE" ? "idle" : "disconnected"}`} />
-              <span className="mission-id-badge">{activeMissionId || "IDLE"}</span>
-            </div>
+          <div className="header-view-segmented" role="navigation" aria-label="View Switcher">
+            <button
+              className={viewMode === "hub" ? "active" : ""}
+              onClick={() => setViewMode("hub")}
+              title="Overview Hub (Ctrl+H)"
+            >
+              Hub
+            </button>
+            <button
+              className={viewMode === "cockpit" ? "active" : ""}
+              onClick={() => setViewMode("cockpit")}
+              title="IDE Cockpit"
+            >
+              Cockpit
+            </button>
+          </div>
+          <div className="header-divider" />
+          <div
+            className="header-project-context"
+            title={`Active Mission: ${missionData.title} (${activeMissionId || "IDLE"})\nClick to view Architecture DAG`}
+            onClick={() => setEditorViewMode("dag")}
+            style={{ cursor: "pointer" }}
+          >
+            <span className={`live-indicator ${connectionStatus === "STREAMING" ? "" : connectionStatus === "IDLE" ? "idle" : "disconnected"}`} />
+            <span className="header-project-name">{missionData.title || "Workspace"}</span>
+            {activeMissionId && (
+              <span className="header-project-tag">Active</span>
+            )}
           </div>
         </div>
 
-        {/* CENTER: OMNIBAR / COMMAND PALETTE TRIGGER BUTTON */}
-        <button
-          type="button"
-          className="header-omnibar-btn"
-          onClick={() => { setIsCommandPaletteOpen(true); setCommandPaletteQuery(""); setCommandPaletteSelectedIndex(0); }}
-          title="Open Command Palette (Ctrl+K)"
-        >
-          <span className="omnibar-icon">🔍</span>
-          <span className="omnibar-placeholder">Search files, actions, or type a command...</span>
-          <span className="omnibar-shortcut">Ctrl K</span>
-        </button>
+        {/* ZONE 2: CENTERED OMNIBAR / QUICK-OPEN & COMMAND TRIGGER */}
+        <div className="header-center-zone">
+          <button
+            type="button"
+            className="header-omnibar-btn"
+            onClick={() => {
+              setQuickOpenQuery("");
+              setQuickOpenFilterKind("all");
+              setQuickOpenSelectedIndex(0);
+              setIsQuickOpenVisible(true);
+            }}
+            title="Quick-Open Symbol or File (Ctrl+P) / Command Palette (Ctrl+K)"
+          >
+            <span className="omnibar-icon">🔍</span>
+            <span className="omnibar-placeholder">Search files, symbols (Ctrl+P) or commands (Ctrl+K)...</span>
+            <div className="omnibar-shortcuts">
+              <kbd className="header-kbd">Ctrl P</kbd>
+              <kbd
+                className="header-kbd"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsCommandPaletteOpen(true);
+                  setCommandPaletteQuery("");
+                  setCommandPaletteSelectedIndex(0);
+                }}
+                title="Open Command Palette (Ctrl+K)"
+              >
+                Ctrl K
+              </kbd>
+            </div>
+          </button>
+        </div>
 
-        {/* 5-STAGE PIPELINE INDICATOR (COMPACT) */}
-        <nav className="pipeline-progress" aria-label="Pipeline Stages">
-          {PIPELINE_STAGES.map((stg) => {
-            const isCompleted = missionData.stageIndex > stg.index || missionData.status === "COMPLETED";
-            const isActive = missionData.stageIndex === stg.index && missionData.status !== "COMPLETED";
-            const isFiltered = selectedStageFilter === stg.id;
+        {/* ZONE 3: ACTIVE PHASE BADGE, TELEMETRY & ACTIONS */}
+        <div className="header-right-zone">
+          {(() => {
+            const currentStage = PIPELINE_STAGES.find(s => s.index === missionData.stageIndex) || PIPELINE_STAGES[2];
+            const isFiltered = selectedStageFilter === currentStage.id;
             return (
-              <React.Fragment key={stg.id}>
-                <div
-                  className={`stage-node ${isActive ? "active" : ""} ${isCompleted ? "completed" : ""} ${isFiltered ? "selected-filter" : ""}`}
-                  title={`${stg.label}: ${stg.desc} (Click to filter workspace files)`}
-                  onClick={() => setSelectedStageFilter(prev => prev === stg.id ? null : stg.id)}
-                  role="button"
-                  tabIndex={0}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      setSelectedStageFilter(prev => prev === stg.id ? null : stg.id);
-                    }
-                  }}
-                >
-                  <span className="node-circle">
-                    {isCompleted ? "✓" : stg.index}
+              <div
+                className={`header-stage-pill ${isFiltered ? "filtered" : ""}`}
+                onClick={() => setSelectedStageFilter(prev => prev === currentStage.id ? null : currentStage.id)}
+                title={`Pipeline Stage ${missionData.stageIndex}/5: ${currentStage.label} (${currentStage.desc})\nClick to ${isFiltered ? "clear filter" : "filter workspace files"}`}
+              >
+                <span className="stage-pill-icon">⚡</span>
+                <span className="stage-pill-phase">Phase {missionData.stageIndex}/5:</span>
+                <span className="stage-pill-name">{currentStage.label}</span>
+                {isFiltered && (
+                  <span
+                    className="stage-pill-clear"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedStageFilter(null);
+                    }}
+                    title="Clear stage filter"
+                  >
+                    ✕
                   </span>
-                  <span className="node-label">{stg.label}</span>
-                </div>
-                {stg.index < 5 && <div className={`stage-connector ${isCompleted ? "completed" : ""}`} />}
-              </React.Fragment>
+                )}
+              </div>
             );
-          })}
-        </nav>
+          })()}
 
-        {/* RIGHT: METRICS & ACTION CONTROLS */}
-        <div className="metrics-controls">
           <div
             className="header-telemetry-chip"
             onClick={() => setIsCostModalOpen(true)}
-            style={{ cursor: "pointer" }}
             title="Total Tokens Burned & Circuit Breaker Health. Click to inspect real-time costs and pod burn."
           >
-            <span>⚡ {Number(costTelemetry?.total_tokens || missionData.tokens.total || 0).toLocaleString()} tok</span>
-            <span style={{ color: "#34d399", fontWeight: 700 }}>
+            <span className="telemetry-tok">⚡ {Number(costTelemetry?.total_tokens || missionData.tokens.total || 0).toLocaleString()} tok</span>
+            <span className="telemetry-cost">
               (${Number(costTelemetry?.net_cost_usd || 0.007).toFixed(4)})
             </span>
-            <span style={{ color: "#64748b" }}>•</span>
-            <span className={missionData.circuitBreaker.healthy ? "chip-status-healthy" : "chip-status-tripped"}>
-              {missionData.circuitBreaker.healthy ? "Healthy" : "Tripped"}
-            </span>
+            <span
+              className={`telemetry-dot ${missionData.circuitBreaker.healthy ? "healthy" : "tripped"}`}
+              title={missionData.circuitBreaker.healthy ? "Circuit Breaker: Healthy" : "Circuit Breaker: Tripped"}
+            />
           </div>
 
           <button
@@ -2709,8 +2740,16 @@ function App() {
 
         {/* CENTER PANE: IDE EDITOR & WORKBENCH */}
         <section className="panel center-panel" aria-label="IDE Code Editor Canvas" style={{ display: "flex", flexDirection: "column" }}>
-          {/* 1. IDE MULTI-TAB BAR */}
-          <div className="ide-tabs-bar" role="tablist">
+          {/* 1. IDE MULTI-TAB BAR (NO DISTRACTING SCROLLBARS, SMOOTH HORIZONTAL SCROLL) */}
+          <div
+            className="ide-tabs-bar"
+            role="tablist"
+            onWheel={(e) => {
+              if (e.deltaY !== 0) {
+                e.currentTarget.scrollLeft += e.deltaY;
+              }
+            }}
+          >
             {openTabs.length === 0 ? (
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", padding: "0.2rem 0.6rem" }}>
                 <span style={{ fontSize: "0.75rem", color: "var(--text-muted)", fontStyle: "italic" }}>
