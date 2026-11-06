@@ -18,8 +18,11 @@ htmlcov/
 
 # Local databases, telemetry & ephemeral worktrees
 *.db
+*.db-wal
+*.db-shm
 *.sqlite3
 .mas_episodic.db
+.mas_missions.db*
 .mas_traces.jsonl
 .worktrees/
 PULL_REQUEST.md
@@ -27,18 +30,12 @@ PULL_REQUEST.md
 .env.local
 .env.*.local
 
+# Ephemeral test & mission run outputs
+artifacts/artifacts/
+artifacts/prd/ProjectCharter_TASK-*.json
+
 # IDE & OS
 .vscode/
 .idea/
 .DS_Store
 Thumbs.db
-
-# IDE Config & Agent Assets (Local Only - Do Not Push to GitHub)
-.agents/
-prompts/
-templates/
-mcp/
-.cursorrules
-.windsurfrules
-AGENTS.md
-CLAUDE.md

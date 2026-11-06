@@ -79,7 +79,9 @@ def test_git_worktree_and_pull_request(tmp_path):
     res = pr_gen_repo.publish_remote_pr(pr, push_to_remote=False, create_github_pr=False)
     assert res.pr_id == "PR-TASK-99"
     assert (tmp_path / "PULL_REQUEST.md").exists()
-    assert "feat(backend): Implement Checkout" in (tmp_path / "PULL_REQUEST.md").read_text(encoding="utf-8")
+    assert "feat(backend): Implement Checkout" in (tmp_path / "PULL_REQUEST.md").read_text(
+        encoding="utf-8"
+    )
 
 
 def test_otlp_trace_exporter(tmp_path):

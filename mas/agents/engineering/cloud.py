@@ -83,7 +83,9 @@ resource "aws_security_group" "service_sg" {{
         )
 
         tokens = TokenUsageTracker(prompt_tokens=850, candidate_tokens=420, thinking_tokens=600)
-        tokens.total_tokens = tokens.prompt_tokens + tokens.candidate_tokens + tokens.thinking_tokens
+        tokens.total_tokens = (
+            tokens.prompt_tokens + tokens.candidate_tokens + tokens.thinking_tokens
+        )
 
         return AgentResponse(
             agent_role=self.role,

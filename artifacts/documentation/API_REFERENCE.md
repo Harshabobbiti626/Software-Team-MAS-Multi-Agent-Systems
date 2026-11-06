@@ -1,7 +1,7 @@
-# API & SDK Reference: Integration Test Service
+# API & SDK Reference: Cost Tracking Test Mission
 
 ## Endpoint: `POST /api/v1/resource`
-Creates a new resource managed under Integration Test Service.
+Creates a new resource managed under Cost Tracking Test Mission.
 
 ### Runnable Example
 ```bash

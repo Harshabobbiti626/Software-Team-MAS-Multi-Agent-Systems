@@ -47,8 +47,8 @@ def test_mission_registry():
     assert retrieved.title == "Payment Service Mission"
 
     missions_list = registry.list_missions()
-    assert len(missions_list) == 1
-    assert missions_list[0]["mission_id"] == session.mission_id
+    assert len(missions_list) >= 1
+    assert any(m["mission_id"] == session.mission_id for m in missions_list)
 
 
 def test_web_server_rest_endpoints(tmp_path):
@@ -77,12 +77,14 @@ def test_web_server_rest_endpoints(tmp_path):
             assert "app.js" in html
 
         # 3. Test POST /api/v1/missions
-        create_payload = json.dumps({
-            "title": "API Test Service",
-            "description": "Integration test description",
-            "target_dir": str(tmp_path),
-            "interactive": False,
-        }).encode("utf-8")
+        create_payload = json.dumps(
+            {
+                "title": "API Test Service",
+                "description": "Integration test description",
+                "target_dir": str(tmp_path),
+                "interactive": False,
+            }
+        ).encode("utf-8")
         req = urllib.request.Request(
             f"{base_url}/api/v1/missions",
             data=create_payload,
@@ -111,6 +113,68 @@ def test_web_server_rest_endpoints(tmp_path):
             assert resp.status == 200
             dec_data = json.loads(resp.read().decode("utf-8"))
             assert dec_data["decision"] == "APPROVED"
+
+        # 6. Test GET /api/v1/artifacts/{id}/diff
+        with urllib.request.urlopen(f"{base_url}/api/v1/artifacts/service.py/diff") as resp:
+            assert resp.status == 200
+            diff_data = json.loads(resp.read().decode("utf-8"))
+            assert "has_diff" in diff_data
+            assert "diff" in diff_data
+            assert "additions_count" in diff_data
+
+        # 7. Test PUT /api/v1/artifacts/{id} (Update file with AST verification)
+        update_payload = json.dumps(
+            {"content": "def test_func():\n    return 'updated'\n"}
+        ).encode("utf-8")
+        update_req = urllib.request.Request(
+            f"{base_url}/api/v1/artifacts/service.py",
+            data=update_payload,
+            headers={"Content-Type": "application/json"},
+            method="PUT",
+        )
+        with urllib.request.urlopen(update_req) as resp:
+            assert resp.status == 200
+            update_data = json.loads(resp.read().decode("utf-8"))
+            assert update_data["status"] == "SAVED"
+            assert "artifact" in update_data
+            assert update_data["artifact"]["version"] >= 2
+
+        # 8. Test PUT /api/v1/artifacts/{id} with broken Python syntax (must fail with 422)
+        broken_payload = json.dumps(
+            {"content": "def broken_func(\n"}
+        ).encode("utf-8")
+        broken_req = urllib.request.Request(
+            f"{base_url}/api/v1/artifacts/service.py",
+            data=broken_payload,
+            headers={"Content-Type": "application/json"},
+            method="PUT",
+        )
+        try:
+            urllib.request.urlopen(broken_req)
+            raise AssertionError("Should have raised HTTP 422 for syntax error")
+        except urllib.error.HTTPError as err:
+            assert err.code == 422
+
+        # 9. Test GET /api/v1/artifacts/{id}/versions
+        with urllib.request.urlopen(f"{base_url}/api/v1/artifacts/service.py/versions") as resp:
+            assert resp.status == 200
+            ver_data = json.loads(resp.read().decode())
+            assert "versions" in ver_data
+            assert len(ver_data["versions"]) >= 1
+
+        # 10. Test POST /api/v1/artifacts/{id}/rollback to version 1
+        rollback_payload = json.dumps({"version": 1}).encode("utf-8")
+        rollback_req = urllib.request.Request(
+            f"{base_url}/api/v1/artifacts/service.py/rollback",
+            data=rollback_payload,
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        with urllib.request.urlopen(rollback_req) as resp:
+            assert resp.status == 200
+            rb_data = json.loads(resp.read().decode())
+            assert rb_data["status"] == "ROLLED_BACK"
+            assert rb_data["rolled_back_to"] == 1
 
     finally:
         server.shutdown()

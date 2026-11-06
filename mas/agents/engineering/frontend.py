@@ -213,13 +213,17 @@ export const {component_name}: React.FC = () => {{
 
         # Automated Dependency Reconciliation for frontend packages
         try:
-            reconciler = DependencyReconciler(workspace_root=self.config.system.blackboard_repo_path)
+            reconciler = DependencyReconciler(
+                workspace_root=self.config.system.blackboard_repo_path
+            )
             reconciler.reconcile_file(target_filename, code_content=component_code)
         except Exception:
             pass
 
         tokens = TokenUsageTracker(prompt_tokens=950, candidate_tokens=650, thinking_tokens=700)
-        tokens.total_tokens = tokens.prompt_tokens + tokens.candidate_tokens + tokens.thinking_tokens
+        tokens.total_tokens = (
+            tokens.prompt_tokens + tokens.candidate_tokens + tokens.thinking_tokens
+        )
 
         return AgentResponse(
             agent_role=self.role,

@@ -1,7 +1,7 @@
 {
-  "task_id": "TASK-001",
+  "task_id": "TASK-1793963097364",
   "review_decision": "REVISION_REQUESTED",
-  "reviewed_artifacts_count": 19,
+  "reviewed_artifacts_count": 25,
   "details": [
     {
       "artifact_name": "CoreView.tsx",
@@ -16,6 +16,40 @@
           "line_number": 4,
           "severity": "ERROR",
           "message": "leading zeros in decimal integer literals are not permitted; use an 0o prefix for octal integers (CoreView.tsx, line 4)",
+          "rule_code": "SYNTAX_ERROR"
+        }
+      ]
+    },
+    {
+      "artifact_name": "CostView.tsx",
+      "ast_syntax_pass": false,
+      "solid_compliance": {
+        "SingleResponsibility": "Compliant: Focused module scope",
+        "DependencyInversion": "Compliant: Relies on abstractions and schemas"
+      },
+      "issues": [
+        {
+          "file_path": "CostView.tsx",
+          "line_number": 4,
+          "severity": "ERROR",
+          "message": "leading zeros in decimal integer literals are not permitted; use an 0o prefix for octal integers (CostView.tsx, line 4)",
+          "rule_code": "SYNTAX_ERROR"
+        }
+      ]
+    },
+    {
+      "artifact_name": "DiagnosticView.tsx",
+      "ast_syntax_pass": false,
+      "solid_compliance": {
+        "SingleResponsibility": "Compliant: Focused module scope",
+        "DependencyInversion": "Compliant: Relies on abstractions and schemas"
+      },
+      "issues": [
+        {
+          "file_path": "DiagnosticView.tsx",
+          "line_number": 4,
+          "severity": "ERROR",
+          "message": "leading zeros in decimal integer literals are not permitted; use an 0o prefix for octal integers (DiagnosticView.tsx, line 4)",
           "rule_code": "SYNTAX_ERROR"
         }
       ]
@@ -132,7 +166,42 @@
       ]
     },
     {
+      "artifact_name": "SymbolView.tsx",
+      "ast_syntax_pass": false,
+      "solid_compliance": {
+        "SingleResponsibility": "Compliant: Focused module scope",
+        "DependencyInversion": "Compliant: Relies on abstractions and schemas"
+      },
+      "issues": [
+        {
+          "file_path": "SymbolView.tsx",
+          "line_number": 4,
+          "severity": "ERROR",
+          "message": "leading zeros in decimal integer literals are not permitted; use an 0o prefix for octal integers (SymbolView.tsx, line 4)",
+          "rule_code": "SYNTAX_ERROR"
+        }
+      ]
+    },
+    {
       "artifact_name": "test_core.py",
+      "ast_syntax_pass": true,
+      "solid_compliance": {
+        "SingleResponsibility": "Compliant: Focused module scope",
+        "DependencyInversion": "Compliant: Relies on abstractions and schemas"
+      },
+      "issues": []
+    },
+    {
+      "artifact_name": "test_cost.py",
+      "ast_syntax_pass": true,
+      "solid_compliance": {
+        "SingleResponsibility": "Compliant: Focused module scope",
+        "DependencyInversion": "Compliant: Relies on abstractions and schemas"
+      },
+      "issues": []
+    },
+    {
+      "artifact_name": "test_diagnostic.py",
       "ast_syntax_pass": true,
       "solid_compliance": {
         "SingleResponsibility": "Compliant: Focused module scope",
@@ -186,7 +255,16 @@
       "issues": []
     },
     {
-      "artifact_name": "IntegrationView.tsx",
+      "artifact_name": "test_symbol.py",
+      "ast_syntax_pass": true,
+      "solid_compliance": {
+        "SingleResponsibility": "Compliant: Focused module scope",
+        "DependencyInversion": "Compliant: Relies on abstractions and schemas"
+      },
+      "issues": []
+    },
+    {
+      "artifact_name": "CostView.tsx",
       "ast_syntax_pass": false,
       "solid_compliance": {
         "SingleResponsibility": "Compliant: Focused module scope",
@@ -194,13 +272,22 @@
       },
       "issues": [
         {
-          "file_path": "IntegrationView.tsx",
-          "line_number": 3,
+          "file_path": "CostView.tsx",
+          "line_number": 4,
           "severity": "ERROR",
-          "message": "leading zeros in decimal integer literals are not permitted; use an 0o prefix for octal integers (IntegrationView.tsx, line 3)",
+          "message": "leading zeros in decimal integer literals are not permitted; use an 0o prefix for octal integers (CostView.tsx, line 4)",
           "rule_code": "SYNTAX_ERROR"
         }
       ]
+    },
+    {
+      "artifact_name": "service.py",
+      "ast_syntax_pass": true,
+      "solid_compliance": {
+        "SingleResponsibility": "Compliant: Focused module scope",
+        "DependencyInversion": "Compliant: Relies on abstractions and schemas"
+      },
+      "issues": []
     },
     {
       "artifact_name": "main.tf",
@@ -237,16 +324,7 @@
       ]
     },
     {
-      "artifact_name": "service.py",
-      "ast_syntax_pass": true,
-      "solid_compliance": {
-        "SingleResponsibility": "Compliant: Focused module scope",
-        "DependencyInversion": "Compliant: Relies on abstractions and schemas"
-      },
-      "issues": []
-    },
-    {
-      "artifact_name": "test_integration.py",
+      "artifact_name": "test_cost.py",
       "ast_syntax_pass": true,
       "solid_compliance": {
         "SingleResponsibility": "Compliant: Focused module scope",

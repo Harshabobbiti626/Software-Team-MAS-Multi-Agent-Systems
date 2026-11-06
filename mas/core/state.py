@@ -143,6 +143,7 @@ class Artifact(BaseModel):
     created_by: str
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     metadata: Dict[str, Any] = Field(default_factory=dict)
+    version_history: List[Dict[str, Any]] = Field(default_factory=list)
 
 
 class Task(BaseModel):

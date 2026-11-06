@@ -79,9 +79,7 @@ class DeterministicLinter:
                 raw_output=str(se),
             )
 
-    def check_json_syntax(
-        self, file_path: str, code_content: Optional[str] = None
-    ) -> LintResult:
+    def check_json_syntax(self, file_path: str, code_content: Optional[str] = None) -> LintResult:
         """
         Validates JSON schema and syntax using standard parser.
         """
@@ -110,9 +108,7 @@ class DeterministicLinter:
                 raw_output=str(err),
             )
 
-    def check_yaml_syntax(
-        self, file_path: str, code_content: Optional[str] = None
-    ) -> LintResult:
+    def check_yaml_syntax(self, file_path: str, code_content: Optional[str] = None) -> LintResult:
         """
         Validates YAML syntax using safe YAML parser.
         """
@@ -156,7 +152,7 @@ class DeterministicLinter:
         lines = content.splitlines()
 
         stack = []
-        matching = {')': '(', ']': '[', '}': '{'}
+        matching = {")": "(", "]": "[", "}": "{"}
         in_single_quote = False
         in_double_quote = False
         in_template_lit = False
@@ -170,7 +166,7 @@ class DeterministicLinter:
 
                 # Check block comment
                 if in_block_comment:
-                    if ch == '*' and i + 1 < n and line[i + 1] == '/':
+                    if ch == "*" and i + 1 < n and line[i + 1] == "/":
                         in_block_comment = False
                         i += 2
                         continue
@@ -179,16 +175,16 @@ class DeterministicLinter:
 
                 # Check line comment
                 if not in_single_quote and not in_double_quote and not in_template_lit:
-                    if ch == '/' and i + 1 < n and line[i + 1] == '/':
+                    if ch == "/" and i + 1 < n and line[i + 1] == "/":
                         # Line comment rest of line
                         break
-                    if ch == '/' and i + 1 < n and line[i + 1] == '*':
+                    if ch == "/" and i + 1 < n and line[i + 1] == "*":
                         in_block_comment = True
                         i += 2
                         continue
 
                 # String handling
-                if ch == '\\' and (in_single_quote or in_double_quote or in_template_lit):
+                if ch == "\\" and (in_single_quote or in_double_quote or in_template_lit):
                     i += 2  # skip escaped character
                     continue
 
@@ -202,7 +198,7 @@ class DeterministicLinter:
                     i += 1
                     continue
 
-                if ch == '`' and not in_single_quote and not in_double_quote:
+                if ch == "`" and not in_single_quote and not in_double_quote:
                     in_template_lit = not in_template_lit
                     i += 1
                     continue
@@ -212,9 +208,9 @@ class DeterministicLinter:
                     continue
 
                 # Delimiter balance check
-                if ch in ('(', '[', '{'):
+                if ch in ("(", "[", "{"):
                     stack.append((ch, line_idx, i + 1))
-                elif ch in (')', ']', '}'):
+                elif ch in (")", "]", "}"):
                     expected = matching[ch]
                     if not stack:
                         return LintResult(
@@ -310,9 +306,7 @@ class DeterministicLinter:
             raw_output="Valid TypeScript/JavaScript structure and balanced tokens.",
         )
 
-    def check_sql_syntax(
-        self, file_path: str, code_content: Optional[str] = None
-    ) -> LintResult:
+    def check_sql_syntax(self, file_path: str, code_content: Optional[str] = None) -> LintResult:
         """
         Validates SQL DDL/DML statements:
         1. Checks balanced parentheses and unclosed string quotes.
@@ -325,9 +319,25 @@ class DeterministicLinter:
         paren_depth = 0
         in_quote = False
         valid_keywords = {
-            "CREATE", "ALTER", "DROP", "SELECT", "INSERT", "UPDATE", "DELETE",
-            "WITH", "BEGIN", "COMMIT", "ROLLBACK", "COMMENT", "GRANT", "REVOKE",
-            "SET", "SHOW", "TRUNCATE", "REINDEX", "EXPLAIN"
+            "CREATE",
+            "ALTER",
+            "DROP",
+            "SELECT",
+            "INSERT",
+            "UPDATE",
+            "DELETE",
+            "WITH",
+            "BEGIN",
+            "COMMIT",
+            "ROLLBACK",
+            "COMMENT",
+            "GRANT",
+            "REVOKE",
+            "SET",
+            "SHOW",
+            "TRUNCATE",
+            "REINDEX",
+            "EXPLAIN",
         }
 
         for line_idx, line in enumerate(lines, start=1):
@@ -339,14 +349,14 @@ class DeterministicLinter:
             n = len(line)
             while i < n:
                 ch = line[i]
-                if ch == "'" and (i == 0 or line[i - 1] != '\\'):
+                if ch == "'" and (i == 0 or line[i - 1] != "\\"):
                     in_quote = not in_quote
                     i += 1
                     continue
                 if not in_quote:
-                    if ch == '(':
+                    if ch == "(":
                         paren_depth += 1
-                    elif ch == ')':
+                    elif ch == ")":
                         paren_depth -= 1
                         if paren_depth < 0:
                             return LintResult(
@@ -434,7 +444,15 @@ class DeterministicLinter:
             conn = sqlite3.connect(":memory:")
             # Replace common Postgres types that SQLite might not understand for pure syntax test
             sqlite_ddl = content
-            for pg_type in ["UUID", "TIMESTAMPTZ", "TIMESTAMP WITH TIME ZONE", "BIGSERIAL", "SERIAL", "JSONB", "BOOLEAN"]:
+            for pg_type in [
+                "UUID",
+                "TIMESTAMPTZ",
+                "TIMESTAMP WITH TIME ZONE",
+                "BIGSERIAL",
+                "SERIAL",
+                "JSONB",
+                "BOOLEAN",
+            ]:
                 sqlite_ddl = re.sub(rf"\b{pg_type}\b", "TEXT", sqlite_ddl, flags=re.IGNORECASE)
             sqlite_ddl = re.sub(r"CREATE\s+EXTENSION[^;]+;", "", sqlite_ddl, flags=re.IGNORECASE)
             sqlite_ddl = re.sub(r"COMMENT\s+ON[^;]+;", "", sqlite_ddl, flags=re.IGNORECASE)
@@ -460,9 +478,23 @@ class DeterministicLinter:
         lines = content.splitlines()
 
         valid_instructions = {
-            "FROM", "RUN", "CMD", "LABEL", "EXPOSE", "ENV", "ADD", "COPY",
-            "ENTRYPOINT", "VOLUME", "USER", "WORKDIR", "ARG", "ONBUILD",
-            "STOPSIGNAL", "HEALTHCHECK", "SHELL"
+            "FROM",
+            "RUN",
+            "CMD",
+            "LABEL",
+            "EXPOSE",
+            "ENV",
+            "ADD",
+            "COPY",
+            "ENTRYPOINT",
+            "VOLUME",
+            "USER",
+            "WORKDIR",
+            "ARG",
+            "ONBUILD",
+            "STOPSIGNAL",
+            "HEALTHCHECK",
+            "SHELL",
         }
 
         has_from = False
@@ -559,9 +591,7 @@ class DeterministicLinter:
             raw_output="Valid Dockerfile syntax and instructions.",
         )
 
-    def check_syntax_auto(
-        self, file_path: str, code_content: Optional[str] = None
-    ) -> LintResult:
+    def check_syntax_auto(self, file_path: str, code_content: Optional[str] = None) -> LintResult:
         """
         Dispatches syntax check automatically according to file extension or name.
         """

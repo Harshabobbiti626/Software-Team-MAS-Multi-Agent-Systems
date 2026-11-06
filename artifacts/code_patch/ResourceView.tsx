@@ -1,6 +1,6 @@
 /**
  * Provenance Header:
- * Task-ID: TASK-1793704116354
+ * Task-ID: TASK-1793726313315
  * ADR-Ref: ADR-001
  * Author: FrontendEngineerAgent
  * Contract: api-spec.yaml

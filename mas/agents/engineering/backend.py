@@ -115,7 +115,9 @@ class {domain_noun}Service:
 
         # 4. Automated Dependency Reconciliation
         try:
-            reconciler = DependencyReconciler(workspace_root=self.config.system.blackboard_repo_path)
+            reconciler = DependencyReconciler(
+                workspace_root=self.config.system.blackboard_repo_path
+            )
             reconciler.reconcile_file("service.py", code_content=service_code)
         except Exception:
             pass

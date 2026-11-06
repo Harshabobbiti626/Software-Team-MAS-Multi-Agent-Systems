@@ -265,3 +265,4 @@ def index_workspace_symbols(
 
     filtered.sort(key=sort_key)
     return filtered[:limit]
+

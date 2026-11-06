@@ -58,7 +58,9 @@ CMD ["python", "main.py"]
         )
 
         tokens = TokenUsageTracker(prompt_tokens=700, candidate_tokens=350, thinking_tokens=400)
-        tokens.total_tokens = tokens.prompt_tokens + tokens.candidate_tokens + tokens.thinking_tokens
+        tokens.total_tokens = (
+            tokens.prompt_tokens + tokens.candidate_tokens + tokens.thinking_tokens
+        )
 
         return AgentResponse(
             agent_role=self.role,

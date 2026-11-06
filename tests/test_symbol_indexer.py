@@ -118,3 +118,4 @@ def test_symbol_api_endpoints_via_http():
     finally:
         server.shutdown()
         server.server_close()
+

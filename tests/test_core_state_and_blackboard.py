@@ -125,4 +125,3 @@ def test_blackboard_target_workspace_sync(tmp_path):
         created_by="DBA",
     )
     assert (target_repo / "migrations" / "schema.sql").exists()
-

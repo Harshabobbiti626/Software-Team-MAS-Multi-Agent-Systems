@@ -78,16 +78,18 @@ def test_llm_provider_factory(monkeypatch):
 
 def test_native_dotenv_loader(tmp_path, monkeypatch):
     test_env = tmp_path / ".env.test"
-    test_env.write_text("CUSTOM_TEST_VAR=mas_value_123\n# A comment\nANOTHER_KEY=\"quoted_value\"\n", encoding="utf-8")
+    test_env.write_text(
+        'CUSTOM_TEST_VAR=mas_value_123\n# A comment\nANOTHER_KEY="quoted_value"\n', encoding="utf-8"
+    )
     monkeypatch.delenv("CUSTOM_TEST_VAR", raising=False)
     monkeypatch.delenv("ANOTHER_KEY", raising=False)
 
     load_dotenv_if_present(test_env)
 
     import os
+
     assert os.environ.get("CUSTOM_TEST_VAR") == "mas_value_123"
     assert os.environ.get("ANOTHER_KEY") == "quoted_value"
-
 
 
 def test_surgical_patcher_success(tmp_path):

@@ -69,12 +69,44 @@ class DependencyReconciler:
             return set(sys.stdlib_module_names)
         # Fallback standard library set
         return {
-            "sys", "os", "re", "json", "ast", "uuid", "datetime", "typing",
-            "pathlib", "shutil", "subprocess", "sqlite3", "io", "difflib",
-            "hashlib", "time", "math", "collections", "itertools", "functools",
-            "unittest", "logging", "contextlib", "abc", "enum", "dataclasses",
-            "copy", "urllib", "http", "socket", "threading", "multiprocessing",
-            "queue", "tempfile", "traceback", "inspect", "random", "string"
+            "sys",
+            "os",
+            "re",
+            "json",
+            "ast",
+            "uuid",
+            "datetime",
+            "typing",
+            "pathlib",
+            "shutil",
+            "subprocess",
+            "sqlite3",
+            "io",
+            "difflib",
+            "hashlib",
+            "time",
+            "math",
+            "collections",
+            "itertools",
+            "functools",
+            "unittest",
+            "logging",
+            "contextlib",
+            "abc",
+            "enum",
+            "dataclasses",
+            "copy",
+            "urllib",
+            "http",
+            "socket",
+            "threading",
+            "multiprocessing",
+            "queue",
+            "tempfile",
+            "traceback",
+            "inspect",
+            "random",
+            "string",
         }
 
     def extract_python_imports(self, code_content: str) -> Set[str]:
@@ -176,9 +208,7 @@ class DependencyReconciler:
             for m in matches:
                 existing_pkgs.add(m.lower())
 
-        missing = [
-            pkg for pkg in mapped_candidates if pkg.lower() not in existing_pkgs
-        ]
+        missing = [pkg for pkg in mapped_candidates if pkg.lower() not in existing_pkgs]
         return sorted(missing)
 
     def find_missing_node_dependencies(
@@ -270,7 +300,10 @@ class DependencyReconciler:
         return str(pkg_json_path)
 
     def reconcile_file(
-        self, file_path: str, code_content: Optional[str] = None, project_root: Optional[Path] = None
+        self,
+        file_path: str,
+        code_content: Optional[str] = None,
+        project_root: Optional[Path] = None,
     ) -> ReconciliationReport:
         """
         End-to-end reconciliation for a single file.
@@ -299,7 +332,9 @@ class DependencyReconciler:
                 missing_dependencies=missing,
                 reconciled_manifest=reconciled,
                 success=True,
-                message=f"Reconciled {len(missing)} Python packages into {reconciled}" if missing else "Dependencies up to date.",
+                message=f"Reconciled {len(missing)} Python packages into {reconciled}"
+                if missing
+                else "Dependencies up to date.",
             )
 
         elif ext in (".ts", ".tsx", ".js", ".jsx"):
@@ -314,7 +349,9 @@ class DependencyReconciler:
                 missing_dependencies=missing,
                 reconciled_manifest=reconciled,
                 success=True,
-                message=f"Reconciled {len(missing)} Node packages into {reconciled}" if missing else "Dependencies up to date.",
+                message=f"Reconciled {len(missing)} Node packages into {reconciled}"
+                if missing
+                else "Dependencies up to date.",
             )
 
         return ReconciliationReport(

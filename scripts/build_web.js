@@ -43,3 +43,4 @@ if (offendingLines.length > 0) {
 
 fs.writeFileSync(jsPath, result.code, 'utf8');
 console.log('Successfully wrote mas/web/app.js (' + result.code.length + ' bytes). 0 module imports.');
+

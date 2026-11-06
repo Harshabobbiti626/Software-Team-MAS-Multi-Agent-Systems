@@ -70,7 +70,7 @@ def test_polyglot_syntax_verification():
     assert linter.check_sql_syntax("schema.sql", sql_invalid_start).passed is False
 
     # Dockerfile Check
-    docker_good = "FROM python:3.11-slim\nWORKDIR /app\nCOPY . .\nCMD [\"python\", \"main.py\"]\n"
+    docker_good = 'FROM python:3.11-slim\nWORKDIR /app\nCOPY . .\nCMD ["python", "main.py"]\n'
     docker_bad_instruction = "INVALID_CMD python:3.11\nWORKDIR /app\n"
     docker_no_from = "WORKDIR /app\nCOPY . .\n"
     assert linter.check_dockerfile_syntax("Dockerfile", docker_good).passed is True
@@ -102,7 +102,9 @@ from pydantic import BaseModel
     # Create an initial requirements.txt that already has pydantic
     (tmp_path / "requirements.txt").write_text("pydantic>=2.0.0\n", encoding="utf-8")
 
-    report = reconciler.reconcile_file("service.py", code_content=python_code, project_root=tmp_path)
+    report = reconciler.reconcile_file(
+        "service.py", code_content=python_code, project_root=tmp_path
+    )
     assert report.success is True
     assert "stripe" in report.detected_imports
     assert "redis" in report.detected_imports
@@ -134,5 +136,3 @@ import axios from 'axios';
     pkg_data = (tmp_path / "package.json").read_text(encoding="utf-8")
     assert "@tanstack/react-query" in pkg_data
     assert "axios" in pkg_data
-
-

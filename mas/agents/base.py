@@ -13,6 +13,7 @@ from mas.core.blackboard import ArtifactBlackboard
 from mas.core.cognition import CognitiveEngine, PreMortemAnalysis
 from mas.core.config import MASConfiguration, get_config
 from mas.core.llm import BaseLLMProvider, LLMGenerationConfig, LLMResponse, get_llm_provider
+from mas.core.react_engine import AutonomousReActEngine, ReActResult, ReActToolbox
 from mas.core.state import (
     Artifact,
     ArtifactType,
@@ -364,3 +365,38 @@ class BaseAgent(ABC):
             path=path,
             commit_to_git=commit_to_git,
         )
+
+    def execute_react_mission_loop(
+        self,
+        task: Task,
+        objective: str,
+        max_turns: Optional[int] = None,
+    ) -> ReActResult:
+        """
+        Executes a true multi-turn Observation-Action ReAct loop with full toolbox access.
+        Enables agents to dynamically inspect, write, patch, verify AST, and run sandboxed tests.
+        """
+        toolbox = ReActToolbox(
+            workspace_root=self.config.system.blackboard_repo_path,
+            blackboard=self.blackboard,
+        )
+        engine = AutonomousReActEngine(
+            llm=self.llm,
+            toolbox=toolbox,
+            max_turns=max_turns or self.config.limits.max_turns_per_agent,
+            model_name=self.config.models.roles.get(
+                self.role.lower(), self.config.models.default_model
+            ),
+        )
+        res = engine.execute_loop(
+            role=self.role,
+            task_title=task.title,
+            task_description=task.description,
+            initial_context=objective,
+        )
+        self.usage.add(
+            prompt=res.total_prompt_tokens,
+            candidate=res.total_candidate_tokens,
+            thinking=res.total_thinking_tokens,
+        )
+        return res

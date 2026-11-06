@@ -117,7 +117,9 @@ class MissionControlConsole:
         while True:
             try:
                 choice = (
-                    input("\n👉 Enter decision [A]pprove / [R]eject / [M]odify (default: Approve): ")
+                    input(
+                        "\n👉 Enter decision [A]pprove / [R]eject / [M]odify (default: Approve): "
+                    )
                     .strip()
                     .upper()
                 )

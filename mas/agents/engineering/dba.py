@@ -43,19 +43,39 @@ class DatabaseArchitectAgent(BaseAgent):
         ]
 
         if any(term in text for term in ["price", "amount", "payment", "cost", "billing"]):
-            fields.append(("amount_cents", "BIGINT NOT NULL DEFAULT 0", "Monetary value in integer cents"))
-            fields.append(("currency", "VARCHAR(3) NOT NULL DEFAULT 'USD'", "ISO 4217 currency code"))
+            fields.append(
+                ("amount_cents", "BIGINT NOT NULL DEFAULT 0", "Monetary value in integer cents")
+            )
+            fields.append(
+                ("currency", "VARCHAR(3) NOT NULL DEFAULT 'USD'", "ISO 4217 currency code")
+            )
 
         if any(term in text for term in ["user", "account", "owner", "auth", "tenant"]):
-            fields.append(("owner_id", "UUID NOT NULL", "Foreign reference to owning user or tenant"))
+            fields.append(
+                ("owner_id", "UUID NOT NULL", "Foreign reference to owning user or tenant")
+            )
 
         if any(term in text for term in ["category", "type", "kind"]):
-            fields.append(("category", "VARCHAR(100) NOT NULL DEFAULT 'DEFAULT'", "Classification group"))
+            fields.append(
+                ("category", "VARCHAR(100) NOT NULL DEFAULT 'DEFAULT'", "Classification group")
+            )
 
-        fields.append(("status", "VARCHAR(50) NOT NULL DEFAULT 'ACTIVE'", "Lifecycle state machine status"))
-        fields.append(("metadata", "JSONB NOT NULL DEFAULT '{}'::jsonb", "Extensible schemaless payload"))
-        fields.append(("created_at", "TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP", "Row creation timestamp"))
-        fields.append(("updated_at", "TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP", "Row update timestamp"))
+        fields.append(
+            ("status", "VARCHAR(50) NOT NULL DEFAULT 'ACTIVE'", "Lifecycle state machine status")
+        )
+        fields.append(
+            ("metadata", "JSONB NOT NULL DEFAULT '{}'::jsonb", "Extensible schemaless payload")
+        )
+        fields.append(
+            (
+                "created_at",
+                "TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP",
+                "Row creation timestamp",
+            )
+        )
+        fields.append(
+            ("updated_at", "TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP", "Row update timestamp")
+        )
         return fields
 
     def execute_turn(self, task: Task, context: Dict[str, Any]) -> AgentResponse:
@@ -106,7 +126,9 @@ ON {table_name} (status, created_at DESC);
             candidate_tokens=450,
             thinking_tokens=600,
         )
-        tokens.total_tokens = tokens.prompt_tokens + tokens.candidate_tokens + tokens.thinking_tokens
+        tokens.total_tokens = (
+            tokens.prompt_tokens + tokens.candidate_tokens + tokens.thinking_tokens
+        )
 
         return AgentResponse(
             agent_role=self.role,

@@ -30,20 +30,20 @@ memory:
   enable_semantic_cache: true
 
 models:
-  default_model: "gemini-3.8-flash"
-  fast_model: "gemini-3.8-flash"
-  reasoning_model: "gemini-3.8-flash"
+  default_model: "gemini-3.5-flash-lite"
+  fast_model: "gemini-3.5-flash-lite"
+  reasoning_model: "gemini-3.5-flash-lite"
   roles:
-    architect: "gemini-3.8-flash"
-    tech_lead: "gemini-3.8-flash"
-    backend: "gemini-3.8-flash"
-    frontend: "gemini-3.8-flash"
-    dba: "gemini-3.8-flash"
-    qa: "gemini-3.8-flash"
-    sme: "gemini-3.8-flash"
-    technical_writer: "gemini-3.8-flash"
-    code_reviewer: "gemini-3.8-flash"
-    security: "gemini-3.8-flash"
+    architect: "gemini-3.5-flash-lite"
+    tech_lead: "gemini-3.5-flash-lite"
+    backend: "gemini-3.5-flash-lite"
+    frontend: "gemini-3.5-flash-lite"
+    dba: "gemini-3.5-flash-lite"
+    qa: "gemini-3.5-flash-lite"
+    sme: "gemini-3.5-flash-lite"
+    technical_writer: "gemini-3.5-flash-lite"
+    code_reviewer: "gemini-3.5-flash-lite"
+    security: "gemini-3.5-flash-lite"
 
 sandbox:
   default_timeout_seconds: 45

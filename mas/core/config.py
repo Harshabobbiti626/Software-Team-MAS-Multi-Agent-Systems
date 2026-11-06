@@ -31,7 +31,6 @@ def load_dotenv_if_present(env_path: Optional[str | Path] = ".env") -> None:
         pass
 
 
-
 class SystemSettings(BaseModel):
     environment: str = "development"
     log_level: str = "INFO"
@@ -67,9 +66,9 @@ class MemorySettings(BaseModel):
 
 class ModelSettings(BaseModel):
     provider: str = "gemini"
-    default_model: str = "gemini-3.8-flash"
-    fast_model: str = "gemini-3.8-flash"
-    reasoning_model: str = "gemini-3.8-flash"
+    default_model: str = "gemini-3.5-flash-lite"
+    fast_model: str = "gemini-3.5-flash-lite"
+    reasoning_model: str = "gemini-3.5-flash-lite"
     api_key: Optional[str] = None
     base_url: Optional[str] = None
     roles: Dict[str, str] = Field(default_factory=dict)

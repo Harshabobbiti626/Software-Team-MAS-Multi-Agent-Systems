@@ -1,4 +1,4 @@
-# System Architecture & Technical Rationale: Integration Test Service
+# System Architecture & Technical Rationale: Cost Tracking Test Mission
 
 ## C4 System Flow
 ```mermaid

@@ -46,6 +46,7 @@ class EventBus:
             "type": event_type,
             "mission_id": mission_id,
             "payload": payload,
+            "data": payload,  # Dual alias so clients consuming either 'payload' or 'data' receive it flawlessly
             "timestamp": time.time(),
         }
 

@@ -276,3 +276,213 @@ Implemented **{task.title}** according to contract-first parallel pod specificat
             )
 
         return result
+
+
+class ArtifactDiffResult(BaseModel):
+    artifact_id: str
+    artifact_name: str
+    has_diff: bool
+    baseline_path: Optional[str] = None
+    baseline_content: str = ""
+    synthesized_content: str = ""
+    diff: str = ""
+    additions_count: int = 0
+    deletions_count: int = 0
+
+
+def compute_artifact_diff(
+    artifact_id: str,
+    artifact_name: str,
+    synthesized_content: str,
+    workspace_root: str = ".",
+    target_rel_path: Optional[str] = None,
+) -> ArtifactDiffResult:
+    """
+    Computes a clean unified git-style diff between the existing workspace baseline
+    and the newly synthesized artifact.
+    """
+    import difflib
+
+    root = Path(workspace_root).resolve()
+    candidate_paths = []
+    if target_rel_path:
+        candidate_paths.append(root / target_rel_path)
+    candidate_paths.extend(
+        [
+            root / artifact_name,
+            root / "src" / artifact_name,
+            root / "app" / artifact_name,
+            root / "components" / artifact_name,
+            root / "artifacts" / "code_patch" / artifact_name,
+        ]
+    )
+
+    baseline_path = None
+    baseline_content = ""
+    for cp in candidate_paths:
+        if cp.is_file():
+            try:
+                rel = cp.relative_to(root)
+                # Do not treat files inside the generated artifacts ledger as pre-existing baseline
+                if rel.parts and rel.parts[0] == "artifacts":
+                    continue
+                baseline_content = cp.read_text(encoding="utf-8", errors="replace")
+                baseline_path = str(rel).replace("\\", "/")
+                break
+            except Exception:
+                pass
+
+    if not baseline_path:
+        baseline_lines = []
+        baseline_label = "/dev/null"
+    else:
+        baseline_lines = baseline_content.splitlines(keepends=True)
+        baseline_label = f"a/{baseline_path}"
+
+    synth_lines = synthesized_content.splitlines(keepends=True)
+    synth_label = f"b/{artifact_name}"
+
+    diff_lines = list(
+        difflib.unified_diff(
+            baseline_lines,
+            synth_lines,
+            fromfile=baseline_label,
+            tofile=synth_label,
+            n=3,
+        )
+    )
+
+    diff_text = "".join(diff_lines)
+    additions = sum(1 for line in diff_lines if line.startswith("+") and not line.startswith("+++"))
+    deletions = sum(1 for line in diff_lines if line.startswith("-") and not line.startswith("---"))
+
+    return ArtifactDiffResult(
+        artifact_id=artifact_id,
+        artifact_name=artifact_name,
+        has_diff=len(diff_lines) > 0,
+        baseline_path=baseline_path,
+        baseline_content=baseline_content,
+        synthesized_content=synthesized_content,
+        diff=diff_text,
+        additions_count=additions,
+        deletions_count=deletions,
+    )
+
+
+class GitCommitResult(BaseModel):
+    status: str  # "COMMITTED" | "CLEAN" | "FAILED"
+    commit_hash: str = ""
+    message: str = ""
+    branch: str = ""
+    files_committed: int = 0
+    error: Optional[str] = None
+
+
+def create_local_git_snapshot(
+    repo_path: str = ".",
+    commit_message: Optional[str] = None,
+    paths_to_stage: Optional[List[str]] = None,
+) -> GitCommitResult:
+    """
+    Creates a strictly local git commit snapshot of workspace artifacts and modified files.
+    NEVER pushes to remote, preserving 100% local safety and rollback capability.
+    """
+    root = Path(repo_path).resolve()
+    git_dir = root / ".git"
+    if not git_dir.exists():
+        return GitCommitResult(
+            status="FAILED",
+            error="Not a git repository",
+        )
+
+    branch_res = subprocess.run(
+        ["git", "branch", "--show-current"],
+        cwd=str(root),
+        capture_output=True,
+        text=True,
+        timeout=10,
+    )
+    branch = branch_res.stdout.strip() or "HEAD"
+
+    # Stage requested paths or default to artifacts/
+    stage_targets = paths_to_stage or ["artifacts/"]
+    for target in stage_targets:
+        target_path = root / target
+        if target_path.exists():
+            subprocess.run(
+                ["git", "add", target],
+                cwd=str(root),
+                capture_output=True,
+                text=True,
+                timeout=15,
+            )
+
+    # Check if there are staged changes
+    diff_cached = subprocess.run(
+        ["git", "diff", "--cached", "--quiet"],
+        cwd=str(root),
+        capture_output=True,
+        timeout=10,
+    )
+
+    rev_head = subprocess.run(
+        ["git", "rev-parse", "--short", "HEAD"],
+        cwd=str(root),
+        capture_output=True,
+        text=True,
+        timeout=10,
+    )
+    current_hash = rev_head.stdout.strip()
+
+    if diff_cached.returncode == 0:
+        return GitCommitResult(
+            status="CLEAN",
+            commit_hash=current_hash,
+            branch=branch,
+            message="Working tree clean. No staged changes to commit.",
+            files_committed=0,
+        )
+
+    # Count staged files
+    stat_res = subprocess.run(
+        ["git", "diff", "--cached", "--numstat"],
+        cwd=str(root),
+        capture_output=True,
+        text=True,
+        timeout=10,
+    )
+    staged_count = len(stat_res.stdout.strip().splitlines()) if stat_res.stdout.strip() else 0
+
+    msg = commit_message or f"feat: snapshot synthesized artifacts ({staged_count} files)"
+    commit_res = subprocess.run(
+        ["git", "commit", "-m", msg],
+        cwd=str(root),
+        capture_output=True,
+        text=True,
+        timeout=20,
+    )
+
+    if commit_res.returncode != 0:
+        return GitCommitResult(
+            status="FAILED",
+            commit_hash=current_hash,
+            branch=branch,
+            error=commit_res.stderr.strip() or "Commit failed",
+        )
+
+    new_rev = subprocess.run(
+        ["git", "rev-parse", "--short", "HEAD"],
+        cwd=str(root),
+        capture_output=True,
+        text=True,
+        timeout=10,
+    )
+    new_hash = new_rev.stdout.strip()
+
+    return GitCommitResult(
+        status="COMMITTED",
+        commit_hash=new_hash,
+        branch=branch,
+        message=msg,
+        files_committed=staged_count,
+    )

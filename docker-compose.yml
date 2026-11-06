@@ -1,0 +1,32 @@
+version: "3.8"
+
+services:
+  mas-cockpit:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: mas-mission-control
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - MAS_LLM_PROVIDER=${MAS_LLM_PROVIDER:-gemini}
+    volumes:
+      # Persistent mission state and generated artifacts
+      - mas_data:/app/.mas_data
+      - ./artifacts:/app/artifacts
+      - ./config:/app/config
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+volumes:
+  mas_data:
+    driver: local
+
